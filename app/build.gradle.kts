@@ -3,12 +3,17 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("com.apollographql.apollo3").version("3.8.2")
     kotlin("kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 apollo {
     service("service") {
         packageName.set("com.avocado")
     }
+}
+
+kapt {
+    correctErrorTypes = true
 }
 
 android {
@@ -72,6 +77,12 @@ dependencies {
 
     //Grapqhl
     implementation("com.apollographql.apollo3:apollo-runtime:3.8.2")
+
+    //Hilt
+    implementation("com.google.dagger:hilt-android:2.44")
+    implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
+    kapt("com.google.dagger:hilt-android-compiler:2.44")
+    kapt("androidx.hilt:hilt-compiler:1.0.0")
 
 
     testImplementation("junit:junit:4.13.2")
