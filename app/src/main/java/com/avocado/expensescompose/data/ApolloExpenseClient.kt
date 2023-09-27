@@ -3,7 +3,6 @@ package com.avocado.expensescompose.data
 import com.apollographql.apollo3.ApolloClient
 import com.avocado.ExpensesByFortnightQuery
 import com.avocado.expensescompose.domain.Expense
-import com.avocado.expensescompose.domain.ExpensesClient
 import com.avocado.expensescompose.domain.adapt
 
 class ApolloExpenseClient(
