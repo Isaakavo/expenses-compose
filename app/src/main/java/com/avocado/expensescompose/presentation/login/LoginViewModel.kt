@@ -22,7 +22,8 @@ data class LoginUiState(
     val password: String = "Weisses9622!",
     val isLoading: Boolean = false,
     val shouldShowPassword: Boolean = false,
-    var userMessage: String? = null
+    var userMessage: String? = null,
+    var success: Boolean = false
 )
 
 @HiltViewModel
@@ -64,10 +65,11 @@ class LoginViewModel @Inject constructor(
                     saveToken(token)
                     Log.d("JWT", "Token saved $token")
                     _uiState.update {
-                        it.copy(isLoading = false)
+                        it.copy(isLoading = false, success = true)
                     }
                 }
 
+                //TODO implement logic to handle errors and display correct message
                 is Result.Error -> {
                     _uiState.update {
                         it.copy(userMessage = response.exception, isLoading = false)

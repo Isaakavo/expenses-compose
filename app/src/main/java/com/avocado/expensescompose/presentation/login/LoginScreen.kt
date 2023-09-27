@@ -26,7 +26,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    viewModel: LoginViewModel = hiltViewModel<LoginViewModel>()
+    viewModel: LoginViewModel = hiltViewModel<LoginViewModel>(),
+    onLoginSuccess: @Composable (success: Boolean) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -65,12 +66,10 @@ fun LoginScreen(
             if (uiState.userMessage?.isNotBlank() == true) {
                 Text(text = uiState.userMessage!!)
             }
+
+            if (uiState.success) {
+                onLoginSuccess(true)
+            }
         }
     }
-}
-
-@Preview
-@Composable
-fun LoginScreenPreview() {
-    LoginScreen(hiltViewModel())
 }
