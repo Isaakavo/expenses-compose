@@ -1,4 +1,4 @@
-package com.avocado.expensescompose.presentation
+package com.avocado.expensescompose.presentation.expenses
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row

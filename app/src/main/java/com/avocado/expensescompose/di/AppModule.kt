@@ -1,14 +1,17 @@
 package com.avocado.expensescompose.di
 
+import android.content.Context
 import com.apollographql.apollo3.ApolloClient
 import com.avocado.expensescompose.data.ApolloExpenseClient
 import com.avocado.expensescompose.data.ExpensesClient
 import com.avocado.expensescompose.data.LoginJwtTokenClient
 import com.avocado.expensescompose.data.model.auth.Constants
+import com.avocado.expensescompose.data.repositories.DataStoreRepository
 import com.avocado.expensescompose.domain.GetExpensesUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -48,4 +51,10 @@ object AppModule {
         Retrofit.Builder().baseUrl(Constants.AWS_PROVIDER)
             .addConverterFactory(GsonConverterFactory.create())
             .build().create(LoginJwtTokenClient::class.java)
+
+    @Provides
+    @Singleton
+    fun provideDataStoreRepository(
+        @ApplicationContext app: Context
+    ) = DataStoreRepository(app)
 }

@@ -1,24 +1,24 @@
 package com.avocado.expensescompose.data.model.auth
 
-import retrofit2.http.Field
+import com.google.gson.annotations.SerializedName
 
 data class Jwt(
-    @Field("AuthenticationResult")
+    @SerializedName("AuthenticationResult")
     val authenticationResult: AuthenticationResult,
-    @Field("ChallengeParameters")
+    @SerializedName("ChallengeParameters")
     val challengeParameters: ChallengeParameters
 )
 
 data class AuthenticationResult(
-    @Field("AccessToken")
+    @SerializedName("AccessToken")
     val accessToken: String,
-    @Field("ExpiresIn")
+    @SerializedName("ExpiresIn")
     val expiresIn: Int,
-    @Field("IdToken")
+    @SerializedName("IdToken")
     val idToken: String,
-    @Field("RefreshToken")
+    @SerializedName("RefreshToken")
     val refreshToken: String,
-    @Field("TokenType")
+    @SerializedName("TokenType")
     val tokenType: String
 )
 

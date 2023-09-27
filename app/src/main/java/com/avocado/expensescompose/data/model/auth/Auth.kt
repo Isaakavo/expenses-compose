@@ -1,19 +1,19 @@
 package com.avocado.expensescompose.data.model.auth
 
-import retrofit2.http.Field
+import com.google.gson.annotations.SerializedName
 
 data class Auth(
-    @Field("AuthFlow")
+    @SerializedName("AuthFlow")
     val authFlow: String = "USER_PASSWORD_AUTH",
-    @Field("AuthParameters")
+    @SerializedName("AuthParameters")
     val authParameters: AuthParameters,
-    @Field("ClientId")
+    @SerializedName("ClientId")
     val clientId: String = Constants.CLIENT_ID
 )
 
 data class AuthParameters(
-    @Field("PASSWORD")
+    @SerializedName("PASSWORD")
     val password: String,
-    @Field("USERNAME")
+    @SerializedName("USERNAME")
     val username: String
 )

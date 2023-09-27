@@ -1,4 +1,4 @@
-package com.avocado.expensescompose.presentation
+package com.avocado.expensescompose.presentation.expenses
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
