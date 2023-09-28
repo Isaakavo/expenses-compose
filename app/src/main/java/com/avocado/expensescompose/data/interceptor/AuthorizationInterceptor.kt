@@ -5,6 +5,7 @@ import com.apollographql.apollo3.api.http.HttpRequest
 import com.apollographql.apollo3.api.http.HttpResponse
 import com.apollographql.apollo3.network.http.HttpInterceptor
 import com.apollographql.apollo3.network.http.HttpInterceptorChain
+import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.data.repositories.DataStoreRepository
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -14,28 +15,42 @@ class AuthorizationInterceptor @Inject constructor(
     private val dataStoreRepository: DataStoreRepository
 ) : HttpInterceptor {
     private val mutex = Mutex()
+
+    private suspend fun extractJwt(): String? = mutex.withLock {
+        when (val value = dataStoreRepository.getString("JWT")) {
+            is MyResult.Success -> {
+                return value.data
+            }
+
+            is MyResult.Error -> {
+                return ""
+            }
+        }
+    }
+
+
+    private suspend fun validateJwtIsNotNullOrEmpty(
+        jwt: String?, request: HttpRequest, chain: HttpInterceptorChain
+    ): HttpResponse {
+        if (jwt.isNullOrBlank()) {
+            Log.d("AUTH", "Error jwt empty")
+            return chain.proceed(request)
+        }
+
+        return chain.proceed(request.newBuilder().addHeader("X-Session-Key", jwt).build())
+    }
+
     override suspend fun intercept(
         request: HttpRequest, chain: HttpInterceptorChain
     ): HttpResponse {
 
         try {
-            var jwt = mutex.withLock { dataStoreRepository.getString("JWT") }
-            if (jwt.isNullOrBlank()) {
-                Log.d("AUTH", "Error jwt empty")
-                return chain.proceed(request)
-            }
-            val response =
-                chain.proceed(request.newBuilder().addHeader("X-Session-Key", jwt).build())
+            var jwt = extractJwt()
+            val response = validateJwtIsNotNullOrEmpty(jwt, request, chain)
             return if (response.statusCode == 401) {
                 //TODO add logic to refetch the token or close the session
-                jwt = mutex.withLock {
-                    dataStoreRepository.getString("JWT")
-                }
-                if (jwt.isNullOrBlank()) {
-                    Log.d("AUTH", "Error jwt empty")
-                    return chain.proceed(request)
-                }
-                chain.proceed(request.newBuilder().addHeader("X-Session-Key", jwt).build())
+                jwt = extractJwt()
+                validateJwtIsNotNullOrEmpty(jwt, request, chain)
             } else {
                 response
             }

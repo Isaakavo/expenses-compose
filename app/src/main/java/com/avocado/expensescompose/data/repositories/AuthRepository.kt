@@ -5,15 +5,15 @@ import com.avocado.expensescompose.data.model.auth.Auth
 import com.avocado.expensescompose.data.model.auth.Constants
 import com.avocado.expensescompose.data.model.auth.Jwt
 import javax.inject.Inject
-import com.avocado.expensescompose.data.model.Result
+import com.avocado.expensescompose.data.model.MyResult
 
 class AuthRepository @Inject constructor(
     private val awsApi: LoginJwtTokenClient
 ) {
-    suspend fun getJwtToken(auth: Auth): Result<Jwt> = try {
+    suspend fun getJwtToken(auth: Auth): MyResult<Jwt> = try {
         val result = awsApi.getJwtToken(base = Constants.AWS_PROVIDER, auth = auth)
-        Result.Success(result)
+        MyResult.Success(result)
     } catch (e: Exception) {
-        Result.Error(e.message)
+        MyResult.Error(null, e.message)
     }
 }
