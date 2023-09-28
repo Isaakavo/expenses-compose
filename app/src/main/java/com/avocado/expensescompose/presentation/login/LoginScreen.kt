@@ -18,16 +18,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
+import com.avocado.expensescompose.presentation.RoutesConstants
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    viewModel: LoginViewModel = hiltViewModel<LoginViewModel>(),
-    onLoginSuccess: @Composable (success: Boolean) -> Unit
+    navController: NavHostController,
+    viewModel: LoginViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -55,7 +56,9 @@ fun LoginScreen(
                         CircularProgressIndicator(
                             color = Color.White,
                             strokeWidth = 2.dp,
-                            modifier = Modifier.size(18.dp).padding(end = 4.dp)
+                            modifier = Modifier
+                                .size(18.dp)
+                                .padding(end = 4.dp)
                         )
                     }
                     Text(text = "Iniciar Sesión")
@@ -67,8 +70,8 @@ fun LoginScreen(
                 Text(text = uiState.userMessage!!)
             }
 
-            if (uiState.success) {
-                onLoginSuccess(true)
+            if (uiState.isSuccess) {
+                navController.navigate(RoutesConstants.INCOME_OVERVIEW)
             }
         }
     }

@@ -3,7 +3,7 @@ package com.avocado.expensescompose.presentation.login
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.avocado.expensescompose.data.model.Result
+import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.data.model.auth.Auth
 import com.avocado.expensescompose.data.model.auth.AuthParameters
 import com.avocado.expensescompose.data.repositories.AuthRepository
@@ -23,7 +23,7 @@ data class LoginUiState(
     val isLoading: Boolean = false,
     val shouldShowPassword: Boolean = false,
     var userMessage: String? = null,
-    var success: Boolean = false
+    var isSuccess: Boolean = false
 )
 
 @HiltViewModel
@@ -46,7 +46,8 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    private suspend fun saveToken(value: String) = dataStoreRepository.putString("JWT", value)
+    private suspend fun saveToken(value: String): MyResult<Boolean> =
+        dataStoreRepository.putString("JWT", value)
 
     fun login() {
         val auth = Auth(
@@ -60,17 +61,27 @@ class LoginViewModel @Inject constructor(
                 it.copy(isLoading = true)
             }
             when (val response = authRepository.getJwtToken(auth)) {
-                is Result.Success -> {
+                is MyResult.Success -> {
                     val token = response.data.authenticationResult.accessToken
-                    saveToken(token)
-                    Log.d("JWT", "Token saved $token")
-                    _uiState.update {
-                        it.copy(isLoading = false, success = true)
+                    when (val isSaved = saveToken(token)) {
+                        is MyResult.Success -> {
+                            Log.d("JWT", "Token saved $token")
+                            _uiState.update {
+                                it.copy(isLoading = false, isSuccess = true)
+                            }
+                        }
+
+                        is MyResult.Error -> {
+                            _uiState.update {
+                                it.copy(isLoading = false, userMessage = isSaved.exception)
+                            }
+                        }
                     }
+
                 }
 
                 //TODO implement logic to handle errors and display correct message
-                is Result.Error -> {
+                is MyResult.Error -> {
                     _uiState.update {
                         it.copy(userMessage = response.exception, isLoading = false)
                     }
