@@ -9,6 +9,7 @@ import com.avocado.expensescompose.data.interceptor.AuthorizationInterceptor
 import com.avocado.expensescompose.data.model.auth.Constants
 import com.avocado.expensescompose.data.repositories.DataStoreRepository
 import com.avocado.expensescompose.domain.GetExpensesUseCase
+import com.avocado.expensescompose.domain.income.GetIncomeUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -41,6 +42,12 @@ object AppModule {
     @Singleton
     fun provideExpenseUseCase(expensesClient: ExpensesClient): GetExpensesUseCase {
         return GetExpensesUseCase(expensesClient)
+    }
+
+    @Provides
+    @Singleton
+    fun provideIncomeUseCase(expensesClient: ExpensesClient): GetIncomeUseCase {
+        return GetIncomeUseCase(expensesClient)
     }
 
     @Provides

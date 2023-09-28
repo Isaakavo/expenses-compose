@@ -1,0 +1,11 @@
+query IncomesByMonth($date: Date!) {
+    incomesByMonth(date: $date) {
+        userId
+        total
+        paymentDate {
+            date
+            forthnight
+        }
+        createdAt
+    }
+}

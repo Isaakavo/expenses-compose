@@ -1,17 +1,24 @@
 package com.avocado.expensescompose.data
 
 import com.apollographql.apollo3.ApolloClient
+import com.apollographql.apollo3.api.ApolloResponse
 import com.avocado.ExpensesByFortnightQuery
+import com.avocado.IncomesByMonthQuery
+import com.avocado.expensescompose.data.adapters.graphql.scalar.Date
 import com.avocado.expensescompose.domain.Expense
 import com.avocado.expensescompose.domain.adapt
+import java.time.LocalDateTime
 
 class ApolloExpenseClient(
     private val apolloClient: ApolloClient
 ): ExpensesClient {
+    override suspend fun getIncomesByMonth(date: String): ApolloResponse<IncomesByMonthQuery.Data> = apolloClient
+        .query(IncomesByMonthQuery(Date(LocalDateTime.now())))
+        .execute()
     override suspend fun getExpensesByFortnight(): List<Expense> {
         return apolloClient
             //TODO make the request dynamic
-            .query(ExpensesByFortnightQuery("2023-09-30"))
+            .query(ExpensesByFortnightQuery(Date(LocalDateTime.now())))
             .execute()
             .data
             ?.expensesByFortnight
