@@ -19,6 +19,17 @@ type Income {
   paymentDate: PaymentDate!
 }
 
+type IncomeTotalByMonth {
+  date: String!,
+  total: Float!
+}
+
+type Incomes {
+  incomes: [Income]
+  totalByMonth: [IncomeTotalByMonth]
+  total: Float!
+}
+
 type Expense {
   id: ID!
   userId: String!
@@ -48,7 +59,7 @@ input ExpenseTagInput {
 }
 
 type Query {
-  incomes: [Income]
+  incomes: Incomes
   incomesByMonth(date: Date!): [Income]
   expensesByFortnight(payBefore: Date!): [Expense]
   expensesByMonth(date: Date!): [Expense]

@@ -1,0 +1,18 @@
+query AllIncomes {
+    incomes {
+        incomes {
+            userId
+            total
+            paymentDate {
+                date
+                forthnight
+            }
+            createdAt
+        }
+        total
+        totalByMonth {
+            total
+            date
+        }
+    }
+}

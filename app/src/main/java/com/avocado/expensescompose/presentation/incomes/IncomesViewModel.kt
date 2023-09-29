@@ -1,10 +1,10 @@
 package com.avocado.expensescompose.presentation.incomes
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.avocado.expensescompose.data.adapters.adapt
 import com.avocado.expensescompose.data.model.incomes.Income
+import com.avocado.expensescompose.data.model.incomes.TotalByMonth
 import com.avocado.expensescompose.domain.income.GetIncomeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +15,9 @@ import java.time.LocalDateTime
 import javax.inject.Inject
 
 data class IncomeState(
-    val incomes: List<Income> = emptyList(), val isLoading: Boolean = false
+    val incomes: List<Income?> = emptyList(),
+    val totalByMonth: List<TotalByMonth?> = emptyList(),
+    val isLoading: Boolean = false
 )
 
 @HiltViewModel
@@ -28,19 +30,20 @@ class IncomesViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
-            val incomes =
-                getIncomeUseCase.execute(LocalDateTime.now().toString()).data?.incomesByMonth?.map {
-                    it?.adapt()
-                }
-            Log.d("INCOMES", incomes.toString())
+            val data = getIncomeUseCase.executeAllIncomes().data?.incomes
+            val incomes = data?.incomes?.map {
+                it?.adapt()
+            } ?: emptyList()
+            val totalByMonth = data?.totalByMonth?.map {
+                it?.adapt()
+            } ?: emptyList()
             _state.update {
                 it.copy(
+                    incomes = incomes,
+                    totalByMonth = totalByMonth,
                     isLoading = false
                 )
             }
         }
     }
-
-    fun callQuery() =
-        viewModelScope.launch { getIncomeUseCase.execute(LocalDateTime.now().toString()) }
 }
