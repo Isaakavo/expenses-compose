@@ -46,6 +46,12 @@ class LoginViewModel @Inject constructor(
         }
     }
 
+    fun onToggleViewPassword() {
+        _uiState.update {
+            it.copy(shouldShowPassword = !it.shouldShowPassword)
+        }
+    }
+
     private suspend fun saveToken(value: String): MyResult<Boolean> =
         dataStoreRepository.putString("JWT", value)
 
