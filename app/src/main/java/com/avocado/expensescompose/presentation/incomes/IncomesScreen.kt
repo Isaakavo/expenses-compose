@@ -15,8 +15,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.rounded.Menu
+import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -88,20 +88,20 @@ fun IncomesScreen(
 
     Scaffold(topBar = {
         AppBar(title = "Ingresos",
-            icon = Icons.Default.Menu,
-            actionIcon = Icons.Default.Refresh,
+            icon = Icons.Rounded.Menu,
+            actionIcon = Icons.Rounded.Refresh,
             iconClickAction = {}) {
             viewModel.fetchQuery()
         }
-    }) {
+    }) { paddingValues ->
         Surface(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(it)
+                .padding(paddingValues)
         ) {
             if (state.isLoading) {
                 Column(
-                    modifier = Modifier.padding(it),
+                    modifier = Modifier.padding(paddingValues),
                     verticalArrangement = Arrangement.Top,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -115,8 +115,8 @@ fun IncomesScreen(
                     itemsIndexed(state.incomes.filterNotNull()) { index, income ->
                         // TODO improve dates render
                         val currentIncomeMonth = income.paymentDate.date.formatDateOnlyMonth()
-                        val currentTotal = state.totalByMonth.find {
-                            it?.date == currentIncomeMonth
+                        val currentTotal = state.totalByMonth.find { totalByMont ->
+                            totalByMont?.date == currentIncomeMonth
                         }
 
                         if (index != 0 && state.incomes[index - 1]?.paymentDate?.date?.formatDateOnlyMonth() != currentIncomeMonth) {
