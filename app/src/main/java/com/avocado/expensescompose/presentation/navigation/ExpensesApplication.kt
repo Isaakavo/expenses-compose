@@ -17,7 +17,13 @@ fun ExpensesApplication() {
         }
 
         composable(RoutesConstants.INCOME_OVERVIEW) {
-            IncomesScreen()
+            IncomesScreen() {
+                navController.navigate(RoutesConstants.LOGIN_SCREEN) {
+                    popUpTo(navController.graph.id) {
+                        inclusive = true
+                    }
+                }
+            }
         }
     }
 }

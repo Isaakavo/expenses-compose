@@ -11,12 +11,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDateTime
 import javax.inject.Inject
 
 data class IncomeState(
     val incomes: List<Income?> = emptyList(),
     val totalByMonth: List<TotalByMonth?> = emptyList(),
+    val showToast: Boolean = false,
     val isLoading: Boolean = false
 )
 
@@ -28,22 +28,33 @@ class IncomesViewModel @Inject constructor(
     val state = _state.asStateFlow()
 
     init {
+        fetchQuery()
+    }
+
+    fun updateToast(show: Boolean) = _state.update {
+        it.copy(showToast = show)
+    }
+
+    fun fetchQuery() {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
-            val data = getIncomeUseCase.executeAllIncomes().data?.incomes
-            val incomes = data?.incomes?.map {
-                it?.adapt()
-            } ?: emptyList()
-            val totalByMonth = data?.totalByMonth?.map {
-                it?.adapt()
-            } ?: emptyList()
-            _state.update {
-                it.copy(
-                    incomes = incomes,
-                    totalByMonth = totalByMonth,
-                    isLoading = false
-                )
-            }
+            callQuery()
+        }
+    }
+
+    private suspend fun callQuery() {
+        _state.update { it.copy(isLoading = true) }
+        val data = getIncomeUseCase.executeAllIncomes().data?.incomes
+        val incomes = data?.incomes?.map {
+            it?.adapt()
+        } ?: emptyList()
+        val totalByMonth = data?.totalByMonth?.map {
+            it?.adapt()
+        } ?: emptyList()
+
+        _state.update {
+            it.copy(
+                incomes = incomes, totalByMonth = totalByMonth, isLoading = false
+            )
         }
     }
 }

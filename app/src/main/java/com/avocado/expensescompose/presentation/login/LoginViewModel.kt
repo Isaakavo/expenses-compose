@@ -66,6 +66,8 @@ class LoginViewModel @Inject constructor(
             _uiState.update {
                 it.copy(isLoading = true)
             }
+            //TODO validate if the token already exists and if it exists, prevent the call to api
+            // also validate in server if the token already expired
             when (val response = authRepository.getJwtToken(auth)) {
                 is MyResult.Success -> {
                     val token = response.data.authenticationResult.accessToken
