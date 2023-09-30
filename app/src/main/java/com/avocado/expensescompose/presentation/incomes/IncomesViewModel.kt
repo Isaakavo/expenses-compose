@@ -14,47 +14,79 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class IncomeState(
-    val incomes: List<Income?> = emptyList(),
-    val totalByMonth: List<TotalByMonth?> = emptyList(),
-    val showToast: Boolean = false,
-    val isLoading: Boolean = false
+  val incomes: List<Income?> = emptyList(),
+  val totalByMonth: List<TotalByMonth?> = emptyList(),
+  val showAddButtons: Boolean = false,
+  val backPressState: Boolean = false,
+  val showToast: Boolean = false,
+  val isLoading: Boolean = false
 )
+
+sealed class IncomeEvent {
+  object AddIncomeFabClick : IncomeEvent()
+
+  object CloseAddIncomeFabClick : IncomeEvent()
+
+  object FetchQuery : IncomeEvent()
+}
 
 @HiltViewModel
 class IncomesViewModel @Inject constructor(
-    private val getIncomeUseCase: GetIncomeUseCase
+  private val getIncomeUseCase: GetIncomeUseCase
 ) : ViewModel() {
-    private val _state = MutableStateFlow(IncomeState())
-    val state = _state.asStateFlow()
+  private val _state = MutableStateFlow(IncomeState())
+  val state = _state.asStateFlow()
 
-    init {
+  init {
+    fetchQuery()
+  }
+
+  fun updateToast(show: Boolean) = _state.update {
+    it.copy(showToast = show)
+  }
+
+  fun onEvent(incomeEvent: IncomeEvent) {
+    when (incomeEvent) {
+      is IncomeEvent.AddIncomeFabClick -> {
+        onClickAddFab(true)
+      }
+
+      is IncomeEvent.CloseAddIncomeFabClick -> {
+        onClickAddFab(false)
+      }
+
+      is IncomeEvent.FetchQuery -> {
         fetchQuery()
+      }
     }
+  }
 
-    fun updateToast(show: Boolean) = _state.update {
-        it.copy(showToast = show)
+  private fun onClickAddFab(state: Boolean) {
+    _state.update {
+      it.copy(showAddButtons = state)
     }
+  }
 
-    fun fetchQuery() {
-        viewModelScope.launch {
-            callQuery()
-        }
+  private fun fetchQuery() {
+    viewModelScope.launch {
+      callQuery()
     }
+  }
 
-    private suspend fun callQuery() {
-        _state.update { it.copy(isLoading = true) }
-        val data = getIncomeUseCase.executeAllIncomes().data?.incomes
-        val incomes = data?.incomes?.map {
-            it?.adapt()
-        } ?: emptyList()
-        val totalByMonth = data?.totalByMonth?.map {
-            it?.adapt()
-        } ?: emptyList()
+  private suspend fun callQuery() {
+    _state.update { it.copy(isLoading = true) }
+    val data = getIncomeUseCase.executeAllIncomes().data?.incomes
+    val incomes = data?.incomes?.map {
+      it?.adapt()
+    } ?: emptyList()
+    val totalByMonth = data?.totalByMonth?.map {
+      it?.adapt()
+    } ?: emptyList()
 
-        _state.update {
-            it.copy(
-                incomes = incomes, totalByMonth = totalByMonth, isLoading = false
-            )
-        }
+    _state.update {
+      it.copy(
+        incomes = incomes, totalByMonth = totalByMonth, isLoading = false
+      )
     }
+  }
 }
