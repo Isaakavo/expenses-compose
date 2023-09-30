@@ -26,13 +26,16 @@ fun AppBar(
     TopAppBar(title = { Text(title, color = Color.White) },
         colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
         navigationIcon = {
-            Icon(imageVector = icon,
+            Icon(
+                imageVector = icon,
                 contentDescription = "",
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
                     .clickable {
                         iconClickAction.invoke()
-                    })
+                    },
+                tint = Color.White
+            )
         },
         actions = {
             Icon(
@@ -40,6 +43,8 @@ fun AppBar(
                 contentDescription = "",
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
-                    .clickable { actionIconClickAction.invoke() })
+                    .clickable { actionIconClickAction.invoke() },
+                tint = Color.White
+            )
         })
 }
