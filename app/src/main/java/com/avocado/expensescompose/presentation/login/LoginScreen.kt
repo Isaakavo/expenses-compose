@@ -33,64 +33,64 @@ import com.avocado.expensescompose.presentation.RoutesConstants
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    navController: NavHostController, viewModel: LoginViewModel = hiltViewModel()
+  navController: NavHostController, viewModel: LoginViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+  val uiState by viewModel.uiState.collectAsState()
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(text = "Iniciar Sesión", modifier = Modifier)
-            OutlinedTextField(
-                value = uiState.username,
-                onValueChange = viewModel::updateUsername,
-                placeholder = { Text(text = "User name") },
+  Box(modifier = Modifier.fillMaxSize()) {
+    Column(
+      modifier = Modifier.fillMaxSize(),
+      verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+      horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+      Text(text = "Iniciar Sesión", modifier = Modifier)
+      OutlinedTextField(
+        value = uiState.username,
+        onValueChange = viewModel::updateUsername,
+        placeholder = { Text(text = "User name") },
+      )
+      OutlinedTextField(
+        value = uiState.password,
+        onValueChange = viewModel::updatePassword,
+        placeholder = { Text(text = "Password") },
+        trailingIcon = {
+          IconButton(onClick = { viewModel.onToggleViewPassword() }) {
+            if (uiState.shouldShowPassword) Icon(
+              painter = painterResource(id = R.drawable.baseline_visibility_24),
+              contentDescription = "Mostrar contraseña"
             )
-            OutlinedTextField(
-                value = uiState.password,
-                onValueChange = viewModel::updatePassword,
-                placeholder = { Text(text = "Password") },
-                trailingIcon = {
-                    IconButton(onClick = { viewModel.onToggleViewPassword() }) {
-                        if (uiState.shouldShowPassword) Icon(
-                            painter = painterResource(id = R.drawable.baseline_visibility_24),
-                            contentDescription = "Mostrar contraseña"
-                        )
-                        else Icon(
-                            painter = painterResource(id = R.drawable.baseline_visibility_off_24),
-                            contentDescription = "Ocultar contraseña"
-                        )
-                    }
-                },
-                visualTransformation = if (uiState.shouldShowPassword) VisualTransformation.None else PasswordVisualTransformation()
+            else Icon(
+              painter = painterResource(id = R.drawable.baseline_visibility_off_24),
+              contentDescription = "Ocultar contraseña"
             )
+          }
+        },
+        visualTransformation = if (uiState.shouldShowPassword) VisualTransformation.None else PasswordVisualTransformation()
+      )
 
-            Button(onClick = { viewModel.login() }) {
-                Row(horizontalArrangement = Arrangement.SpaceBetween) {
-                    if (uiState.isLoading) {
-                        CircularProgressIndicator(
-                            color = Color.White,
-                            strokeWidth = 2.dp,
-                            modifier = Modifier
-                                .size(18.dp)
-                                .padding(end = 4.dp)
-                        )
-                    }
-                    Text(text = "Iniciar Sesión")
-                }
-
-            }
-
-            if (uiState.userMessage?.isNotBlank() == true) {
-                Text(text = uiState.userMessage!!)
-            }
-
-            if (uiState.isSuccess) {
-                navController.navigate(RoutesConstants.INCOME_OVERVIEW)
-            }
+      Button(onClick = { viewModel.login() }) {
+        Row(horizontalArrangement = Arrangement.SpaceBetween) {
+          if (uiState.isLoading) {
+            CircularProgressIndicator(
+              color = Color.White,
+              strokeWidth = 2.dp,
+              modifier = Modifier
+                  .size(18.dp)
+                  .padding(top = 1.dp, end = 4.dp)
+            )
+          }
+          Text(text = "Iniciar Sesión")
         }
+
+      }
+
+      if (uiState.userMessage?.isNotBlank() == true) {
+        Text(text = uiState.userMessage!!)
+      }
+
+      if (uiState.isSuccess) {
+        navController.navigate(RoutesConstants.INCOME_OVERVIEW)
+      }
     }
+  }
 }

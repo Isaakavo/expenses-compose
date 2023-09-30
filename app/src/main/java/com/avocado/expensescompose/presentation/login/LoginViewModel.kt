@@ -18,83 +18,107 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class LoginUiState(
-    val username: String = "isaakhaas96@gmail.com",
-    val password: String = "Weisses9622!",
-    val isLoading: Boolean = false,
-    val shouldShowPassword: Boolean = false,
-    var userMessage: String? = null,
-    var isSuccess: Boolean = false
+  val username: String = "isaakhaas96@gmail.com",
+  val password: String = "Weisses9622!",
+  val isLoading: Boolean = false,
+  val shouldShowPassword: Boolean = false,
+  var userMessage: String? = null,
+  var isSuccess: Boolean = false
 )
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val authRepository: AuthRepository, private val dataStoreRepository: DataStoreRepository
+  private val authRepository: AuthRepository, private val dataStoreRepository: DataStoreRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(LoginUiState())
-    val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
+  private val _uiState = MutableStateFlow(LoginUiState())
+  val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
-    fun updateUsername(newValue: String) {
-        _uiState.update {
-            it.copy(username = newValue)
-        }
+  fun updateUsername(newValue: String) {
+    _uiState.update {
+      it.copy(username = newValue)
     }
+  }
 
-    fun updatePassword(newValue: String) {
-        _uiState.update {
-            it.copy(password = newValue)
-        }
+  fun updatePassword(newValue: String) {
+    _uiState.update {
+      it.copy(password = newValue)
     }
+  }
 
-    fun onToggleViewPassword() {
-        _uiState.update {
-            it.copy(shouldShowPassword = !it.shouldShowPassword)
-        }
+  fun onToggleViewPassword() {
+    _uiState.update {
+      it.copy(shouldShowPassword = !it.shouldShowPassword)
     }
+  }
 
-    private suspend fun saveToken(value: String): MyResult<Boolean> =
-        dataStoreRepository.putString("JWT", value)
+  private suspend fun saveToken(value: String): MyResult<Boolean> =
+    dataStoreRepository.putString("JWT", value)
 
-    fun login() {
-        val auth = Auth(
-            authParameters = AuthParameters(
-                password = uiState.value.password, username = uiState.value.username
-            )
-        )
+  private suspend fun getToken(): MyResult<String?> = dataStoreRepository.getString("JWT")
 
-        viewModelScope.launch(Dispatchers.IO) {
+  private suspend fun requestNewToken(auth: Auth) =
+    when (val response = authRepository.getJwtToken(auth)) {
+      is MyResult.Success -> {
+        val token = response.data.authenticationResult.accessToken
+        when (val isSaved = saveToken(token)) {
+          is MyResult.Success -> {
+            Log.d("JWT", "Token saved $token")
             _uiState.update {
-                it.copy(isLoading = true)
+              it.copy(isLoading = false, isSuccess = true)
             }
-            //TODO validate if the token already exists and if it exists, prevent the call to api
-            // also validate in server if the token already expired
-            when (val response = authRepository.getJwtToken(auth)) {
-                is MyResult.Success -> {
-                    val token = response.data.authenticationResult.accessToken
-                    when (val isSaved = saveToken(token)) {
-                        is MyResult.Success -> {
-                            Log.d("JWT", "Token saved $token")
-                            _uiState.update {
-                                it.copy(isLoading = false, isSuccess = true)
-                            }
-                        }
+          }
 
-                        is MyResult.Error -> {
-                            _uiState.update {
-                                it.copy(isLoading = false, userMessage = isSaved.exception)
-                            }
-                        }
-                    }
-
-                }
-
-                //TODO implement logic to handle errors and display correct message
-                is MyResult.Error -> {
-                    _uiState.update {
-                        it.copy(userMessage = response.exception, isLoading = false)
-                    }
-                }
+          is MyResult.Error -> {
+            _uiState.update {
+              it.copy(isLoading = false, userMessage = isSaved.exception)
             }
+          }
         }
+
+      }
+
+      //TODO implement logic to handle errors and display correct message
+      is MyResult.Error -> {
+        _uiState.update {
+          it.copy(userMessage = response.exception, isLoading = false)
+        }
+      }
     }
+
+  fun login() {
+    val auth = Auth(
+      authParameters = AuthParameters(
+        password = uiState.value.password, username = uiState.value.username
+      )
+    )
+
+    viewModelScope.launch(Dispatchers.IO) {
+      _uiState.update {
+        it.copy(isLoading = true)
+      }
+
+      when (val tokenFromDataStore = getToken()) {
+        is MyResult.Success -> {
+          Log.d("JWT", "The value extracted from data store is $tokenFromDataStore")
+          if (tokenFromDataStore.data.isNullOrBlank()) {
+            Log.d("JWT", "Non existing Token, requesting a new one")
+            requestNewToken(auth)
+            return@launch
+          }
+          _uiState.update {
+            it.copy(isLoading = false, isSuccess = true)
+          }
+          return@launch
+        }
+
+        is MyResult.Error -> {
+          Log.d("JWT", "Error retrieving the JWT")
+          _uiState.update {
+            it.copy(isLoading = false, userMessage = "Error at login")
+          }
+        }
+      }
+    }
+  }
 }
