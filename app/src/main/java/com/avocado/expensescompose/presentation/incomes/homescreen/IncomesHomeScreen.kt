@@ -50,12 +50,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.adapters.formatDateDaysWithMonth
 import com.avocado.expensescompose.data.adapters.formatDateOnlyMonth
 import com.avocado.expensescompose.data.model.incomes.Fortnight
 import com.avocado.expensescompose.data.model.incomes.Income
 import com.avocado.expensescompose.data.model.incomes.PaymentDate
+import com.avocado.expensescompose.presentation.RoutesConstants
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import kotlinx.coroutines.delay
 import java.time.LocalDateTime
@@ -65,9 +68,15 @@ sealed class BackPress {
   object InitialTouch : BackPress()
 }
 
+sealed class NavigateButton {
+  object NavigateAddIncome : NavigateButton()
+}
+
 @Composable
 fun IncomesScreen(
-  viewModel: IncomesViewModel = hiltViewModel(), onLogout: () -> Unit
+  navController: NavHostController,
+  viewModel: IncomesViewModel = hiltViewModel(),
+  onLogout: () -> Unit
 ) {
   val state by viewModel.state.collectAsState()
   //TODO refactor this to use viewmodel
@@ -96,7 +105,7 @@ fun IncomesScreen(
     viewModel.updateToast(true)
   }
 
-  IncomeScreenContent(state) {
+  IncomeScreenContent(state = state, navController = navController) {
     viewModel.onEvent(it)
   }
 }
@@ -104,7 +113,7 @@ fun IncomesScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IncomeScreenContent(
-  state: IncomeState, onEvent: (IncomeEvent) -> Unit
+  navController: NavHostController, state: IncomeState, onEvent: (IncomeEvent) -> Unit
 ) {
   Scaffold(topBar = {
     AppBar(title = "Ingresos",
@@ -114,7 +123,13 @@ fun IncomeScreenContent(
       onEvent(IncomeEvent.FetchQuery)
     }
   }, floatingActionButton = {
-    IncomesFAB(state) {
+    IncomesFAB(state = state, onNavigate = { navigateTo ->
+      when (navigateTo) {
+        is NavigateButton.NavigateAddIncome -> {
+          navController.navigate(RoutesConstants.INCOME_ADD)
+        }
+      }
+    }) {
       onEvent(it)
     }
   }) { paddingValues ->
@@ -209,17 +224,25 @@ fun IncomeMonth(monthTotal: String, incomeMonth: String) {
 }
 
 @Composable
-fun IncomesFAB(state: IncomeState, onEvent: (IncomeEvent) -> Unit) {
+fun IncomesFAB(
+  state: IncomeState, onNavigate: (NavigateButton) -> Unit, onEvent: (IncomeEvent) -> Unit
+) {
   Column(horizontalAlignment = Alignment.End) {
     when (state.showAddButtons) {
       true -> {
         //TODO add animation when showing the buttons
-        FabWithLabel(labelText = "Agregar Gasto", icon = Icons.Rounded.ShoppingCart)
+        FabWithLabel(
+          labelText = "Agregar Gasto", icon = Icons.Rounded.ShoppingCart
+        ) {
+          onNavigate(NavigateButton.NavigateAddIncome)
+        }
         Spacer(modifier = Modifier.padding(top = 6.dp, bottom = 6.dp))
         FabWithLabel(
           labelText = "Agregar ingreso",
           icon = ImageVector.vectorResource(id = R.drawable.round_paid_24)
-        )
+        ) {
+          onNavigate(NavigateButton.NavigateAddIncome)
+        }
         Spacer(modifier = Modifier.padding(top = 6.dp, bottom = 6.dp))
         LargeFloatingActionButton(onClick = { onEvent(IncomeEvent.CloseAddIncomeFabClick) }) {
           Icon(imageVector = Icons.Rounded.Close, contentDescription = "")
@@ -242,7 +265,9 @@ fun IncomesFAB(state: IncomeState, onEvent: (IncomeEvent) -> Unit) {
 }
 
 @Composable
-fun FabWithLabel(labelText: String, icon: ImageVector) {
+fun FabWithLabel(
+  labelText: String, icon: ImageVector, onNavigate: () -> Unit
+) {
   Row(
     verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(end = 6.dp)
   ) {
@@ -261,10 +286,9 @@ fun FabWithLabel(labelText: String, icon: ImageVector) {
       }
     }
     //TODO implement logic to handle adding values
-    FloatingActionButton(onClick = { /*TODO*/ }) {
+    FloatingActionButton(onClick = { onNavigate() }) {
       Icon(
-        imageVector = icon,
-        contentDescription = ""
+        imageVector = icon, contentDescription = ""
       )
     }
   }
@@ -274,7 +298,7 @@ fun FabWithLabel(labelText: String, icon: ImageVector) {
 @Composable
 fun IncomeItemPreview() {
   IncomeScreenContent(
-    IncomeState(
+    navController = rememberNavController(), IncomeState(
       showToast = false, incomes = listOf(
         Income(
           userId = "alskhjdjkas",
