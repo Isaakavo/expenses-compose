@@ -27,7 +27,6 @@ object AppModule {
     fun provideApolloClient(dataStoreRepository: DataStoreRepository): ApolloClient {
         return ApolloClient.Builder()
             .serverUrl("http://10.0.2.2:4000/graphql")
-            // TODO implement logic to extract this from login
             .addHttpInterceptor(AuthorizationInterceptor(dataStoreRepository = dataStoreRepository))
             .build()
     }
