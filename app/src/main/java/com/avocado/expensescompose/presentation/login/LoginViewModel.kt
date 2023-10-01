@@ -98,6 +98,7 @@ class LoginViewModel @Inject constructor(
         it.copy(isLoading = true)
       }
 
+      //TODO improve login process to refresh tokens
       when (val tokenFromDataStore = getToken()) {
         is MyResult.Success -> {
           Log.d("JWT", "The value extracted from data store is $tokenFromDataStore")

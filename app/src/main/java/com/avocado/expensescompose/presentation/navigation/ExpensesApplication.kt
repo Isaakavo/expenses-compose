@@ -5,7 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.avocado.expensescompose.presentation.RoutesConstants
-import com.avocado.expensescompose.presentation.incomes.IncomesScreen
+import com.avocado.expensescompose.presentation.incomes.homescreen.IncomesScreen
 import com.avocado.expensescompose.presentation.login.LoginScreen
 
 @Composable

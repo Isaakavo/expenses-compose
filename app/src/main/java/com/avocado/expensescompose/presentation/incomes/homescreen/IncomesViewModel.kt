@@ -1,7 +1,9 @@
-package com.avocado.expensescompose.presentation.incomes
+package com.avocado.expensescompose.presentation.incomes.homescreen
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.apollographql.apollo3.exception.ApolloHttpException
 import com.avocado.expensescompose.data.adapters.adapt
 import com.avocado.expensescompose.data.model.incomes.Income
 import com.avocado.expensescompose.data.model.incomes.TotalByMonth
@@ -75,18 +77,27 @@ class IncomesViewModel @Inject constructor(
 
   private suspend fun callQuery() {
     _state.update { it.copy(isLoading = true) }
-    val data = getIncomeUseCase.executeAllIncomes().data?.incomes
-    val incomes = data?.incomes?.map {
-      it?.adapt()
-    } ?: emptyList()
-    val totalByMonth = data?.totalByMonth?.map {
-      it?.adapt()
-    } ?: emptyList()
 
-    _state.update {
-      it.copy(
-        incomes = incomes, totalByMonth = totalByMonth, isLoading = false
-      )
+    try {
+      val data = getIncomeUseCase.executeAllIncomes().data?.incomes
+      val incomes = data?.incomes?.map {
+        it?.adapt()
+      } ?: emptyList()
+      val totalByMonth = data?.totalByMonth?.map {
+        it?.adapt()
+      } ?: emptyList()
+
+      _state.update {
+        it.copy(
+          incomes = incomes, totalByMonth = totalByMonth, isLoading = false
+        )
+      }
+    } catch (exception: ApolloHttpException) {
+      Log.d("JWT", exception.statusCode.toString())
+//      if (exception.statusCode == 401) {
+//
+//      }
     }
+
   }
 }
