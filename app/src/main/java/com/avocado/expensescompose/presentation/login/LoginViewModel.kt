@@ -3,11 +3,12 @@ package com.avocado.expensescompose.presentation.login
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.apollographql.apollo3.exception.ApolloHttpException
 import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.data.model.auth.Auth
 import com.avocado.expensescompose.data.model.auth.AuthParameters
-import com.avocado.expensescompose.data.repositories.AuthRepository
 import com.avocado.expensescompose.data.repositories.DataStoreRepository
+import com.avocado.expensescompose.domain.login.GetLoginUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,7 +29,7 @@ data class LoginUiState(
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-  private val authRepository: AuthRepository, private val dataStoreRepository: DataStoreRepository
+  private val dataStoreRepository: DataStoreRepository, private val getLoginUseCase: GetLoginUseCase
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(LoginUiState())
@@ -52,18 +53,19 @@ class LoginViewModel @Inject constructor(
     }
   }
 
-  private suspend fun saveToken(value: String): MyResult<Boolean> =
-    dataStoreRepository.putString("JWT", value)
+  private suspend fun saveToken(value: String): MyResult<Boolean> = dataStoreRepository.putString(
+    "JWT", value
+  )
 
   private suspend fun getToken(): MyResult<String?> = dataStoreRepository.getString("JWT")
 
-  private suspend fun requestNewToken(auth: Auth) =
-    when (val response = authRepository.getJwtToken(auth)) {
+  private suspend fun requestNewTokenMutation(auth: Auth, token: String) = try {
+    when (val response = getLoginUseCase.execute(auth.authParameters, token)) {
       is MyResult.Success -> {
-        val token = response.data.authenticationResult.accessToken
-        when (val isSaved = saveToken(token)) {
+        val tokenResponse = response.data.data?.login?.accessToken ?: ""
+        when (val isSaved = saveToken(tokenResponse)) {
           is MyResult.Success -> {
-            Log.d("JWT", "Token saved $token")
+            Log.d("JWT", "Token saved $tokenResponse")
             _uiState.update {
               it.copy(isLoading = false, isSuccess = true)
             }
@@ -75,9 +77,7 @@ class LoginViewModel @Inject constructor(
             }
           }
         }
-
       }
-
       //TODO implement logic to handle errors and display correct message
       is MyResult.Error -> {
         _uiState.update {
@@ -85,6 +85,13 @@ class LoginViewModel @Inject constructor(
         }
       }
     }
+  } catch (exception: ApolloHttpException) {
+    Log.d("JWT", exception.message ?: "")
+    _uiState.update {
+      it.copy(userMessage = exception.message, isLoading = false)
+    }
+  }
+
 
   fun login() {
     val auth = Auth(
@@ -102,15 +109,7 @@ class LoginViewModel @Inject constructor(
       when (val tokenFromDataStore = getToken()) {
         is MyResult.Success -> {
           Log.d("JWT", "The value extracted from data store is $tokenFromDataStore")
-          if (tokenFromDataStore.data.isNullOrBlank()) {
-            Log.d("JWT", "Non existing Token, requesting a new one")
-            requestNewToken(auth)
-            return@launch
-          }
-          _uiState.update {
-            it.copy(isLoading = false, isSuccess = true)
-          }
-          return@launch
+          requestNewTokenMutation(auth, tokenFromDataStore.data ?: "")
         }
 
         is MyResult.Error -> {
