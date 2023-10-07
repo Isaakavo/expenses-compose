@@ -108,6 +108,11 @@ fun IncomesScreen(
   IncomeScreenContent(state = state, navController = navController) {
     viewModel.onEvent(it)
   }
+
+  if (state.isInvalidSession) {
+    Toast.makeText(context, "Por favor, inicia sesión de nuevo", Toast.LENGTH_LONG).show()
+    onLogout()
+  }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

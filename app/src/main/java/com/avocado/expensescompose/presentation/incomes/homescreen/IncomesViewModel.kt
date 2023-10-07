@@ -21,7 +21,8 @@ data class IncomeState(
   val showAddButtons: Boolean = false,
   val backPressState: Boolean = false,
   val showToast: Boolean = false,
-  val isLoading: Boolean = false
+  val isLoading: Boolean = false,
+  val isInvalidSession: Boolean = false
 )
 
 sealed class IncomeEvent {

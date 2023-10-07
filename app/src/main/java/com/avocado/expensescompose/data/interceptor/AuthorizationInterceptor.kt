@@ -48,7 +48,7 @@ class AuthorizationInterceptor @Inject constructor(
             var jwt = extractJwt()
             val response = validateJwtIsNotNullOrEmpty(jwt, request, chain)
             return if (response.statusCode == 401) {
-                //TODO add logic to refetch the token or close the session
+                //TODO validate if is possible make a mutation from here to refresh the token
                 jwt = extractJwt()
                 validateJwtIsNotNullOrEmpty(jwt, request, chain)
             } else {

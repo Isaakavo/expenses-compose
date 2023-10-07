@@ -2,11 +2,11 @@ package com.avocado.expensescompose.data
 
 import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.api.ApolloResponse
-import com.apollographql.apollo3.api.Optional
 import com.avocado.AllIncomesQuery
 import com.avocado.ExpensesByFortnightQuery
 import com.avocado.IncomesByMonthQuery
 import com.avocado.LoginMutation
+import com.avocado.ValidateTokenMutation
 import com.avocado.expensescompose.data.adapters.graphql.scalar.Date
 import com.avocado.expensescompose.data.model.auth.AuthParameters
 import com.avocado.expensescompose.domain.Expense
@@ -16,8 +16,12 @@ import java.time.LocalDateTime
 class ApolloExpenseClient(
   private val apolloClient: ApolloClient
 ) : ExpensesClient {
-  override suspend fun getLoginToken(auth: AuthParameters, token: String): ApolloResponse<LoginMutation.Data> =
-    apolloClient.mutation(LoginMutation(auth.username, auth.password, Optional.present(token))).execute()
+  override suspend fun getLoginToken(auth: AuthParameters): ApolloResponse<LoginMutation.Data> =
+    apolloClient.mutation(LoginMutation(auth.username, auth.password)).execute()
+
+  override suspend fun validateToken(token: String): ApolloResponse<ValidateTokenMutation.Data> =
+    apolloClient.mutation(ValidateTokenMutation(token)).execute()
+
 
   override suspend fun getIncomesByMonth(date: String): ApolloResponse<IncomesByMonthQuery.Data> =
     apolloClient

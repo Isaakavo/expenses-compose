@@ -81,7 +81,11 @@ fun LoginScreen(
           }
           Text(text = "Iniciar Sesión")
         }
+      }
 
+      //TODO validate if this works
+      if (uiState.retryLogin) {
+        viewModel.login()
       }
 
       if (uiState.userMessage?.isNotBlank() == true) {
