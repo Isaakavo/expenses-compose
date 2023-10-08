@@ -3,12 +3,11 @@ package com.avocado.expensescompose.presentation.login
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.apollographql.apollo3.exception.ApolloHttpException
 import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.data.model.auth.Auth
 import com.avocado.expensescompose.data.model.auth.AuthParameters
-import com.avocado.expensescompose.data.repositories.DataStoreRepository
-import com.avocado.expensescompose.domain.login.GetLoginUseCase
+import com.avocado.expensescompose.data.repositories.AuthRepository
+import com.avocado.expensescompose.data.repositories.TokenManagerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,7 +29,8 @@ data class LoginUiState(
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-  private val dataStoreRepository: DataStoreRepository, private val getLoginUseCase: GetLoginUseCase
+  private val authRepository: AuthRepository,
+  private val tokenManagerRepository: TokenManagerRepository
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(LoginUiState())
@@ -54,92 +54,17 @@ class LoginViewModel @Inject constructor(
     }
   }
 
-  private suspend fun saveToken(value: String): MyResult<Boolean> = dataStoreRepository.putString(
-    "JWT", value
-  )
+  private suspend fun saveAccessToken(value: String): MyResult<Boolean> =
+    tokenManagerRepository.saveAccessToken(
+      value
+    )
 
-  private suspend fun getToken(): MyResult<String?> = dataStoreRepository.getString("JWT")
+  private suspend fun saveRefreshToken(value: String): MyResult<Boolean> =
+    tokenManagerRepository.saveRefreshToken(value)
 
-  private suspend fun validateSavedToken(tokenResponse: String?) {
-    when (val isSaved = saveToken(tokenResponse ?: "")) {
-      is MyResult.Success -> {
-        Log.d("JWT", "Token saved $tokenResponse")
-        _uiState.update {
-          it.copy(isLoading = false, isSuccess = true)
-        }
-      }
-
-      is MyResult.Error -> {
-        _uiState.update {
-          it.copy(isLoading = false, userMessage = isSaved.exception)
-        }
-      }
-    }
-  }
-
-  private suspend fun requestToken(auth: Auth, token: String) {
-    when (token.isBlank()) {
-      true -> {
-        requestNewTokenMutation(auth)
-      }
-
-      false -> {
-        validateExistingToken(token)
-      }
-    }
-  }
-
-  private suspend fun validateExistingToken(token: String) {
-    try {
-      when (val response = getLoginUseCase.executeValidateToken(token)) {
-        is MyResult.Success -> {
-          val isExpired = response.data.data?.validateToken?.isExpired
-          if (isExpired == true) {
-            dataStoreRepository.putString("JWT", "")
-            _uiState.update {
-              it.copy(
-                retryLogin = true
-              )
-            }
-            return
-          }
-          validateSavedToken(response.data.data?.validateToken?.accessToken)
-        }
-
-        is MyResult.Error -> {
-
-        }
-      }
-    } catch (exception: ApolloHttpException) {
-
-    }
-  }
-
-  private suspend fun requestNewTokenMutation(auth: Auth) {
-    try {
-      when (val response = getLoginUseCase.executeGetToken(auth.authParameters)) {
-        is MyResult.Success -> {
-          val tokenResponse = response.data.data?.login?.accessToken
-          val error = response.data.errors
-          Log.d("JWT", error.toString())
-          validateSavedToken(tokenResponse)
-        }
-        //TODO implement logic to handle errors and display correct message
-        is MyResult.Error -> {
-          _uiState.update {
-            it.copy(userMessage = response.exception, isLoading = false)
-          }
-        }
-      }
-    } catch (exception: ApolloHttpException) {
-      Log.d("JWT", exception.message ?: "")
-      dataStoreRepository.putString("JWT", "")
-      _uiState.update {
-        it.copy(userMessage = exception.message, isLoading = false)
-      }
-    }
-  }
-
+  private suspend fun getAccessToken(): MyResult<String?> = tokenManagerRepository.getAccessToken()
+  private suspend fun getRefreshToken(): MyResult<String?> =
+    tokenManagerRepository.getRefreshToken()
 
   fun login() {
     val auth = Auth(
@@ -153,25 +78,54 @@ class LoginViewModel @Inject constructor(
         it.copy(isLoading = true)
       }
 
-      //TODO improve login process to refresh tokens
-      when (val tokenFromDataStore = getToken()) {
+      // Validate the existence of a previous Access Token
+      // If exists, continue and use it
+      when (val savedAccessToken = getAccessToken()) {
         is MyResult.Success -> {
-          Log.d("JWT", "The value extracted from data store is $tokenFromDataStore")
-          requestToken(
-            auth,
-            tokenFromDataStore.data ?: ""
-          )
-          if (_uiState.value.retryLogin) {
-            _uiState.update {
-              it.copy(retryLogin = false)
+          if (savedAccessToken.data != null) {
+            // Validate also that there is a refresh token available
+            // If exists, we are safe to make the request
+            // Interceptor will use it to ask for a new access token
+            when (val savedRefreshToken = getRefreshToken()) {
+              is MyResult.Success -> {
+                if (savedRefreshToken.data != null) {
+                  _uiState.update {
+                    it.copy(isLoading = false, isSuccess = true)
+                  }
+                  return@launch
+                }
+              }
+
+              is MyResult.Error -> {
+                Log.d("JWT", savedRefreshToken.exception.toString())
+              }
             }
           }
         }
 
         is MyResult.Error -> {
-          Log.d("JWT", "Error retrieving the JWT")
+
+        }
+      }
+
+      // If there is no access nor refresh token, make the call to the API
+      // and store the tokens
+      when (val response = authRepository.getAccessToken(auth)) {
+        is MyResult.Success -> {
+          val accessToken = response.data.authenticationResult.accessToken
+          val refreshToken = response.data.authenticationResult.refreshToken
+          saveAccessToken(accessToken)
+          saveRefreshToken(refreshToken)
+          Log.d("JWT", "Access Token saved $accessToken")
+          Log.d("JWT", "Refresh Token saved $refreshToken")
           _uiState.update {
-            it.copy(isLoading = false, userMessage = "Error at login")
+            it.copy(isLoading = false, isSuccess = true)
+          }
+        }
+
+        is MyResult.Error -> {
+          _uiState.update {
+            it.copy(userMessage = response.exception, isLoading = false)
           }
         }
       }

@@ -1,6 +1,0 @@
-mutation ValidateTokenMutation($token: String!) {
-    validateToken(token: $token) {
-        accessToken
-        isExpired
-    }
-}
