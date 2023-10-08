@@ -3,7 +3,7 @@ package com.avocado.expensescompose.data.model.auth
 import com.google.gson.annotations.SerializedName
 
 
-data class Jwt(
+data class CognitoResponse(
   @SerializedName("AuthenticationResult")
   val authenticationResult: AuthenticationResult,
   @SerializedName("ChallengeParameters")

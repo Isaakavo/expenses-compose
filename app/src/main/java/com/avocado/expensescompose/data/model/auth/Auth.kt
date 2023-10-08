@@ -1,5 +1,6 @@
 package com.avocado.expensescompose.data.model.auth
 
+import com.avocado.expensescompose.presentation.util.Constants
 import com.google.gson.annotations.SerializedName
 
 data class Auth(
