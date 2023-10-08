@@ -108,9 +108,9 @@ type Query {
 }
 
 type Mutation {
-  createIncome(total: Float!, comment: String, createdAt: Date!, paymentDate: Date!): Income
+  createIncome(total: Float!, comment: String, paymentDate: Date!): Income
 
-  createExpense(concept: String!, total: Float!, payBefore: Date!, createdAt: Date!, tags: [ExpenseTagInput], comment: String): Expense
+  createExpense(concept: String!, total: Float!, payBefore: Date!, tags: [ExpenseTagInput], comment: String): Expense
 }
 
 """

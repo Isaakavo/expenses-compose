@@ -1,5 +1,5 @@
-mutation CreateIncome($total: Float!, $createdAt: Date!, $paymentDate: Date!, $comment: String) {
-    createIncome(total: $total, createdAt: $createdAt, paymentDate: $paymentDate, comment: $comment) {
+mutation CreateIncome($total: Float!, $paymentDate: Date!, $comment: String) {
+    createIncome(total: $total, paymentDate: $paymentDate, comment: $comment) {
         userId
         total
         createdAt
