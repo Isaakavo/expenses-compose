@@ -12,7 +12,7 @@ fun IncomesByMonthQuery.IncomesByMonth.adapt(): Income = Income(
     total = total,
     paymentDate = PaymentDate(
         date = paymentDate.date.date,
-        fortnight = Fortnight.valueOf(paymentDate.forthnight.name)
+        fortnight = Fortnight.valueOf(paymentDate.fortnight.name)
     ),
     createdAt = createdAt?.date?.formatDateWithYear()
 )
@@ -22,7 +22,7 @@ fun AllIncomesQuery.Income.adapt(): Income = Income(
     total = total,
     paymentDate = PaymentDate(
         date = paymentDate.date.date,
-        fortnight = Fortnight.valueOf(paymentDate.forthnight.name)
+        fortnight = Fortnight.valueOf(paymentDate.fortnight.name)
     ),
     createdAt = createdAt?.date?.formatDateWithYear()
 )

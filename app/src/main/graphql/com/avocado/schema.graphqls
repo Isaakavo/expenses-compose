@@ -9,7 +9,7 @@ enum Fortnight {
 type PaymentDate {
   date: Date!
 
-  forthnight: Fortnight!
+  fortnight: Fortnight!
 }
 
 type Income {

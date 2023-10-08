@@ -5,7 +5,7 @@ query AllIncomes {
             total
             paymentDate {
                 date
-                forthnight
+                fortnight
             }
             createdAt
         }

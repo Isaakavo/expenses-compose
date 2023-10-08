@@ -1,0 +1,11 @@
+mutation CreateIncome($total: Float!, $createdAt: Date!, $paymentDate: Date!, $comment: String) {
+    createIncome(total: $total, createdAt: $createdAt, paymentDate: $paymentDate, comment: $comment) {
+        userId
+        total
+        createdAt
+        paymentDate {
+            date
+            fortnight
+        }
+    }
+}

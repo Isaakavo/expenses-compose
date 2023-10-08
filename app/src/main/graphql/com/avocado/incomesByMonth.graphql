@@ -4,7 +4,7 @@ query IncomesByMonth($date: Date!) {
         total
         paymentDate {
             date
-            forthnight
+            fortnight
         }
         createdAt
     }
