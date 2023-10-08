@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -54,7 +53,7 @@ fun AddIncomeScreen(
       AppBar(
         title = "Agregar ingreso",
         icon = Icons.Rounded.ArrowBack,
-        actionIcon = Icons.Rounded.Check,
+        buttonText = "Guardar",
         iconClickAction = { navController.popBackStack() }) {
 
       }

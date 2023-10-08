@@ -19,7 +19,6 @@ import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Menu
-import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.ShoppingCart
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -123,7 +122,7 @@ fun IncomeScreenContent(
   Scaffold(topBar = {
     AppBar(title = "Ingresos",
       icon = Icons.Rounded.Menu,
-      actionIcon = Icons.Rounded.Refresh,
+      buttonText = "Refrescar",
       iconClickAction = {}) {
       onEvent(IncomeEvent.FetchQuery)
     }

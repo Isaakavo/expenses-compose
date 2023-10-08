@@ -3,16 +3,16 @@ package com.avocado.expensescompose.domain.income
 import com.apollographql.apollo3.api.ApolloResponse
 import com.avocado.AllIncomesQuery
 import com.avocado.IncomesByMonthQuery
-import com.avocado.expensescompose.data.ExpensesClient
+import com.avocado.expensescompose.data.apolloclients.incomes.IncomesClient
 
 class GetIncomeUseCase(
-    private val expenseClient: ExpensesClient
+    private val incomesClient: IncomesClient
 ) {
 
     suspend fun executeAllIncomes(): ApolloResponse<AllIncomesQuery.Data> =
-        expenseClient.getAllIncomes()
+        incomesClient.getAllIncomes()
 
     suspend fun executeIncomesByMonth(date: String): ApolloResponse<IncomesByMonthQuery.Data> =
-        expenseClient.getIncomesByMonth(date)
+        incomesClient.getIncomesByMonth(date)
 
 }

@@ -4,6 +4,8 @@ import android.content.Context
 import com.apollographql.apollo3.ApolloClient
 import com.avocado.expensescompose.data.ApolloExpenseClient
 import com.avocado.expensescompose.data.ExpensesClient
+import com.avocado.expensescompose.data.apolloclients.incomes.ApolloIncomesClient
+import com.avocado.expensescompose.data.apolloclients.incomes.IncomesClient
 import com.avocado.expensescompose.data.interceptor.AuthorizationInterceptor
 import com.avocado.expensescompose.data.model.auth.Constants
 import com.avocado.expensescompose.data.network.LoginJwtClient
@@ -52,6 +54,10 @@ object AppModule {
   fun provideExpenseClient(apolloClient: ApolloClient): ExpensesClient =
     ApolloExpenseClient(apolloClient)
 
+  @Provides
+  @Singleton
+  fun provideIncomesClient(apolloClient: ApolloClient): IncomesClient =
+    ApolloIncomesClient(apolloClient)
 
   @Provides
   @Singleton
@@ -61,8 +67,8 @@ object AppModule {
 
   @Provides
   @Singleton
-  fun provideIncomeUseCase(expensesClient: ExpensesClient): GetIncomeUseCase =
-    GetIncomeUseCase(expensesClient)
+  fun provideIncomeUseCase(incomesClient: IncomesClient): GetIncomeUseCase =
+    GetIncomeUseCase(incomesClient)
 
 
   @Provides
