@@ -54,9 +54,9 @@ import androidx.navigation.compose.rememberNavController
 import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.adapters.formatDateDaysWithMonth
 import com.avocado.expensescompose.data.adapters.formatDateOnlyMonth
-import com.avocado.expensescompose.data.model.incomes.Fortnight
-import com.avocado.expensescompose.data.model.incomes.Income
-import com.avocado.expensescompose.data.model.incomes.PaymentDate
+import com.avocado.expensescompose.domain.income.models.Fortnight
+import com.avocado.expensescompose.domain.income.models.Income
+import com.avocado.expensescompose.domain.income.models.PaymentDate
 import com.avocado.expensescompose.presentation.RoutesConstants
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import kotlinx.coroutines.delay
@@ -154,26 +154,42 @@ fun IncomeScreenContent(
         }
 
         false -> {
-          LazyColumn(
-            contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)
-          ) {
-            itemsIndexed(state.incomes.filterNotNull()) { index, income ->
-              // TODO improve dates render
-              val currentIncomeMonth = income.paymentDate.date.formatDateOnlyMonth()
-              val currentTotal = state.totalByMonth.find { totalByMont ->
-                totalByMont?.date == currentIncomeMonth
-              }
+          if (state.incomesList.isNotEmpty()) {
+            LazyColumn(
+              contentPadding = PaddingValues(16.dp),
+              verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+              itemsIndexed(state.incomesList) { index, income ->
+                // TODO improve dates render
+                val currentIncomeMonth = income.paymentDate.date?.formatDateOnlyMonth()
+                val currentTotal = state.totalByMonth.find { totalByMont ->
+                  totalByMont?.date == currentIncomeMonth
+                }
 
-              if (index != 0 && state.incomes[index - 1]?.paymentDate?.date?.formatDateOnlyMonth() != currentIncomeMonth) {
-                IncomeMonth(
-                  monthTotal = currentTotal?.total.toString(), incomeMonth = currentIncomeMonth
-                )
-              } else if (index == 0) {
-                IncomeMonth(
-                  monthTotal = currentTotal?.total.toString(), incomeMonth = currentIncomeMonth
-                )
+                if (index != 0 && state.incomesList[index - 1].paymentDate.date?.formatDateOnlyMonth() != currentIncomeMonth) {
+                  IncomeMonth(
+                    monthTotal = currentTotal?.total.toString(),
+                    incomeMonth = currentIncomeMonth ?: ""
+                  )
+                } else if (index == 0) {
+                  IncomeMonth(
+                    monthTotal = currentTotal?.total.toString(),
+                    incomeMonth = currentIncomeMonth ?: ""
+                  )
+                }
+                IncomeItem(item = income)
               }
-              IncomeItem(item = income)
+            }
+          } else {
+            Column(
+              horizontalAlignment = Alignment.CenterHorizontally,
+              verticalArrangement = Arrangement.Center,
+              modifier = Modifier.padding(start = 12.dp, end = 12.dp)
+            ) {
+              Text(
+                text = "Aun no tienes ingresos añadidos, no te preocupes, eso se puede solucionar facil",
+                style = MaterialTheme.typography.headlineLarge
+              )
             }
           }
         }
@@ -201,7 +217,7 @@ fun IncomeItem(item: Income) {
         horizontalArrangement = Arrangement.SpaceBetween
       ) {
         Text(
-          text = item.paymentDate.date.formatDateDaysWithMonth(),
+          text = item.paymentDate.date?.formatDateDaysWithMonth() ?: "",
           style = MaterialTheme.typography.titleMedium,
           textAlign = TextAlign.End
         )
@@ -303,12 +319,12 @@ fun FabWithLabel(
 fun IncomeItemPreview() {
   IncomeScreenContent(
     navController = rememberNavController(), IncomeState(
-      showToast = false, incomes = listOf(
+      showToast = false, incomesList = listOf(
         Income(
           userId = "alskhjdjkas",
           total = 13675.76,
           paymentDate = PaymentDate(date = LocalDateTime.now(), fortnight = Fortnight.FIRST),
-          createdAt = LocalDateTime.now().toString()
+          createdAt = LocalDateTime.now()
         )
       )
     )

@@ -38,10 +38,10 @@ type IncomeTotalByMonth {
   total: Float!
 }
 
-type Incomes {
-  incomes: [Income]
+type IncomesList {
+  incomes: [Income!]!
 
-  totalByMonth: [IncomeTotalByMonth]
+  totalByMonth: [IncomeTotalByMonth!]!
 
   total: Float!
 }
@@ -92,7 +92,7 @@ input ExpenseTagInput {
 }
 
 type Query {
-  incomes: Incomes
+  incomesList: IncomesList
 
   incomesByMonth(date: Date!): [Income]
 

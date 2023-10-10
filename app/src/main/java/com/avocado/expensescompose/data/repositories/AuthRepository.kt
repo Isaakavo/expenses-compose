@@ -1,6 +1,5 @@
 package com.avocado.expensescompose.data.repositories
 
-import android.util.Log
 import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.data.model.SimpleResource
 import com.avocado.expensescompose.data.model.auth.Auth
@@ -58,38 +57,39 @@ class AuthRepository @Inject constructor(
   }
 
   suspend fun getAccessToken(email: String, password: String): SimpleResource {
-    return try {
-      // Validate the existence of a previous Access Token
-      // If exists, continue and use it
-       when (val savedAccessToken = getAccessToken()) {
-        is MyResult.Success -> {
-          if (savedAccessToken.data != null) {
-            // Validate also that there is a refresh token available
-            // If exists, we are safe to make the request
-            // Interceptor will use it to ask for a new access token
-            when (val savedRefreshToken = getRefreshToken()) {
-              is MyResult.Success -> {
-                if (savedRefreshToken.data != null) {
-                  return MyResult.Success(Unit)
-                }
-              }
-
-              is MyResult.Error -> {
-                Log.d("JWT", savedRefreshToken.uiText.toString())
-              }
-            }
-          }
-        }
-
-        is MyResult.Error -> {
-          Log.d("JWT", "Access Token not found, requesting a new one")
-          return getTokenFromApi(email, password)
-        }
-      }
-      MyResult.Error(uiText = "Something went wrong retrieving your credentials")
-    } catch (e: Exception) {
-      MyResult.Error(null, e.message)
-    }
+    return getTokenFromApi(email, password)
+//    return try {
+//      // Validate the existence of a previous Access Token
+//      // If exists, continue and use it
+//       when (val savedAccessToken = getAccessToken()) {
+//        is MyResult.Success -> {
+//          if (savedAccessToken.data != null) {
+//            // Validate also that there is a refresh token available
+//            // If exists, we are safe to make the request
+//            // Interceptor will use it to ask for a new access token
+//            when (val savedRefreshToken = getRefreshToken()) {
+//              is MyResult.Success -> {
+//                if (savedRefreshToken.data != null) {
+//                  return MyResult.Success(Unit)
+//                }
+//              }
+//
+//              is MyResult.Error -> {
+//                Log.d("JWT", savedRefreshToken.uiText.toString())
+//              }
+//            }
+//          }
+//        }
+//
+//        is MyResult.Error -> {
+//          Log.d("JWT", "Access Token not found, requesting a new one")
+//          return getTokenFromApi(email, password)
+//        }
+//      }
+//      MyResult.Error(uiText = "Something went wrong retrieving your credentials")
+//    } catch (e: Exception) {
+//      MyResult.Error(null, e.message)
+//    }
   }
 
   suspend fun refreshToken(auth: Auth): MyResult<CognitoResponse> = try {

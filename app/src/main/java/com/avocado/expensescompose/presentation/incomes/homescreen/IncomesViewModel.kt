@@ -4,10 +4,9 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apollographql.apollo3.exception.ApolloHttpException
-import com.avocado.expensescompose.data.adapters.adapt
-import com.avocado.expensescompose.data.model.incomes.Income
-import com.avocado.expensescompose.data.model.incomes.TotalByMonth
-import com.avocado.expensescompose.domain.income.GetIncomeUseCase
+import com.avocado.expensescompose.domain.income.models.Income
+import com.avocado.expensescompose.domain.income.models.IncomeTotalByMonth
+import com.avocado.expensescompose.domain.income.usecase.GetAllIncomesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,8 +15,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class IncomeState(
-  val incomes: List<Income?> = emptyList(),
-  val totalByMonth: List<TotalByMonth?> = emptyList(),
+  val incomesList: List<Income> = emptyList(),
+  val totalByMonth: List<IncomeTotalByMonth?> = emptyList(),
   val showAddButtons: Boolean = false,
   val backPressState: Boolean = false,
   val showToast: Boolean = false,
@@ -35,7 +34,7 @@ sealed class IncomeEvent {
 
 @HiltViewModel
 class IncomesViewModel @Inject constructor(
-  private val getIncomeUseCase: GetIncomeUseCase
+  private val getAllIncomesUseCase: GetAllIncomesUseCase
 ) : ViewModel() {
   private val _state = MutableStateFlow(IncomeState())
   val state = _state.asStateFlow()
@@ -80,17 +79,12 @@ class IncomesViewModel @Inject constructor(
     _state.update { it.copy(isLoading = true) }
 
     try {
-      val data = getIncomeUseCase.executeAllIncomes().data?.incomes
-      val incomes = data?.incomes?.map {
-        it?.adapt()
-      } ?: emptyList()
-      val totalByMonth = data?.totalByMonth?.map {
-        it?.adapt()
-      } ?: emptyList()
-
+      val incomes = getAllIncomesUseCase()
       _state.update {
         it.copy(
-          incomes = incomes, totalByMonth = totalByMonth, isLoading = false
+          incomesList = incomes.incomesList,
+          totalByMonth = incomes.totalByMonth,
+          isLoading = false
         )
       }
     } catch (exception: ApolloHttpException) {
