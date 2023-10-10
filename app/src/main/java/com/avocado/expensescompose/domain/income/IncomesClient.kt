@@ -1,5 +1,6 @@
 package com.avocado.expensescompose.domain.income
 
+import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.domain.income.models.Income
 import com.avocado.expensescompose.domain.income.models.Incomes
 import java.time.LocalDateTime
@@ -11,5 +12,5 @@ interface IncomesClient {
     total: Double,
     paymentDate: LocalDateTime,
     comment: String
-  )
+  ): MyResult<Income?>
 }

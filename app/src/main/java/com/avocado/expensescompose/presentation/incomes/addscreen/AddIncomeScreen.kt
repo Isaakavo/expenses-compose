@@ -5,11 +5,13 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -21,6 +23,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.avocado.expensescompose.data.adapters.formatDateDaysWithMonth
 import com.avocado.expensescompose.presentation.topbar.AppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,6 +45,7 @@ fun AddIncomeScreen(
   navController: NavHostController,
   viewModel: AddIncomeViewModel = hiltViewModel()
 ) {
+  val state by viewModel.state.collectAsState()
   val calendar = Calendar.getInstance()
   calendar.set(2023, 8, 30) // add year, month (Jan), date
   val datePickerState = rememberDatePickerState(initialSelectedDateMillis = viewModel.initialDate)
@@ -55,7 +60,7 @@ fun AddIncomeScreen(
         icon = Icons.Rounded.ArrowBack,
         buttonText = "Guardar",
         iconClickAction = { navController.popBackStack() }) {
-
+        viewModel.onEvent(AddIncomeEvent.InsertIncome)
       }
     }
   ) { paddingValues ->
@@ -125,6 +130,45 @@ fun AddIncomeScreen(
           label = { Text(text = "Comentarios") },
           onValueChange = { viewModel.setComment(it) },
           maxLines = 12,
+        )
+      }
+
+      if(state.isInserted) {
+        AlertDialog(
+          title = {
+            Text(text = "¡Se agregó el ingreso correctamente!")
+          },
+          //TODO improve dialog to show better the data
+          text = {
+            Row {
+              Text(text = state.insertedIncome?.paymentDate?.date?.formatDateDaysWithMonth() ?: "")
+              Text(text = "$${state.insertedIncome?.total.toString()}")
+            }
+          },
+          onDismissRequest = {
+            viewModel.resetInputs()
+            viewModel.closeDialog()
+          },
+          confirmButton = {
+            TextButton(
+              onClick = {
+                //TODO check how to detect in home screen that we need to recall the query
+                navController.popBackStack()
+              }
+            ) {
+              Text("Continuar")
+            }
+          },
+          dismissButton = {
+            TextButton(
+              onClick = {
+                viewModel.resetInputs()
+                viewModel.closeDialog()
+              }
+            ) {
+              Text("Agregar otro ingreso")
+            }
+          }
         )
       }
     }

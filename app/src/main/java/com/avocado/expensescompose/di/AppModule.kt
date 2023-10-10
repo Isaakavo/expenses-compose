@@ -12,6 +12,7 @@ import com.avocado.expensescompose.data.network.LoginJwtClient
 import com.avocado.expensescompose.data.repositories.AuthRepository
 import com.avocado.expensescompose.data.repositories.TokenManagerRepository
 import com.avocado.expensescompose.domain.GetExpensesUseCase
+import com.avocado.expensescompose.domain.income.usecase.CreateIncomeUseCase
 import com.avocado.expensescompose.domain.income.usecase.GetAllIncomesUseCase
 import dagger.Module
 import dagger.Provides
@@ -39,6 +40,7 @@ object AppModule {
       )
       .build()
   }
+
   @Provides
   @Singleton
   fun provideAuthClient(client: OkHttpClient): LoginJwtClient =
@@ -86,6 +88,10 @@ object AppModule {
   fun provideIncomeUseCase(incomesClient: IncomesClient): GetAllIncomesUseCase =
     GetAllIncomesUseCase(incomesClient)
 
+  @Provides
+  @Singleton
+  fun provideCreateIncomeUseCase(incomesClient: IncomesClient): CreateIncomeUseCase =
+    CreateIncomeUseCase(incomesClient)
 
   @Provides
   @Singleton

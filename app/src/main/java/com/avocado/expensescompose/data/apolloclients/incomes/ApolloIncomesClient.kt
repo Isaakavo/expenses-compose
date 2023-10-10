@@ -1,8 +1,14 @@
 package com.avocado.expensescompose.data.apolloclients.incomes
 
+import android.util.Log
 import com.apollographql.apollo3.ApolloClient
+import com.apollographql.apollo3.api.Optional
+import com.apollographql.apollo3.exception.ApolloException
 import com.avocado.AllIncomesQuery
+import com.avocado.CreateIncomeMutation
+import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.domain.income.IncomesClient
+import com.avocado.expensescompose.domain.income.models.Fortnight
 import com.avocado.expensescompose.domain.income.models.Income
 import com.avocado.expensescompose.domain.income.models.Incomes
 import com.avocado.expensescompose.domain.income.models.PaymentDate
@@ -34,7 +40,30 @@ class ApolloIncomesClient(private val apolloClient: ApolloClient) : IncomesClien
     total: Double,
     paymentDate: LocalDateTime,
     comment: String,
-  ) {
+  ): MyResult<Income?> {
+    try {
+      val insertedIncome = apolloClient.mutation(
+        CreateIncomeMutation(
+          total = total,
+          paymentDate = com.avocado.expensescompose.data.adapters.graphql.scalar.Date(paymentDate),
+          comment = Optional.present(comment)
+        )
+      ).execute().data?.createIncome
+        ?: return MyResult.Error(uiText = "Error extracting the response")
 
+      return MyResult.Success(
+        Income(
+          userId = insertedIncome.userId,
+          total = insertedIncome.total,
+          paymentDate = PaymentDate(
+            date = insertedIncome.paymentDate.date.date,
+            fortnight = Fortnight.valueOf(insertedIncome.paymentDate.fortnight.name)
+          )
+        )
+      )
+    } catch (e: ApolloException) {
+      Log.d("Apollo Incomes", e.message.toString())
+      return MyResult.Error(uiText = e.message.toString())
+    }
   }
 }
