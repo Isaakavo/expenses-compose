@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apollographql.apollo3.exception.ApolloHttpException
+import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.domain.income.models.Income
 import com.avocado.expensescompose.domain.income.models.IncomeTotalByMonth
 import com.avocado.expensescompose.domain.income.usecase.GetAllIncomesUseCase
@@ -21,7 +22,8 @@ data class IncomeState(
   val backPressState: Boolean = false,
   val showToast: Boolean = false,
   val isLoading: Boolean = false,
-  val isInvalidSession: Boolean = false
+  val isInvalidSession: Boolean = false,
+  val errorMessage: String = ""
 )
 
 sealed class IncomeEvent {
@@ -79,14 +81,27 @@ class IncomesViewModel @Inject constructor(
     _state.update { it.copy(isLoading = true) }
 
     try {
-      val incomes = getAllIncomesUseCase()
-      _state.update {
-        it.copy(
-          incomesList = incomes.incomesList,
-          totalByMonth = incomes.totalByMonth,
-          isLoading = false
-        )
+      when (val incomes = getAllIncomesUseCase()) {
+        is MyResult.Success -> {
+          _state.update {
+            it.copy(
+              incomesList = incomes.data.incomesList,
+              totalByMonth = incomes.data.totalByMonth,
+              isLoading = false
+            )
+          }
+        }
+
+        is MyResult.Error -> {
+          _state.update {
+            it.copy(
+              errorMessage = incomes.uiText ?: ""
+            )
+          }
+          Log.d("Incomes List", "Something went wrong ${incomes.uiText}")
+        }
       }
+
     } catch (exception: ApolloHttpException) {
       Log.d("JWT", exception.statusCode.toString())
 //      if (exception.statusCode == 401) {

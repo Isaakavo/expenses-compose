@@ -19,20 +19,27 @@ class ApolloIncomesClient(private val apolloClient: ApolloClient) : IncomesClien
     listOf(Income(paymentDate = PaymentDate(date = null)))
 
 
-  override suspend fun getAllIncomes(): Incomes {
-    val responseIncome = apolloClient.query(AllIncomesQuery()).execute().data
-    val incomesList = responseIncome?.incomesList?.incomes?.map { item ->
-      item.toIncome()
-    }
-    val totalByMonth = responseIncome?.incomesList?.totalByMonth?.map {
-      it.toTotalByMonth()
+  override suspend fun getAllIncomes(): MyResult<Incomes> {
+    try {
+      val responseIncome = apolloClient.query(AllIncomesQuery()).execute().data
+      val incomesList = responseIncome?.incomesList?.incomes?.map { item ->
+        item.toIncome()
+      }
+      val totalByMonth = responseIncome?.incomesList?.totalByMonth?.map {
+        it.toTotalByMonth()
+      }
+
+      return MyResult.Success(
+        Incomes(
+          incomesList = incomesList ?: emptyList(),
+          totalByMonth = totalByMonth ?: emptyList(),
+          total = responseIncome?.incomesList?.total ?: 0.0
+        )
+      )
+    } catch (e: ApolloException) {
+      return MyResult.Error(uiText = e.message)
     }
 
-    return Incomes(
-      incomesList = incomesList ?: emptyList(),
-      totalByMonth = totalByMonth ?: emptyList(),
-      total = responseIncome?.incomesList?.total ?: 0.0
-    )
   }
 
 
