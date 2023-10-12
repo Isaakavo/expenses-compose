@@ -60,6 +60,7 @@ class ApolloIncomesClient(private val apolloClient: ApolloClient) : IncomesClien
 
       return MyResult.Success(
         Income(
+          id = insertedIncome.id,
           userId = insertedIncome.userId,
           total = insertedIncome.total,
           paymentDate = PaymentDate(

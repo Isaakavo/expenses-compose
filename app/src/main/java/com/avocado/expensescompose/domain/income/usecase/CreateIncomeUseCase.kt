@@ -13,6 +13,6 @@ class CreateIncomeUseCase(
     paymentDate: LocalDateTime,
     comment: String,
   ): MyResult<Income?> {
-    return incomesClient.insertIncome(total, paymentDate, comment)
+    return incomesClient.insertIncome(total, paymentDate, comment.trim())
   }
 }

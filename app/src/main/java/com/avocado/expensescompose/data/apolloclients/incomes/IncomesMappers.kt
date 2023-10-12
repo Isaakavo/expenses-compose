@@ -8,6 +8,7 @@ import com.avocado.expensescompose.domain.income.models.PaymentDate
 
 fun AllIncomesQuery.Income.toIncome(): Income {
   return Income(
+    id = id,
     userId = userId,
     total = total,
     createdAt = createdAt?.date,
