@@ -1,7 +1,7 @@
 package com.avocado.expensescompose.data.network
 
 import com.avocado.expensescompose.data.model.auth.Auth
-import com.avocado.expensescompose.data.model.auth.Jwt
+import com.avocado.expensescompose.data.model.auth.CognitoResponse
 import retrofit2.http.Body
 import retrofit2.http.Headers
 import javax.inject.Singleton
@@ -19,7 +19,7 @@ interface LoginJwtClient {
   suspend fun getJwtToken(
     @Url base: String,
     @Body auth: Auth
-  ): Jwt
+  ): CognitoResponse
 
   @Headers(
     "X-Amz-Target: AWSCognitoIdentityProviderService.InitiateAuth",
@@ -29,5 +29,5 @@ interface LoginJwtClient {
   suspend fun refreshToken(
     @Url base: String,
     @Body auth: Auth
-  ): Jwt
+  ): CognitoResponse
 }

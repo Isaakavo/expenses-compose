@@ -1,6 +1,7 @@
-query AllIncomes {
-    incomes {
+query HomeScreenAllIncomesQuery {
+    incomesList {
         incomes {
+            id
             userId
             total
             paymentDate {

@@ -1,6 +1,7 @@
 package com.avocado.expensescompose.data.repositories
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -26,6 +27,7 @@ class TokenManagerRepository @Inject constructor(private val context: Context) :
       context.dataStore.edit { preferences ->
         preferences[JWT_ACCESS_KEY] = value
       }
+      Log.d("JWT", "Access Token saved $value")
       MyResult.Success(true)
     } catch (exception: IOException) {
       MyResult.Error(false, exception.message)
@@ -34,7 +36,12 @@ class TokenManagerRepository @Inject constructor(private val context: Context) :
 
   override suspend fun getAccessToken(): MyResult<String?> = try {
     val preferences = context.dataStore.data.first()
-    MyResult.Success(preferences[JWT_ACCESS_KEY])
+    val accessToken = preferences[JWT_REFRESH_KEY]
+    if (accessToken != null) {
+      MyResult.Success(preferences[JWT_ACCESS_KEY])
+    } else {
+      MyResult.Error(null, "Access Token not found")
+    }
   } catch (e: Exception) {
     e.printStackTrace()
     MyResult.Error(null, e.message)
@@ -54,6 +61,8 @@ class TokenManagerRepository @Inject constructor(private val context: Context) :
       context.dataStore.edit { preferences ->
         preferences[JWT_REFRESH_KEY] = value
       }
+
+      Log.d("JWT", "Refresh Token saved $value")
       MyResult.Success(true)
     } catch (exception: IOException) {
       MyResult.Error(false, exception.message)
