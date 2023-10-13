@@ -4,7 +4,7 @@ import android.util.Log
 import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.api.Optional
 import com.apollographql.apollo3.exception.ApolloException
-import com.avocado.AllIncomesQuery
+import com.avocado.HomeScreenAllIncomesQuery
 import com.avocado.CreateIncomeMutation
 import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.domain.income.IncomesClient
@@ -21,7 +21,7 @@ class ApolloIncomesClient(private val apolloClient: ApolloClient) : IncomesClien
 
   override suspend fun getAllIncomes(): MyResult<Incomes> {
     try {
-      val responseIncome = apolloClient.query(AllIncomesQuery()).execute().data
+      val responseIncome = apolloClient.query(HomeScreenAllIncomesQuery()).execute().data
       val incomesList = responseIncome?.incomesList?.incomes?.map { item ->
         item.toIncome()
       }
