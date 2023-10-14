@@ -1,0 +1,8 @@
+fragment incomeFragment on Income {
+    total
+    createdAt
+    paymentDate {
+        date
+        fortnight
+    }
+}

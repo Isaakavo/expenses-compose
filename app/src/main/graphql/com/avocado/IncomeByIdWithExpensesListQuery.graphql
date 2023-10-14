@@ -1,0 +1,22 @@
+query IncomeByIdWithExpensesListQuery($input: IncomesAndExpensesByFortnightInput!) {
+    incomeAndExpensesByFortnight(input: $input) {
+        expensesTotal
+        income {
+            comment
+            ...incomeFragment
+        }
+        expenses {
+            id
+            concept
+            comment
+            total
+            payBefore
+            createdAt
+            updatedAt
+            tags {
+                id
+                name
+            }
+        }
+    }
+}

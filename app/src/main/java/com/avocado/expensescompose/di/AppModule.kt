@@ -2,8 +2,6 @@ package com.avocado.expensescompose.di
 
 import android.content.Context
 import com.apollographql.apollo3.ApolloClient
-import com.avocado.expensescompose.data.ApolloExpenseClient
-import com.avocado.expensescompose.data.ExpensesClient
 import com.avocado.expensescompose.data.apolloclients.incomes.ApolloIncomesClient
 import com.avocado.expensescompose.domain.income.IncomesClient
 import com.avocado.expensescompose.data.interceptor.AuthorizationInterceptor
@@ -11,9 +9,9 @@ import com.avocado.expensescompose.presentation.util.Constants
 import com.avocado.expensescompose.data.network.LoginJwtClient
 import com.avocado.expensescompose.data.repositories.AuthRepository
 import com.avocado.expensescompose.data.repositories.TokenManagerRepository
-import com.avocado.expensescompose.domain.GetExpensesUseCase
 import com.avocado.expensescompose.domain.income.usecase.CreateIncomeUseCase
 import com.avocado.expensescompose.domain.income.usecase.GetAllIncomesUseCase
+import com.avocado.expensescompose.domain.income.usecase.GetIncomeByIdWithExpensesUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -66,22 +64,10 @@ object AppModule {
       )
       .build()
 
-
-  @Provides
-  @Singleton
-  fun provideExpenseClient(apolloClient: ApolloClient): ExpensesClient =
-    ApolloExpenseClient(apolloClient)
-
   @Provides
   @Singleton
   fun provideIncomesClient(apolloClient: ApolloClient): IncomesClient =
     ApolloIncomesClient(apolloClient)
-
-  @Provides
-  @Singleton
-  fun provideExpenseUseCase(expensesClient: ExpensesClient): GetExpensesUseCase =
-    GetExpensesUseCase(expensesClient)
-
 
   @Provides
   @Singleton
@@ -92,6 +78,11 @@ object AppModule {
   @Singleton
   fun provideCreateIncomeUseCase(incomesClient: IncomesClient): CreateIncomeUseCase =
     CreateIncomeUseCase(incomesClient)
+
+  @Provides
+  @Singleton
+  fun provideGetIncomeByIdWithExpensesUseCase(incomesClient: IncomesClient): GetIncomeByIdWithExpensesUseCase =
+    GetIncomeByIdWithExpensesUseCase(incomesClient)
 
   @Provides
   @Singleton

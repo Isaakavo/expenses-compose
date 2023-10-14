@@ -2,6 +2,7 @@ package com.avocado.expensescompose.presentation.incomes.homescreen
 
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -75,6 +76,7 @@ sealed class NavigateButton {
 fun IncomesScreen(
   navController: NavHostController,
   viewModel: IncomesViewModel = hiltViewModel(),
+  onNavigate: (incomeId: String) -> Unit,
   onLogout: () -> Unit
 ) {
   val state by viewModel.state.collectAsState()
@@ -104,7 +106,7 @@ fun IncomesScreen(
     viewModel.updateToast(true)
   }
 
-  IncomeScreenContent(state = state, navController = navController) {
+  IncomeScreenContent(state = state, navController = navController, onNavigate = onNavigate) {
     viewModel.onEvent(it)
   }
 
@@ -117,7 +119,10 @@ fun IncomesScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IncomeScreenContent(
-  navController: NavHostController, state: IncomeState, onEvent: (IncomeEvent) -> Unit
+  navController: NavHostController,
+  state: IncomeState,
+  onNavigate: (incomeId: String) -> Unit,
+  onEvent: (IncomeEvent) -> Unit
 ) {
   Scaffold(topBar = {
     AppBar(title = "Ingresos",
@@ -177,7 +182,7 @@ fun IncomeScreenContent(
                     incomeMonth = currentIncomeMonth ?: ""
                   )
                 }
-                IncomeItem(item = income)
+                IncomeItem(item = income, onNavigate = onNavigate)
               }
             }
           } else {
@@ -199,13 +204,14 @@ fun IncomeScreenContent(
 }
 
 @Composable
-fun IncomeItem(item: Income) {
+fun IncomeItem(item: Income, onNavigate: (incomeId: String) -> Unit) {
   Card(
     shape = RoundedCornerShape(16.dp),
     modifier = Modifier
       .fillMaxWidth()
       .wrapContentHeight()
-      .padding(start = 8.dp, end = 8.dp),
+      .padding(start = 8.dp, end = 8.dp)
+      .clickable { onNavigate(item.id) },
     elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
   ) {
     Column {
@@ -327,7 +333,8 @@ fun IncomeItemPreview() {
           createdAt = LocalDateTime.now()
         )
       )
-    )
+    ),
+    onNavigate = {}
   ) {
 
   }

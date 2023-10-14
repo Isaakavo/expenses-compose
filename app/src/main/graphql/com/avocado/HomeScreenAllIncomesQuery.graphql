@@ -3,12 +3,7 @@ query HomeScreenAllIncomesQuery {
         incomes {
             id
             userId
-            total
-            paymentDate {
-                date
-                fortnight
-            }
-            createdAt
+            ...incomeFragment
         }
         total
         totalByMonth {

@@ -6,12 +6,17 @@ import com.apollographql.apollo3.api.Optional
 import com.apollographql.apollo3.exception.ApolloException
 import com.avocado.HomeScreenAllIncomesQuery
 import com.avocado.CreateIncomeMutation
+import com.avocado.IncomeByIdWithExpensesListQuery
+import com.avocado.expensescompose.data.adapters.formatDateToISO
+import com.avocado.expensescompose.data.adapters.graphql.scalar.Date
 import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.domain.income.IncomesClient
 import com.avocado.expensescompose.domain.income.models.Fortnight
 import com.avocado.expensescompose.domain.income.models.Income
+import com.avocado.expensescompose.domain.income.models.IncomeWithExpenses
 import com.avocado.expensescompose.domain.income.models.Incomes
 import com.avocado.expensescompose.domain.income.models.PaymentDate
+import com.avocado.type.IncomesAndExpensesByFortnightInput
 import java.time.LocalDateTime
 
 class ApolloIncomesClient(private val apolloClient: ApolloClient) : IncomesClient {
@@ -42,6 +47,33 @@ class ApolloIncomesClient(private val apolloClient: ApolloClient) : IncomesClien
 
   }
 
+  override suspend fun getIncomeByIdWithExpenses(
+    incomeId: String,
+    payBefore: String
+  ): MyResult<IncomeWithExpenses> {
+    return try {
+      val input = IncomesAndExpensesByFortnightInput(
+        incomeId = incomeId,
+        payBefore = payBefore.formatDateToISO()?.let { Date(it) } ?: Date(LocalDateTime.now())
+      )
+      val incomeWithExpenses = apolloClient.query(IncomeByIdWithExpensesListQuery(input))
+        .execute().data?.incomeAndExpensesByFortnight
+      val income = incomeWithExpenses?.income?.toIncome()
+      val expensesList = incomeWithExpenses?.expenses?.map { expense ->
+        expense.toExpense()
+      }
+      return MyResult.Success(
+        IncomeWithExpenses(
+          income = income ?: Income(paymentDate = PaymentDate(null)),
+          expensesList = expensesList ?: emptyList(),
+          expensesTotal = incomeWithExpenses?.expensesTotal ?: 0.0
+        )
+      )
+    } catch (e: ApolloException) {
+      MyResult.Error(uiText = e.message)
+    }
+  }
+
 
   override suspend fun insertIncome(
     total: Double,
@@ -52,7 +84,7 @@ class ApolloIncomesClient(private val apolloClient: ApolloClient) : IncomesClien
       val insertedIncome = apolloClient.mutation(
         CreateIncomeMutation(
           total = total,
-          paymentDate = com.avocado.expensescompose.data.adapters.graphql.scalar.Date(paymentDate),
+          paymentDate = Date(paymentDate),
           comment = Optional.present(comment)
         )
       ).execute().data?.createIncome
