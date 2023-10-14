@@ -12,6 +12,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -41,6 +43,7 @@ import com.avocado.expensescompose.domain.income.models.Fortnight
 import com.avocado.expensescompose.domain.income.models.Income
 import com.avocado.expensescompose.domain.income.models.PaymentDate
 import com.avocado.expensescompose.presentation.topbar.AppBar
+import com.avocado.expensescompose.presentation.topbar.IconsActions
 import java.time.LocalDateTime
 
 @Composable
@@ -70,16 +73,20 @@ fun IncomeWithExpensesContent(
   isLoading: Boolean = false,
   onNavigateBack: () -> Unit = {}
 ) {
-  Scaffold(
-    topBar = {
-      AppBar(
-        title = income?.paymentDate?.date?.formatDateDaysWithMonth() ?: "",
-        onNavigationIconClick = { onNavigateBack() })
-    },
-    floatingActionButton = {
-      FABAddExpense()
-    }
-  ) {
+  //TODO add logic to edit income
+  // and more menu
+  Scaffold(topBar = {
+    AppBar(
+      title = income?.paymentDate?.date?.formatDateDaysWithMonth() ?: "",
+      onNavigationIconClick = { onNavigateBack() },
+      actionsList = listOf(
+        IconsActions(icon = Icons.Rounded.Edit, action = {}),
+        IconsActions(icon = Icons.Rounded.MoreVert, action = {})
+      )
+    )
+  }, floatingActionButton = {
+    FABAddExpense()
+  }) {
     Surface(
       modifier = Modifier
         .padding(it)
@@ -106,13 +113,11 @@ fun IncomeWithExpensesContent(
 @Composable
 fun IncomeDetails(income: Income?, remaining: Double) {
   Card(
-    modifier = Modifier
-      .fillMaxWidth(),
+    modifier = Modifier.fillMaxWidth(),
     elevation = CardDefaults.cardElevation(defaultElevation = 22.dp)
   ) {
     Column(
-      modifier = Modifier
-        .padding(16.dp)
+      modifier = Modifier.padding(16.dp)
     ) {
 
       Row(
@@ -128,14 +133,12 @@ fun IncomeDetails(income: Income?, remaining: Double) {
       }
 
       Row(
-        modifier = Modifier
-          .fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
+        modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
       ) {
         //TODO make text color of remaining
         // if remaining is more than income make it green if not red
         Text(
-          text = "${income?.total?.formatMoney()}",
-          style = MaterialTheme.typography.headlineMedium
+          text = "${income?.total?.formatMoney()}", style = MaterialTheme.typography.headlineMedium
         )
 
         Text(text = remaining.formatMoney(), style = MaterialTheme.typography.headlineMedium)
@@ -143,7 +146,8 @@ fun IncomeDetails(income: Income?, remaining: Double) {
       Row(
         modifier = Modifier
           .fillMaxWidth()
-          .padding(top = 4.dp, start = 8.dp), horizontalArrangement = Arrangement.SpaceBetween
+          .padding(top = 4.dp, start = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
       ) {
         Text(text = "Ingreso", color = MaterialTheme.colorScheme.secondary)
         Text(text = "Restante", color = MaterialTheme.colorScheme.secondary)
@@ -167,8 +171,7 @@ fun IncomeDetails(income: Income?, remaining: Double) {
 @Composable
 fun ExpenseItem(expense: Expense) {
   Card(
-    modifier = Modifier
-      .fillMaxWidth()
+    modifier = Modifier.fillMaxWidth()
   ) {
     Column(modifier = Modifier.padding(12.dp)) {
 
@@ -233,8 +236,7 @@ fun ExpenseTags(tags: ExpenseTag) {
 @Composable
 fun ExpensesList(expenseList: List<Expense>) {
   Text(
-    text = "Transacciones", modifier = Modifier
-      .fillMaxWidth(), textAlign = TextAlign.End
+    text = "Transacciones", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.End
   )
   LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
     items(expenseList) { expense ->
@@ -259,9 +261,7 @@ fun IncomeWithExpenseContent() {
       total = 15712.22,
       createdAt = LocalDateTime.now(),
       paymentDate = PaymentDate(date = LocalDateTime.now(), fortnight = Fortnight.FIRST)
-    ),
-    remaining = 10000.0,
-    expenseList = listOf(
+    ), remaining = 10000.0, expenseList = listOf(
       Expense(
         total = 5500.0,
         incomeId = "1",
@@ -275,20 +275,17 @@ fun IncomeWithExpenseContent() {
             name = "Tag de prueba",
             createdAt = LocalDateTime.now(),
             updatedAt = LocalDateTime.now()
-          ),
-          ExpenseTag(
+          ), ExpenseTag(
             id = "1",
             name = "Tag de prueba 2",
             createdAt = LocalDateTime.now(),
             updatedAt = LocalDateTime.now()
-          ),
-          ExpenseTag(
+          ), ExpenseTag(
             id = "1",
             name = "Tag de prueba",
             createdAt = LocalDateTime.now(),
             updatedAt = LocalDateTime.now()
-          ),
-          ExpenseTag(
+          ), ExpenseTag(
             id = "1",
             name = "Tag de prueba 2",
             createdAt = LocalDateTime.now(),
