@@ -34,16 +34,14 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.avocado.expensescompose.data.adapters.formatDateDaysWithMonth
 import com.avocado.expensescompose.presentation.topbar.AppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddIncomeScreen(
-  navController: NavHostController,
-  viewModel: AddIncomeViewModel = hiltViewModel()
+  viewModel: AddIncomeViewModel = hiltViewModel(),
+  onPopBackStack: () -> Unit = {}
 ) {
   val state by viewModel.state.collectAsState()
   val calendar = Calendar.getInstance()
@@ -59,7 +57,7 @@ fun AddIncomeScreen(
         title = "Agregar ingreso",
         icon = Icons.Rounded.ArrowBack,
         buttonText = "Guardar",
-        iconClickAction = { navController.popBackStack() }) {
+        iconClickAction = { onPopBackStack() }) {
         viewModel.onEvent(AddIncomeEvent.InsertIncome)
       }
     }
@@ -153,7 +151,7 @@ fun AddIncomeScreen(
             TextButton(
               onClick = {
                 //TODO check how to detect in home screen that we need to recall the query
-                navController.popBackStack()
+                onPopBackStack()
               }
             ) {
               Text("Continuar")
@@ -179,5 +177,5 @@ fun AddIncomeScreen(
 @Preview
 @Composable
 fun AddScreenPreview() {
-  AddIncomeScreen(rememberNavController())
+  AddIncomeScreen()
 }

@@ -22,12 +22,16 @@ fun ExpensesApplication() {
     }
 
     composable(RoutesConstants.INCOME_OVERVIEW) {
-      IncomesScreen(navController = navController, onNavigate = {
-        Log.d("Navigate", "Navigating with $it")
-        navController.navigate(
-          "${RoutesConstants.INCOME_EXPENSES_LIST}/${it}"
-        )
-      }) {
+      IncomesScreen(
+        onNavigate = {
+          Log.d("Navigate", "Navigating with $it")
+          navController.navigate(
+            "${RoutesConstants.INCOME_EXPENSES_LIST}/${it}"
+          )
+        },
+        onAddIncomeNavigate = {
+          navController.navigate(RoutesConstants.INCOME_ADD)
+        }) {
         navController.navigate(RoutesConstants.LOGIN_SCREEN) {
           popUpTo(navController.graph.id) {
             inclusive = true
@@ -45,7 +49,9 @@ fun ExpensesApplication() {
     }
 
     composable(RoutesConstants.INCOME_ADD) {
-      AddIncomeScreen(navController)
+      AddIncomeScreen() {
+        navController.popBackStack()
+      }
     }
   }
 }

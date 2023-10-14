@@ -50,15 +50,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.adapters.formatDateDaysWithMonth
 import com.avocado.expensescompose.data.adapters.formatDateOnlyMonth
 import com.avocado.expensescompose.domain.income.models.Fortnight
 import com.avocado.expensescompose.domain.income.models.Income
 import com.avocado.expensescompose.domain.income.models.PaymentDate
-import com.avocado.expensescompose.presentation.RoutesConstants
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import kotlinx.coroutines.delay
 import java.time.LocalDateTime
@@ -74,10 +71,10 @@ sealed class NavigateButton {
 
 @Composable
 fun IncomesScreen(
-  navController: NavHostController,
   viewModel: IncomesViewModel = hiltViewModel(),
-  onNavigate: (incomeId: String) -> Unit,
-  onLogout: () -> Unit
+  onNavigate: (incomeId: String) -> Unit = {},
+  onAddIncomeNavigate: () -> Unit = {},
+  onLogout: () -> Unit = {}
 ) {
   val state by viewModel.state.collectAsState()
   //TODO refactor this to use viewmodel
@@ -106,7 +103,11 @@ fun IncomesScreen(
     viewModel.updateToast(true)
   }
 
-  IncomeScreenContent(state = state, navController = navController, onNavigate = onNavigate) {
+  IncomeScreenContent(
+    state = state,
+    onAddIncomeNavigate = onAddIncomeNavigate,
+    onNavigate = onNavigate
+  ) {
     viewModel.onEvent(it)
   }
 
@@ -119,10 +120,10 @@ fun IncomesScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IncomeScreenContent(
-  navController: NavHostController,
   state: IncomeState,
-  onNavigate: (incomeId: String) -> Unit,
-  onEvent: (IncomeEvent) -> Unit
+  onNavigate: (incomeId: String) -> Unit = {},
+  onAddIncomeNavigate: () -> Unit = {},
+  onEvent: (IncomeEvent) -> Unit = {}
 ) {
   Scaffold(topBar = {
     AppBar(title = "Ingresos",
@@ -135,7 +136,7 @@ fun IncomeScreenContent(
     IncomesFAB(state = state, onNavigate = { navigateTo ->
       when (navigateTo) {
         is NavigateButton.NavigateAddIncome -> {
-          navController.navigate(RoutesConstants.INCOME_ADD)
+          onAddIncomeNavigate()
         }
       }
     }) {
@@ -324,7 +325,7 @@ fun FabWithLabel(
 @Composable
 fun IncomeItemPreview() {
   IncomeScreenContent(
-    navController = rememberNavController(), IncomeState(
+    IncomeState(
       showToast = false, incomesList = listOf(
         Income(
           userId = "alskhjdjkas",
@@ -333,10 +334,7 @@ fun IncomeItemPreview() {
           createdAt = LocalDateTime.now()
         )
       )
-    ),
-    onNavigate = {}
-  ) {
-
-  }
+    )
+  )
 
 }
