@@ -10,8 +10,13 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SuggestionChip
@@ -70,6 +75,9 @@ fun IncomeWithExpensesContent(
       AppBar(
         title = income?.paymentDate?.date?.formatDateDaysWithMonth() ?: "",
         onNavigationIconClick = { onNavigateBack() })
+    },
+    floatingActionButton = {
+      FABAddExpense()
     }
   ) {
     Surface(
@@ -99,7 +107,8 @@ fun IncomeWithExpensesContent(
 fun IncomeDetails(income: Income?, remaining: Double) {
   Card(
     modifier = Modifier
-      .fillMaxWidth()
+      .fillMaxWidth(),
+    elevation = CardDefaults.cardElevation(defaultElevation = 22.dp)
   ) {
     Column(
       modifier = Modifier
@@ -122,6 +131,8 @@ fun IncomeDetails(income: Income?, remaining: Double) {
         modifier = Modifier
           .fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
       ) {
+        //TODO make text color of remaining
+        // if remaining is more than income make it green if not red
         Text(
           text = "${income?.total?.formatMoney()}",
           style = MaterialTheme.typography.headlineMedium
@@ -229,6 +240,13 @@ fun ExpensesList(expenseList: List<Expense>) {
     items(expenseList) { expense ->
       ExpenseItem(expense = expense)
     }
+  }
+}
+
+@Composable
+fun FABAddExpense() {
+  FloatingActionButton(onClick = { /*TODO*/ }) {
+    Icon(Icons.Rounded.Add, contentDescription = "")
   }
 }
 

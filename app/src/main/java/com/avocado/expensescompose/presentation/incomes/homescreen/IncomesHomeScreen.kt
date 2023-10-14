@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -36,14 +37,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.adapters.formatDateDaysWithMonth
 import com.avocado.expensescompose.data.adapters.formatDateOnlyMonth
 import com.avocado.expensescompose.data.adapters.formatMoney
@@ -251,7 +249,7 @@ fun FabAddIncome(
 ) {
   FloatingActionButton(onClick = { onNavigate() }) {
     Icon(
-      imageVector = ImageVector.vectorResource(id = R.drawable.round_paid_24),
+      Icons.Rounded.Add,
       contentDescription = ""
     )
   }
