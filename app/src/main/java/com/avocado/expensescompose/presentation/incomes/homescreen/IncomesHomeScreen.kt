@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -17,18 +16,13 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Menu
-import androidx.compose.material.icons.rounded.ShoppingCart
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LargeFloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -42,7 +36,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
@@ -63,10 +56,6 @@ import java.time.LocalDateTime
 sealed class BackPress {
   object Idle : BackPress()
   object InitialTouch : BackPress()
-}
-
-sealed class NavigateButton {
-  object NavigateAddIncome : NavigateButton()
 }
 
 @Composable
@@ -104,9 +93,7 @@ fun IncomesScreen(
   }
 
   IncomeScreenContent(
-    state = state,
-    onAddIncomeNavigate = onAddIncomeNavigate,
-    onNavigate = onNavigate
+    state = state, onAddIncomeNavigate = onAddIncomeNavigate, onNavigate = onNavigate
   ) {
     viewModel.onEvent(it)
   }
@@ -126,21 +113,16 @@ fun IncomeScreenContent(
   onEvent: (IncomeEvent) -> Unit = {}
 ) {
   Scaffold(topBar = {
-    AppBar(title = "Ingresos",
+    AppBar(
+      title = "Ingresos",
       icon = Icons.Rounded.Menu,
       buttonText = "Refrescar",
       iconClickAction = {}) {
       onEvent(IncomeEvent.FetchQuery)
     }
   }, floatingActionButton = {
-    IncomesFAB(state = state, onNavigate = { navigateTo ->
-      when (navigateTo) {
-        is NavigateButton.NavigateAddIncome -> {
-          onAddIncomeNavigate()
-        }
-      }
-    }) {
-      onEvent(it)
+    FabAddIncome {
+      onAddIncomeNavigate()
     }
   }) { paddingValues ->
     Surface(
@@ -251,74 +233,16 @@ fun IncomeMonth(monthTotal: String, incomeMonth: String) {
 }
 
 @Composable
-fun IncomesFAB(
-  state: IncomeState, onNavigate: (NavigateButton) -> Unit, onEvent: (IncomeEvent) -> Unit
+fun FabAddIncome(
+  onNavigate: () -> Unit
 ) {
-  Column(horizontalAlignment = Alignment.End) {
-    when (state.showAddButtons) {
-      true -> {
-        //TODO add animation when showing the buttons
-        FabWithLabel(
-          labelText = "Agregar Gasto", icon = Icons.Rounded.ShoppingCart
-        ) {
-          onNavigate(NavigateButton.NavigateAddIncome)
-        }
-        Spacer(modifier = Modifier.padding(top = 6.dp, bottom = 6.dp))
-        FabWithLabel(
-          labelText = "Agregar ingreso",
-          icon = ImageVector.vectorResource(id = R.drawable.round_paid_24)
-        ) {
-          onNavigate(NavigateButton.NavigateAddIncome)
-        }
-        Spacer(modifier = Modifier.padding(top = 6.dp, bottom = 6.dp))
-        LargeFloatingActionButton(onClick = { onEvent(IncomeEvent.CloseAddIncomeFabClick) }) {
-          Icon(imageVector = Icons.Rounded.Close, contentDescription = "")
-        }
-      }
-
-      false -> {
-        ExtendedFloatingActionButton(text = { Text(text = "Agregar") },
-          onClick = { onEvent(IncomeEvent.AddIncomeFabClick) },
-          icon = {
-            Icon(
-              imageVector = Icons.Rounded.Add, contentDescription = ""
-            )
-          })
-      }
-
-    }
-
+  FloatingActionButton(onClick = { onNavigate() }) {
+    Icon(
+      imageVector = ImageVector.vectorResource(id = R.drawable.round_paid_24),
+      contentDescription = ""
+    )
   }
-}
 
-@Composable
-fun FabWithLabel(
-  labelText: String, icon: ImageVector, onNavigate: () -> Unit
-) {
-  Row(
-    verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(end = 6.dp)
-  ) {
-    Card(
-      elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
-      shape = RoundedCornerShape(16.dp),
-      colors = CardDefaults.cardColors(containerColor = Color.White),
-      modifier = Modifier
-        .wrapContentHeight()
-        .padding(end = 8.dp)
-    ) {
-      Row(modifier = Modifier.padding(6.dp)) {
-        Text(
-          text = labelText, modifier = Modifier.padding(5.dp)
-        )
-      }
-    }
-    //TODO implement logic to handle adding values
-    FloatingActionButton(onClick = { onNavigate() }) {
-      Icon(
-        imageVector = icon, contentDescription = ""
-      )
-    }
-  }
 }
 
 @Preview

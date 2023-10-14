@@ -27,9 +27,6 @@ data class IncomeState(
 )
 
 sealed class IncomeEvent {
-  object AddIncomeFabClick : IncomeEvent()
-
-  object CloseAddIncomeFabClick : IncomeEvent()
 
   object FetchQuery : IncomeEvent()
 }
@@ -51,23 +48,9 @@ class IncomesViewModel @Inject constructor(
 
   fun onEvent(incomeEvent: IncomeEvent) {
     when (incomeEvent) {
-      is IncomeEvent.AddIncomeFabClick -> {
-        onClickAddFab(true)
-      }
-
-      is IncomeEvent.CloseAddIncomeFabClick -> {
-        onClickAddFab(false)
-      }
-
       is IncomeEvent.FetchQuery -> {
         fetchQuery()
       }
-    }
-  }
-
-  private fun onClickAddFab(state: Boolean) {
-    _state.update {
-      it.copy(showAddButtons = state)
     }
   }
 
