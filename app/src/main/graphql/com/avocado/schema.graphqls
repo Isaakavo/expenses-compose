@@ -99,6 +99,8 @@ type IncomeListAndExpenses {
   expenses: [Expense!]
 
   expensesTotal: Float
+
+  remaining: Float
 }
 
 input CreateExpenseInput {

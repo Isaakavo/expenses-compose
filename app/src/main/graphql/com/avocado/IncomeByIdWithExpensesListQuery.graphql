@@ -1,6 +1,7 @@
 query IncomeByIdWithExpensesListQuery($input: IncomesAndExpensesByFortnightInput!) {
     incomeAndExpensesByFortnight(input: $input) {
         expensesTotal
+        remaining
         income {
             comment
             ...incomeFragment

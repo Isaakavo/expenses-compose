@@ -26,7 +26,7 @@ fun ExpensesApplication() {
         onNavigate = {
           Log.d("Navigate", "Navigating with $it")
           navController.navigate(
-            "${RoutesConstants.INCOME_EXPENSES_LIST}/${it}"
+            "${RoutesConstants.INCOME_EXPENSES_LIST}/${it.incomeId}/${it.paymentDate.toString()}"
           )
         },
         onAddIncomeNavigate = {
@@ -41,15 +41,20 @@ fun ExpensesApplication() {
     }
 
     composable(
-      "${RoutesConstants.INCOME_EXPENSES_LIST}/{incomeId}",
-      arguments = listOf(navArgument("incomeId") { type = NavType.StringType })
+      "${RoutesConstants.INCOME_EXPENSES_LIST}/{incomeId}/{paymentDate}",
+      arguments = listOf(
+        navArgument("incomeId") { type = NavType.StringType },
+        navArgument("paymentDate") { type = NavType.StringType })
     ) { navBackStackEntry ->
       val incomeId = navBackStackEntry.arguments?.getString("incomeId") ?: ""
-      IncomeExpensesScreen(incomeId = incomeId)
+      val paymentDate = navBackStackEntry.arguments?.getString("paymentDate") ?: ""
+      IncomeExpensesScreen(incomeId = incomeId, paymentDate = paymentDate) {
+        navController.popBackStack()
+      }
     }
 
     composable(RoutesConstants.INCOME_ADD) {
-      AddIncomeScreen() {
+      AddIncomeScreen {
         navController.popBackStack()
       }
     }

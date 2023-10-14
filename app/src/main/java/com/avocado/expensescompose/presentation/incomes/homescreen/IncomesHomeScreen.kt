@@ -46,6 +46,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.adapters.formatDateDaysWithMonth
 import com.avocado.expensescompose.data.adapters.formatDateOnlyMonth
+import com.avocado.expensescompose.data.adapters.formatMoney
 import com.avocado.expensescompose.domain.income.models.Fortnight
 import com.avocado.expensescompose.domain.income.models.Income
 import com.avocado.expensescompose.domain.income.models.PaymentDate
@@ -58,10 +59,15 @@ sealed class BackPress {
   object InitialTouch : BackPress()
 }
 
+data class NavigationIncomeDetails(
+  val incomeId: String,
+  val paymentDate: LocalDateTime?
+)
+
 @Composable
 fun IncomesScreen(
   viewModel: IncomesViewModel = hiltViewModel(),
-  onNavigate: (incomeId: String) -> Unit = {},
+  onNavigate: (income: NavigationIncomeDetails) -> Unit = {},
   onAddIncomeNavigate: () -> Unit = {},
   onLogout: () -> Unit = {}
 ) {
@@ -108,16 +114,16 @@ fun IncomesScreen(
 @Composable
 fun IncomeScreenContent(
   state: IncomeState,
-  onNavigate: (incomeId: String) -> Unit = {},
+  onNavigate: (income: NavigationIncomeDetails) -> Unit = {},
   onAddIncomeNavigate: () -> Unit = {},
   onEvent: (IncomeEvent) -> Unit = {}
 ) {
   Scaffold(topBar = {
     AppBar(
       title = "Ingresos",
-      icon = Icons.Rounded.Menu,
+      navigationIcon = Icons.Rounded.Menu,
       buttonText = "Refrescar",
-      iconClickAction = {}) {
+      onNavigationIconClick = {}) {
       onEvent(IncomeEvent.FetchQuery)
     }
   }, floatingActionButton = {
@@ -156,12 +162,12 @@ fun IncomeScreenContent(
 
                 if (index != 0 && state.incomesList[index - 1].paymentDate.date?.formatDateOnlyMonth() != currentIncomeMonth) {
                   IncomeMonth(
-                    monthTotal = currentTotal?.total.toString(),
+                    monthTotal = currentTotal?.total ?: 0.0,
                     incomeMonth = currentIncomeMonth ?: ""
                   )
                 } else if (index == 0) {
                   IncomeMonth(
-                    monthTotal = currentTotal?.total.toString(),
+                    monthTotal = currentTotal?.total ?: 0.0,
                     incomeMonth = currentIncomeMonth ?: ""
                   )
                 }
@@ -187,14 +193,21 @@ fun IncomeScreenContent(
 }
 
 @Composable
-fun IncomeItem(item: Income, onNavigate: (incomeId: String) -> Unit) {
+fun IncomeItem(item: Income, onNavigate: (income: NavigationIncomeDetails) -> Unit) {
   Card(
     shape = RoundedCornerShape(16.dp),
     modifier = Modifier
       .fillMaxWidth()
       .wrapContentHeight()
       .padding(start = 8.dp, end = 8.dp)
-      .clickable { onNavigate(item.id) },
+      .clickable {
+        onNavigate(
+          NavigationIncomeDetails(
+            incomeId = item.id,
+            paymentDate = item.paymentDate.date
+          )
+        )
+      },
     elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
   ) {
     Column {
@@ -210,7 +223,7 @@ fun IncomeItem(item: Income, onNavigate: (incomeId: String) -> Unit) {
           style = MaterialTheme.typography.titleMedium,
           textAlign = TextAlign.End
         )
-        Text(text = "$${item.total}", style = MaterialTheme.typography.titleMedium)
+        Text(text = item.total.formatMoney(), style = MaterialTheme.typography.titleMedium)
         Icon(Icons.Filled.KeyboardArrowRight, "")
       }
     }
@@ -219,7 +232,7 @@ fun IncomeItem(item: Income, onNavigate: (incomeId: String) -> Unit) {
 }
 
 @Composable
-fun IncomeMonth(monthTotal: String, incomeMonth: String) {
+fun IncomeMonth(monthTotal: Double, incomeMonth: String) {
   Row(
     modifier = Modifier
       .padding(top = 12.dp, bottom = 12.dp, start = 24.dp, end = 24.dp)
@@ -228,7 +241,7 @@ fun IncomeMonth(monthTotal: String, incomeMonth: String) {
     horizontalArrangement = Arrangement.SpaceBetween
   ) {
     Text(text = incomeMonth, style = MaterialTheme.typography.headlineSmall)
-    Text(text = "$$monthTotal", style = MaterialTheme.typography.headlineSmall)
+    Text(text = monthTotal.formatMoney(), style = MaterialTheme.typography.headlineSmall)
   }
 }
 

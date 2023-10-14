@@ -2,6 +2,8 @@ package com.avocado.expensescompose.presentation.topbar
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -19,21 +21,21 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun AppBar(
   title: String,
-  icon: ImageVector,
+  navigationIcon: ImageVector = Icons.Rounded.ArrowBack,
   buttonText: String = "",
-  iconClickAction: () -> Unit,
-  actionItemOnClick: () -> Unit
+  onNavigationIconClick: () -> Unit = {},
+  actionItemOnClick: () -> Unit = {}
 ) {
   TopAppBar(title = { Text(title, color = Color.White) },
     colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
     navigationIcon = {
       Icon(
-        imageVector = icon,
+        imageVector = navigationIcon,
         contentDescription = "",
         modifier = Modifier
           .padding(horizontal = 12.dp)
           .clickable {
-            iconClickAction.invoke()
+            onNavigationIconClick.invoke()
           },
         tint = Color.White
       )

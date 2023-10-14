@@ -55,9 +55,9 @@ fun AddIncomeScreen(
     topBar = {
       AppBar(
         title = "Agregar ingreso",
-        icon = Icons.Rounded.ArrowBack,
+        navigationIcon = Icons.Rounded.ArrowBack,
         buttonText = "Guardar",
-        iconClickAction = { onPopBackStack() }) {
+        onNavigationIconClick = { onPopBackStack() }) {
         viewModel.onEvent(AddIncomeEvent.InsertIncome)
       }
     }

@@ -10,13 +10,16 @@ import com.avocado.expensescompose.domain.income.usecase.GetIncomeByIdWithExpens
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class IncomeWithExpenseState(
   val income: Income? = null,
   val expense: List<Expense> = emptyList(),
-  val expensesTotal: Double = 0.0
+  val expensesTotal: Double = 0.0,
+  val remaining: Double = 0.0,
+  val isLoading: Boolean = false
 )
 
 @HiltViewModel
@@ -26,19 +29,34 @@ class IncomeWithExpenseViewModel @Inject constructor(
   private val _state = MutableStateFlow(IncomeWithExpenseState())
   val state = _state.asStateFlow()
 
-  fun getIncomesWithExpenses(incomeId: String) {
+  fun getIncomesWithExpenses(incomeId: String, paymentDate: String) {
     viewModelScope.launch {
 
-      when (val response = getIncomeByIdWithExpensesUseCase(incomeId, "2023-10-15")) {
+      _state.update {
+        it.copy(isLoading = true)
+      }
+
+      when (val response = getIncomeByIdWithExpensesUseCase(incomeId, paymentDate)) {
         is MyResult.Success -> {
           Log.d("IncomeWithExpense", response.data.income.comment)
+          val data = response.data
+          _state.update {
+            it.copy(
+              income = data.income,
+              expense = data.expensesList ?: emptyList(),
+              expensesTotal = data.expensesTotal,
+              remaining = data.remaining,
+              isLoading = false
+            )
+          }
         }
 
         is MyResult.Error -> {
-
+          _state.update {
+            it.copy(isLoading = false)
+          }
         }
       }
-
     }
   }
 }

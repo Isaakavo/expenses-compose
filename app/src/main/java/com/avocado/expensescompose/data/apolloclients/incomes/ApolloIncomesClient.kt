@@ -66,7 +66,8 @@ class ApolloIncomesClient(private val apolloClient: ApolloClient) : IncomesClien
         IncomeWithExpenses(
           income = income ?: Income(paymentDate = PaymentDate(null)),
           expensesList = expensesList ?: emptyList(),
-          expensesTotal = incomeWithExpenses?.expensesTotal ?: 0.0
+          expensesTotal = incomeWithExpenses?.expensesTotal ?: 0.0,
+          remaining = incomeWithExpenses?.remaining ?: 0.0
         )
       )
     } catch (e: ApolloException) {
