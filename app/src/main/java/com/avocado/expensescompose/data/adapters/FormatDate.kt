@@ -31,3 +31,15 @@ fun String.formatDateToISO(): LocalDateTime? {
     null
   }
 }
+
+fun String.formatDateForRequest(): LocalDateTime? {
+  val originalFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
+  return try {
+    val localDate = LocalDate.parse(this, originalFormatter)
+
+    localDate.atStartOfDay()
+  } catch (e: Exception) {
+    println("Error al convertir la cadena a LocalDateTime: ${e.message}")
+    null
+  }
+}

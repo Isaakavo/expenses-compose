@@ -7,7 +7,7 @@ import com.apollographql.apollo3.exception.ApolloException
 import com.avocado.HomeScreenAllIncomesQuery
 import com.avocado.CreateIncomeMutation
 import com.avocado.IncomeByIdWithExpensesListQuery
-import com.avocado.expensescompose.data.adapters.formatDateToISO
+import com.avocado.expensescompose.data.adapters.formatDateForRequest
 import com.avocado.expensescompose.data.adapters.graphql.scalar.Date
 import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.domain.income.IncomesClient
@@ -54,7 +54,7 @@ class ApolloIncomesClient(private val apolloClient: ApolloClient) : IncomesClien
     return try {
       val input = IncomesAndExpensesByFortnightInput(
         incomeId = incomeId,
-        payBefore = payBefore.formatDateToISO()?.let { Date(it) } ?: Date(LocalDateTime.now())
+        payBefore = payBefore.formatDateForRequest()?.let { Date(it) } ?: Date(LocalDateTime.now())
       )
       val incomeWithExpenses = apolloClient.query(IncomeByIdWithExpensesListQuery(input))
         .execute().data?.incomeAndExpensesByFortnight
