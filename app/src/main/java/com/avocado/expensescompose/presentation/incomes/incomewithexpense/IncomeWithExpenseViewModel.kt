@@ -1,6 +1,5 @@
 package com.avocado.expensescompose.presentation.incomes.incomewithexpense
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.avocado.expensescompose.data.model.MyResult
@@ -15,7 +14,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class IncomeWithExpenseState(
-  val income: Income? = null,
+  val income: List<Income>? = null,
   val expensesList: List<Expense> = emptyList(),
   val expensesTotal: Double = 0.0,
   val remaining: Double = 0.0,
@@ -38,7 +37,6 @@ class IncomeWithExpenseViewModel @Inject constructor(
 
       when (val response = getIncomeByIdWithExpensesUseCase(incomeId, paymentDate)) {
         is MyResult.Success -> {
-          Log.d("IncomeWithExpense", response.data.income.comment)
           val data = response.data
           _state.update {
             it.copy(

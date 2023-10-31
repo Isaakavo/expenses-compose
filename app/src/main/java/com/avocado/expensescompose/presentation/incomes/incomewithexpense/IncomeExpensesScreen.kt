@@ -1,5 +1,6 @@
 package com.avocado.expensescompose.presentation.incomes.incomewithexpense
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -67,7 +68,7 @@ fun IncomeExpensesScreen(
 
 @Composable
 fun IncomeWithExpensesContent(
-  income: Income?,
+  income: List<Income>?,
   remaining: Double,
   expenseList: List<Expense>,
   isLoading: Boolean = false,
@@ -77,7 +78,7 @@ fun IncomeWithExpensesContent(
   // and more menu
   Scaffold(topBar = {
     AppBar(
-      title = income?.paymentDate?.date?.formatDateDaysWithMonth() ?: "",
+      title = income?.get(0)?.paymentDate?.date?.formatDateDaysWithMonth() ?: "",
       onNavigationIconClick = { onNavigateBack() },
       actionsList = listOf(
         IconsActions(icon = Icons.Rounded.Edit, action = {}),
@@ -86,10 +87,10 @@ fun IncomeWithExpensesContent(
     )
   }, floatingActionButton = {
     FABAddExpense()
-  }) {
+  }) { paddingValues ->
     Surface(
       modifier = Modifier
-        .padding(it)
+        .padding(paddingValues)
         .fillMaxSize()
     ) {
       Column(
@@ -101,7 +102,15 @@ fun IncomeWithExpensesContent(
         if (isLoading) {
           CircularProgressIndicator(strokeWidth = 6.dp)
         } else {
-          IncomeDetails(income, remaining)
+          if (income != null && income.size > 1) {
+            LazyRow(modifier = Modifier, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+              items(income) {
+                IncomeDetails(it, remaining)
+              }
+            }
+          } else if (income != null) {
+            IncomeDetails(income[0], remaining)
+          }
           ExpensesList(expenseList)
         }
       }
@@ -187,9 +196,12 @@ fun ExpenseItem(expense: Expense) {
         modifier = Modifier
           .fillMaxWidth()
           .padding(top = 4.dp, end = 8.dp),
-        horizontalArrangement = Arrangement.End,
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
       ) {
+        SuggestionChip(
+          onClick = { /*TODO*/ },
+          label = { Text(text = "Banregio", style = MaterialTheme.typography.bodySmall) })
 
         Text(
           text = expense.total.formatMoney(),
@@ -207,7 +219,18 @@ fun ExpenseItem(expense: Expense) {
       ) {
         LazyRow(modifier = Modifier.wrapContentWidth()) {
           items(expense.tags) { tag ->
-            ExpenseTags(tags = tag)
+            // ExpenseTags(tags = tag)
+            Card(
+              modifier = Modifier.padding(end = 4.dp),
+              border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary)
+            ) {
+              Row {
+                Text(
+                  text = tag.name,
+                  modifier = Modifier.padding(start = 6.dp, end = 6.dp, top = 2.dp, bottom = 2.dp)
+                )
+              }
+            }
           }
         }
       }
@@ -256,12 +279,105 @@ fun FABAddExpense() {
 @Composable
 fun IncomeWithExpenseContent() {
   IncomeWithExpensesContent(
-    Income(
+    listOf(Income(
       comment = "Aumento salarial",
       total = 15712.22,
       createdAt = LocalDateTime.now(),
       paymentDate = PaymentDate(date = LocalDateTime.now(), fortnight = Fortnight.FIRST)
-    ), remaining = 10000.0, expenseList = listOf(
+    )), remaining = 10000.0, expenseList = listOf(
+      Expense(
+        total = 5500.0,
+        incomeId = "1",
+        concept = "Gasto de prueba",
+        createdAt = LocalDateTime.now(),
+        comment = "",
+        id = "1",
+        tags = listOf(
+          ExpenseTag(
+            id = "1",
+            name = "Tag de prueba",
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+          ), ExpenseTag(
+            id = "1",
+            name = "Tag de prueba 2",
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+          ), ExpenseTag(
+            id = "1",
+            name = "Tag de prueba",
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+          ), ExpenseTag(
+            id = "1",
+            name = "Tag de prueba 2",
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+          )
+        )
+      ),
+      Expense(
+        total = 5500.0,
+        incomeId = "1",
+        concept = "Gasto de prueba",
+        createdAt = LocalDateTime.now(),
+        comment = "",
+        id = "1",
+        tags = listOf(
+          ExpenseTag(
+            id = "1",
+            name = "Tag de prueba",
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+          ), ExpenseTag(
+            id = "1",
+            name = "Tag de prueba 2",
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+          ), ExpenseTag(
+            id = "1",
+            name = "Tag de prueba",
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+          ), ExpenseTag(
+            id = "1",
+            name = "Tag de prueba 2",
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+          )
+        )
+      ),
+      Expense(
+        total = 5500.0,
+        incomeId = "1",
+        concept = "Gasto de prueba",
+        createdAt = LocalDateTime.now(),
+        comment = "",
+        id = "1",
+        tags = listOf(
+          ExpenseTag(
+            id = "1",
+            name = "Tag de prueba",
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+          ), ExpenseTag(
+            id = "1",
+            name = "Tag de prueba 2",
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+          ), ExpenseTag(
+            id = "1",
+            name = "Tag de prueba",
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+          ), ExpenseTag(
+            id = "1",
+            name = "Tag de prueba 2",
+            createdAt = LocalDateTime.now(),
+            updatedAt = LocalDateTime.now()
+          )
+        )
+      ),
       Expense(
         total = 5500.0,
         incomeId = "1",

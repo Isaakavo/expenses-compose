@@ -1,5 +1,5 @@
-query ExpensesByFortnight($payBefore: Date!) {
-    expensesByFortnight(payBefore: $payBefore) {
+query ExpensesByFortnight($input: PayBeforeInput!) {
+    expensesByFortnight(input: $input) {
         id
         userId
         total

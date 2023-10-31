@@ -1,4 +1,4 @@
-query IncomeByIdWithExpensesListQuery($input: IncomesAndExpensesByFortnightInput!) {
+query IncomeByIdWithExpensesListQuery($input: PayBeforeInput!) {
     incomeAndExpensesByFortnight(input: $input) {
         expensesTotal
         remaining

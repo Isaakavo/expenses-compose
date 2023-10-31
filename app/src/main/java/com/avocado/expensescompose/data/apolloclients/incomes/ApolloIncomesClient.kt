@@ -16,7 +16,7 @@ import com.avocado.expensescompose.domain.income.models.Income
 import com.avocado.expensescompose.domain.income.models.IncomeWithExpenses
 import com.avocado.expensescompose.domain.income.models.Incomes
 import com.avocado.expensescompose.domain.income.models.PaymentDate
-import com.avocado.type.IncomesAndExpensesByFortnightInput
+import com.avocado.type.PayBeforeInput
 import java.time.LocalDateTime
 
 class ApolloIncomesClient(private val apolloClient: ApolloClient) : IncomesClient {
@@ -52,19 +52,20 @@ class ApolloIncomesClient(private val apolloClient: ApolloClient) : IncomesClien
     payBefore: String
   ): MyResult<IncomeWithExpenses> {
     return try {
-      val input = IncomesAndExpensesByFortnightInput(
-        incomeId = incomeId,
-        payBefore = payBefore.formatDateForRequest()?.let { Date(it) } ?: Date(LocalDateTime.now())
+      val input = IncomeByIdWithExpensesListQuery(
+        input = PayBeforeInput(payBefore.formatDateForRequest()?.let { Date(it) } ?: Date(LocalDateTime.now()))
       )
-      val incomeWithExpenses = apolloClient.query(IncomeByIdWithExpensesListQuery(input))
+      val incomeWithExpenses = apolloClient.query(input)
         .execute().data?.incomeAndExpensesByFortnight
-      val income = incomeWithExpenses?.income?.toIncome()
+      val incomes = incomeWithExpenses?.income?.map {
+        it.toIncome()
+      }
       val expensesList = incomeWithExpenses?.expenses?.map { expense ->
         expense.toExpense()
       }
       return MyResult.Success(
         IncomeWithExpenses(
-          income = income ?: Income(paymentDate = PaymentDate(null)),
+          income = incomes ?: listOf(Income(paymentDate = PaymentDate(null))),
           expensesList = expensesList ?: emptyList(),
           expensesTotal = incomeWithExpenses?.expensesTotal ?: 0.0,
           remaining = incomeWithExpenses?.remaining ?: 0.0

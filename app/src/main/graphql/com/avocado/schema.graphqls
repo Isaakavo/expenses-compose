@@ -55,10 +55,27 @@ type IncomesList {
   total: Float!
 }
 
-type Expense {
+type Card {
   id: ID!
 
-  incomeId: ID!
+  userId: ID!
+
+  alias: String
+
+  bank: String!
+
+  isDigital: Boolean
+
+  isDebit: Boolean
+}
+
+"""
+The `Boolean` scalar type represents `true` or `false`.
+"""
+scalar Boolean
+
+type Expense {
+  id: ID!
 
   userId: String
 
@@ -73,6 +90,8 @@ type Expense {
   updatedAt: Date
 
   tags: [ExpenseTag!]!
+
+  card: Card
 
   comment: String
 }
@@ -94,7 +113,7 @@ type FinancialBalance {
 }
 
 type IncomeListAndExpenses {
-  income: Income!
+  income: [Income!]
 
   expenses: [Expense!]
 
@@ -104,7 +123,7 @@ type IncomeListAndExpenses {
 }
 
 input CreateExpenseInput {
-  incomeId: ID!
+  cardId: ID
 
   concept: String!
 
@@ -112,14 +131,22 @@ input CreateExpenseInput {
 
   payBefore: Date!
 
-  tags: [ExpenseTagInput]
+  tags: [ExpenseTagInput!]!
 
   comment: String
 }
 
-input IncomesAndExpensesByFortnightInput {
-  incomeId: ID!
+input CreateCardInput {
+  alias: String
 
+  bank: String!
+
+  isDigital: Boolean
+
+  isDebit: Boolean
+}
+
+input PayBeforeInput {
   payBefore: Date!
 }
 
@@ -132,31 +159,32 @@ type Query {
 
   incomesByMonth(date: Date!): [Income]
 
-  expensesByFortnight(payBefore: Date!): [Expense]
+  expensesByFortnight(input: PayBeforeInput!): [Expense]
 
   expensesByMonth(date: Date!): [Expense]
 
-  incomeAndExpensesByFortnight(input: IncomesAndExpensesByFortnightInput!): IncomeListAndExpenses!
+  incomeAndExpensesByFortnight(input: PayBeforeInput!): IncomeListAndExpenses!
 
   allExpenses: [Expense]
 
-  financialBalanceByFortnight(payBefore: Date!): FinancialBalance
+  financialBalanceByFortnight(input: PayBeforeInput!): FinancialBalance
 
   tags: [ExpenseTag]
+
+  cardList: [Card]
+
+  cardById(cardId: ID!): Card
 }
 
 type Mutation {
   createIncome(total: Float!, comment: String, paymentDate: Date!): Income!
 
-  deleteIncomeById(id: ID!): Boolean
-
   createExpense(input: CreateExpenseInput!): Expense
-}
 
-"""
-The `Boolean` scalar type represents `true` or `false`.
-"""
-scalar Boolean
+  createCard(input: CreateCardInput): Card
+
+  deleteIncomeById(id: ID!): Boolean
+}
 
 """
 A GraphQL Schema defines the capabilities of a GraphQL server. It exposes all available types and directives on the server, as well as the entry points for query, mutation, and subscription operations.
