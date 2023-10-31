@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class IncomeState(
-  val incomesList: List<Income> = emptyList(),
+  val incomesMap: Map<String, MutableMap<String, MutableList<Income>?>>? = null,
   val totalByMonth: List<IncomeTotalByMonth?> = emptyList(),
   val showAddButtons: Boolean = false,
   val backPressState: Boolean = false,
@@ -60,15 +60,36 @@ class IncomesViewModel @Inject constructor(
     }
   }
 
+  private fun getIncomesMap(incomesList: List<Income>): Map<String, MutableMap<String, MutableList<Income>?>>? {
+    val incomesMap = mutableMapOf<String, MutableMap<String, MutableList<Income>?>>()
+    incomesList.map { income ->
+      val month = income.paymentDate.date?.month ?: return null
+      val incomeMonths = incomesMap[month.name]
+      if (incomeMonths !== null) {
+        val incomeFortnight = income.paymentDate.fortnight ?: return null
+        val incomeArr = incomeMonths[incomeFortnight.translate()]
+        incomeArr?.add(income) ?: incomeMonths.put(incomeFortnight.translate(), mutableListOf(income))
+      } else {
+        val fortnight = income.paymentDate.fortnight ?: return null
+        incomesMap[month.name] = mutableMapOf(
+          fortnight.translate() to mutableListOf(income)
+        )
+      }
+    }
+
+    return incomesMap.toMap()
+  }
+
   private suspend fun callQuery() {
     _state.update { it.copy(isLoading = true) }
 
     try {
       when (val incomes = getAllIncomesUseCase()) {
         is MyResult.Success -> {
+          val incomesList = incomes.data.incomesList
           _state.update {
             it.copy(
-              incomesList = incomes.data.incomesList,
+              incomesMap = getIncomesMap(incomesList),
               totalByMonth = incomes.data.totalByMonth,
               isLoading = false
             )

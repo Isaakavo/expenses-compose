@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowRight
@@ -43,14 +43,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.avocado.expensescompose.data.adapters.formatDateDaysWithMonth
-import com.avocado.expensescompose.data.adapters.formatDateOnlyMonth
 import com.avocado.expensescompose.data.adapters.formatMoney
-import com.avocado.expensescompose.domain.income.models.Fortnight
 import com.avocado.expensescompose.domain.income.models.Income
-import com.avocado.expensescompose.domain.income.models.PaymentDate
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import kotlinx.coroutines.delay
 import java.time.LocalDateTime
+import java.util.Locale
 
 sealed class BackPress {
   object Idle : BackPress()
@@ -146,30 +144,29 @@ fun IncomeScreenContent(
         }
 
         false -> {
-          if (state.incomesList.isNotEmpty()) {
+          if (state.incomesMap?.isNotEmpty() == true) {
             LazyColumn(
               contentPadding = PaddingValues(16.dp),
               verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-              itemsIndexed(state.incomesList) { index, income ->
-                // TODO improve dates render
-                val currentIncomeMonth = income.paymentDate.date?.formatDateOnlyMonth()
+              items(state.incomesMap.toList()) { income ->
                 val currentTotal = state.totalByMonth.find { totalByMont ->
-                  totalByMont?.date == currentIncomeMonth
-                }
+                  totalByMont?.date?.uppercase(Locale.ROOT) == income.first
+                }?.total ?: 0.0
+                IncomeMonth(monthTotal = currentTotal, incomeMonth = income.first)
+                income.second.map { fortnightIncome ->
+                  Column(
+                    modifier = Modifier.padding(start = 12.dp, top = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                  ) {
 
-                if (index != 0 && state.incomesList[index - 1].paymentDate.date?.formatDateOnlyMonth() != currentIncomeMonth) {
-                  IncomeMonth(
-                    monthTotal = currentTotal?.total ?: 0.0,
-                    incomeMonth = currentIncomeMonth ?: ""
-                  )
-                } else if (index == 0) {
-                  IncomeMonth(
-                    monthTotal = currentTotal?.total ?: 0.0,
-                    incomeMonth = currentIncomeMonth ?: ""
-                  )
+                    IncomeItem(
+                      items = fortnightIncome.value ?: emptyList(),
+                      fortnight = fortnightIncome.key,
+                      onNavigate = onNavigate
+                    )
+                  }
                 }
-                IncomeItem(item = income, onNavigate = onNavigate)
               }
             }
           } else {
@@ -191,41 +188,63 @@ fun IncomeScreenContent(
 }
 
 @Composable
-fun IncomeItem(item: Income, onNavigate: (income: NavigationIncomeDetails) -> Unit) {
+fun IncomeItem(
+  items: List<Income>,
+  fortnight: String,
+  onNavigate: (income: NavigationIncomeDetails) -> Unit
+) {
   Card(
     shape = RoundedCornerShape(16.dp),
     modifier = Modifier
       .fillMaxWidth()
       .wrapContentHeight()
-      .padding(start = 8.dp, end = 8.dp)
       .clickable {
-        onNavigate(
-          NavigationIncomeDetails(
-            incomeId = item.id,
-            paymentDate = item.paymentDate.date
-          )
-        )
+        //TODO Passing id is not necessary anymore
+//        onNavigate(
+//          NavigationIncomeDetails(
+//            incomeId = item.id,
+//            paymentDate = item.paymentDate.date
+//          )
+//        )
       },
     elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
   ) {
-    Column {
-      Row(
-        modifier = Modifier
-          .padding(top = 12.dp, bottom = 12.dp, start = 24.dp, end = 24.dp)
-          .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-      ) {
-        Text(
-          text = item.paymentDate.date?.formatDateDaysWithMonth() ?: "",
-          style = MaterialTheme.typography.titleMedium,
-          textAlign = TextAlign.End
-        )
-        Text(text = item.total.formatMoney(), style = MaterialTheme.typography.titleMedium)
-        Icon(Icons.Filled.KeyboardArrowRight, "")
+    Column(
+      modifier = Modifier
+        .padding(top = 12.dp, bottom = 12.dp, start = 22.dp, end = 24.dp)
+    ) {
+      Text(text = "${fortnight} quincena")
+      if (items.size == 1) {
+        IncomeItemRow(item = items[0])
+      } else {
+        Column {
+          items.map { item ->
+            IncomeItemRow(item = item, renderIcon = false)
+          }
+        }
       }
     }
+  }
+}
 
+@Composable
+fun IncomeItemRow(item: Income, renderIcon: Boolean = true) {
+  Row(
+    modifier = Modifier
+      .padding(top = 12.dp, bottom = 12.dp, start = 8.dp, end = 1.dp)
+      .fillMaxWidth(),
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.SpaceBetween
+  ) {
+    Text(
+      text = item.paymentDate.date?.formatDateDaysWithMonth() ?: "",
+      style = MaterialTheme.typography.titleMedium,
+      textAlign = TextAlign.End
+    )
+    Text(text = item.total.formatMoney(), style = MaterialTheme.typography.titleMedium)
+    if (renderIcon) {
+      Icon(Icons.Filled.KeyboardArrowRight, "")
+    }
   }
 }
 
@@ -233,7 +252,7 @@ fun IncomeItem(item: Income, onNavigate: (income: NavigationIncomeDetails) -> Un
 fun IncomeMonth(monthTotal: Double, incomeMonth: String) {
   Row(
     modifier = Modifier
-      .padding(top = 12.dp, bottom = 12.dp, start = 24.dp, end = 24.dp)
+      .padding(top = 12.dp, bottom = 12.dp, start = 12.dp, end = 12.dp)
       .fillMaxWidth(),
     verticalAlignment = Alignment.CenterVertically,
     horizontalArrangement = Arrangement.SpaceBetween
@@ -261,14 +280,7 @@ fun FabAddIncome(
 fun IncomeItemPreview() {
   IncomeScreenContent(
     IncomeState(
-      showToast = false, incomesList = listOf(
-        Income(
-          userId = "alskhjdjkas",
-          total = 13675.76,
-          paymentDate = PaymentDate(date = LocalDateTime.now(), fortnight = Fortnight.FIRST),
-          createdAt = LocalDateTime.now()
-        )
-      )
+      showToast = false
     )
   )
 
