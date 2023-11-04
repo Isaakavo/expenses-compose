@@ -112,10 +112,12 @@ type FinancialBalance {
   debts: Float!
 }
 
-type IncomeListAndExpenses {
-  income: [Income!]
+type IncomesListAndExpenses {
+  incomes: [Income!]
 
   expenses: [Expense!]
+
+  incomesTotal: Float!
 
   expensesTotal: Float
 
@@ -163,7 +165,7 @@ type Query {
 
   expensesByMonth(date: Date!): [Expense]
 
-  incomeAndExpensesByFortnight(input: PayBeforeInput!): IncomeListAndExpenses!
+  incomesAndExpensesByFortnight(input: PayBeforeInput!): IncomesListAndExpenses!
 
   allExpenses: [Expense]
 

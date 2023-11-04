@@ -16,6 +16,7 @@ import javax.inject.Inject
 data class IncomeWithExpenseState(
   val income: List<Income>? = null,
   val expensesList: List<Expense> = emptyList(),
+  val incomesTotal: Double = 0.0,
   val expensesTotal: Double = 0.0,
   val remaining: Double = 0.0,
   val isLoading: Boolean = false
@@ -39,7 +40,8 @@ class IncomeWithExpenseViewModel @Inject constructor(
           val data = response.data
           _state.update {
             it.copy(
-              income = data.income,
+              income = data.incomes,
+              incomesTotal = data.incomesTotal,
               expensesList = data.expensesList ?: emptyList(),
               expensesTotal = data.expensesTotal,
               remaining = data.remaining,

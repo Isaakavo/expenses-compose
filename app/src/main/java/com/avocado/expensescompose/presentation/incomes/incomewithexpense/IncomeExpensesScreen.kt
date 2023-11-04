@@ -35,14 +35,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.avocado.expensescompose.data.adapters.adapt
 import com.avocado.expensescompose.data.adapters.formatDateDaysWithMonth
+import com.avocado.expensescompose.data.adapters.formatDateOnlyMonth
 import com.avocado.expensescompose.data.adapters.formatMoney
 import com.avocado.expensescompose.domain.income.models.Expense
 import com.avocado.expensescompose.domain.income.models.ExpenseTag
-import com.avocado.expensescompose.domain.income.models.Fortnight
-import com.avocado.expensescompose.domain.income.models.Income
-import com.avocado.expensescompose.domain.income.models.PaymentDate
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.expensescompose.presentation.topbar.IconsActions
 import java.time.LocalDateTime
@@ -57,7 +54,9 @@ fun IncomeExpensesScreen(
   viewModel.getIncomesWithExpenses(paymentDate)
 
   IncomeWithExpensesContent(
-    income = state.income,
+    incomesTotal = state.incomesTotal,
+    fortnight = state.income?.get(0)?.paymentDate?.fortnight?.translate() ?: "",
+    month = state.income?.get(0)?.paymentDate?.date?.formatDateOnlyMonth() ?: "",
     remaining = state.remaining,
     expenseList = state.expensesList,
     isLoading = state.isLoading,
@@ -67,7 +66,9 @@ fun IncomeExpensesScreen(
 
 @Composable
 fun IncomeWithExpensesContent(
-  income: List<Income>?,
+  incomesTotal: Double,
+  fortnight: String,
+  month: String,
   remaining: Double,
   expenseList: List<Expense>,
   isLoading: Boolean = false,
@@ -77,7 +78,7 @@ fun IncomeWithExpensesContent(
   // and more menu
   Scaffold(topBar = {
     AppBar(
-      title = income?.get(0)?.paymentDate?.date?.formatDateDaysWithMonth() ?: "",
+      title = "$fortnight Quincena",
       onNavigationIconClick = { onNavigateBack() },
       actionsList = listOf(
         IconsActions(icon = Icons.Rounded.Edit, action = {}),
@@ -101,15 +102,7 @@ fun IncomeWithExpensesContent(
         if (isLoading) {
           CircularProgressIndicator(strokeWidth = 6.dp)
         } else {
-          if (income != null && income.size > 1) {
-            LazyRow(modifier = Modifier, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-              items(income) {
-                IncomeDetails(it, remaining)
-              }
-            }
-          } else if (income != null) {
-            IncomeDetails(income[0], remaining)
-          }
+          IncomeDetails(incomesTotal, month, remaining)
           ExpensesList(expenseList)
         }
       }
@@ -119,7 +112,7 @@ fun IncomeWithExpensesContent(
 }
 
 @Composable
-fun IncomeDetails(income: Income?, remaining: Double) {
+fun IncomeDetails(incomesTotal: Double, month: String, remaining: Double) {
   Card(
     modifier = Modifier.fillMaxWidth(),
     elevation = CardDefaults.cardElevation(defaultElevation = 22.dp)
@@ -127,7 +120,6 @@ fun IncomeDetails(income: Income?, remaining: Double) {
     Column(
       modifier = Modifier.padding(16.dp)
     ) {
-
       Row(
         modifier = Modifier
           .padding(bottom = 8.dp)
@@ -135,10 +127,11 @@ fun IncomeDetails(income: Income?, remaining: Double) {
         horizontalArrangement = Arrangement.End
       ) {
         Text(
-          text = "${income?.paymentDate?.fortnight?.adapt()} Quincena",
+          text = month,
           style = MaterialTheme.typography.bodyLarge
         )
       }
+
 
       Row(
         modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
@@ -146,9 +139,8 @@ fun IncomeDetails(income: Income?, remaining: Double) {
         //TODO make text color of remaining
         // if remaining is more than income make it green if not red
         Text(
-          text = "${income?.total?.formatMoney()}", style = MaterialTheme.typography.headlineMedium
+          text = incomesTotal.formatMoney(), style = MaterialTheme.typography.headlineMedium
         )
-
         Text(text = remaining.formatMoney(), style = MaterialTheme.typography.headlineMedium)
       }
       Row(
@@ -160,17 +152,16 @@ fun IncomeDetails(income: Income?, remaining: Double) {
         Text(text = "Ingreso", color = MaterialTheme.colorScheme.secondary)
         Text(text = "Restante", color = MaterialTheme.colorScheme.secondary)
       }
-
-      if (income?.comment != null && income.comment.isNotEmpty()) {
-        Row(
-          modifier = Modifier
-            .padding(top = 8.dp)
-            .fillMaxWidth(),
-          horizontalArrangement = Arrangement.End
-        ) {
-          Text(text = income.comment, style = MaterialTheme.typography.bodyLarge)
-        }
-      }
+//      if (income?.comment != null && income.comment.isNotEmpty()) {
+//        Row(
+//          modifier = Modifier
+//            .padding(top = 8.dp)
+//            .fillMaxWidth(),
+//          horizontalArrangement = Arrangement.End
+//        ) {
+//          Text(text = income.comment, style = MaterialTheme.typography.bodyLarge)
+//        }
+//      }
     }
 
   }
@@ -278,12 +269,10 @@ fun FABAddExpense() {
 @Composable
 fun IncomeWithExpenseContent() {
   IncomeWithExpensesContent(
-    listOf(Income(
-      comment = "Aumento salarial",
-      total = 15712.22,
-      createdAt = LocalDateTime.now(),
-      paymentDate = PaymentDate(date = LocalDateTime.now(), fortnight = Fortnight.FIRST)
-    )), remaining = 10000.0, expenseList = listOf(
+    incomesTotal = 500.0,
+    fortnight = "Primera",
+    month = "Noviembre",
+    remaining = 10000.0, expenseList = listOf(
       Expense(
         total = 5500.0,
         incomeId = "1",

@@ -55,8 +55,8 @@ class ApolloIncomesClient(private val apolloClient: ApolloClient) : IncomesClien
         input = PayBeforeInput(payBefore.formatDateForRequest()?.let { Date(it) } ?: Date(LocalDateTime.now()))
       )
       val incomeWithExpenses = apolloClient.query(input)
-        .execute().data?.incomeAndExpensesByFortnight
-      val incomes = incomeWithExpenses?.income?.map {
+        .execute().data?.incomesAndExpensesByFortnight
+      val incomes = incomeWithExpenses?.incomes?.map {
         it.toIncome()
       }
       val expensesList = incomeWithExpenses?.expenses?.map { expense ->
@@ -64,8 +64,9 @@ class ApolloIncomesClient(private val apolloClient: ApolloClient) : IncomesClien
       }
       return MyResult.Success(
         IncomeWithExpenses(
-          income = incomes ?: listOf(Income(paymentDate = PaymentDate(null))),
+          incomes = incomes ?: listOf(Income(paymentDate = PaymentDate(null))),
           expensesList = expensesList ?: emptyList(),
+          incomesTotal = incomeWithExpenses?.incomesTotal ?: 0.0,
           expensesTotal = incomeWithExpenses?.expensesTotal ?: 0.0,
           remaining = incomeWithExpenses?.remaining ?: 0.0
         )

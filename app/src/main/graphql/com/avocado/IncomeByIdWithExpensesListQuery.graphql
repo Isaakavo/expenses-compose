@@ -1,8 +1,9 @@
 query IncomeByIdWithExpensesListQuery($input: PayBeforeInput!) {
-    incomeAndExpensesByFortnight(input: $input) {
+    incomesAndExpensesByFortnight(input: $input) {
+        incomesTotal
         expensesTotal
         remaining
-        income {
+        incomes {
             comment
             ...incomeFragment
         }
