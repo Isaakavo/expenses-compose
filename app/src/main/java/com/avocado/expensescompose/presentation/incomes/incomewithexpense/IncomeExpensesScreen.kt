@@ -132,7 +132,6 @@ fun IncomeDetails(incomesTotal: Double, month: String, remaining: Double) {
         )
       }
 
-
       Row(
         modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
       ) {
@@ -143,6 +142,7 @@ fun IncomeDetails(incomesTotal: Double, month: String, remaining: Double) {
         )
         Text(text = remaining.formatMoney(), style = MaterialTheme.typography.headlineMedium)
       }
+
       Row(
         modifier = Modifier
           .fillMaxWidth()
@@ -153,7 +153,6 @@ fun IncomeDetails(incomesTotal: Double, month: String, remaining: Double) {
         Text(text = "Restante", color = MaterialTheme.colorScheme.secondary)
       }
     }
-
   }
 }
 

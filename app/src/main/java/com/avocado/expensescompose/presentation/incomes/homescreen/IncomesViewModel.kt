@@ -27,7 +27,6 @@ data class IncomeState(
 )
 
 sealed class IncomeEvent {
-
   object FetchQuery : IncomeEvent()
 }
 
