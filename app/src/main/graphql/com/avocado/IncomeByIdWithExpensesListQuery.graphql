@@ -4,7 +4,6 @@ query IncomeByIdWithExpensesListQuery($input: PayBeforeInput!) {
         expensesTotal
         remaining
         incomes {
-            comment
             ...incomeFragment
         }
         expenses {

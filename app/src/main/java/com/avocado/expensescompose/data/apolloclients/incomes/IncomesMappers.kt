@@ -26,7 +26,6 @@ fun IncomeByIdWithExpensesListQuery.Income.toIncome(): Income {
   return Income(
     total = incomeFragment.total,
     createdAt = incomeFragment.createdAt?.date,
-    comment = comment ?: "",
     paymentDate = PaymentDate(
       date = incomeFragment.paymentDate.date.date,
       fortnight = Fortnight.valueOf(incomeFragment.paymentDate.fortnight.name)

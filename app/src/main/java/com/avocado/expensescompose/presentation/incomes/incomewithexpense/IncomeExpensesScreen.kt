@@ -128,7 +128,7 @@ fun IncomeDetails(incomesTotal: Double, month: String, remaining: Double) {
       ) {
         Text(
           text = month,
-          style = MaterialTheme.typography.bodyLarge
+          style = MaterialTheme.typography.headlineSmall
         )
       }
 
@@ -152,16 +152,6 @@ fun IncomeDetails(incomesTotal: Double, month: String, remaining: Double) {
         Text(text = "Ingreso", color = MaterialTheme.colorScheme.secondary)
         Text(text = "Restante", color = MaterialTheme.colorScheme.secondary)
       }
-//      if (income?.comment != null && income.comment.isNotEmpty()) {
-//        Row(
-//          modifier = Modifier
-//            .padding(top = 8.dp)
-//            .fillMaxWidth(),
-//          horizontalArrangement = Arrangement.End
-//        ) {
-//          Text(text = income.comment, style = MaterialTheme.typography.bodyLarge)
-//        }
-//      }
     }
 
   }
