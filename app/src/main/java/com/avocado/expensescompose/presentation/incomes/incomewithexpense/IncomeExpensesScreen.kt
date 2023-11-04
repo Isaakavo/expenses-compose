@@ -50,12 +50,11 @@ import java.time.LocalDateTime
 @Composable
 fun IncomeExpensesScreen(
   viewModel: IncomeWithExpenseViewModel = hiltViewModel(),
-  incomeId: String,
   paymentDate: String,
   onNavigateBack: () -> Unit = {}
 ) {
   val state by viewModel.state.collectAsState()
-  viewModel.getIncomesWithExpenses(incomeId, paymentDate)
+  viewModel.getIncomesWithExpenses(paymentDate)
 
   IncomeWithExpensesContent(
     income = state.income,

@@ -48,7 +48,6 @@ class ApolloIncomesClient(private val apolloClient: ApolloClient) : IncomesClien
   }
 
   override suspend fun getIncomeByIdWithExpenses(
-    incomeId: String,
     payBefore: String
   ): MyResult<IncomeWithExpenses> {
     return try {

@@ -28,14 +28,13 @@ class IncomeWithExpenseViewModel @Inject constructor(
   private val _state = MutableStateFlow(IncomeWithExpenseState())
   val state = _state.asStateFlow()
 
-  fun getIncomesWithExpenses(incomeId: String, paymentDate: String) {
+  fun getIncomesWithExpenses(paymentDate: String) {
     viewModelScope.launch {
-
       _state.update {
         it.copy(isLoading = true)
       }
 
-      when (val response = getIncomeByIdWithExpensesUseCase(incomeId, paymentDate)) {
+      when (val response = getIncomeByIdWithExpensesUseCase(paymentDate = paymentDate)) {
         is MyResult.Success -> {
           val data = response.data
           _state.update {

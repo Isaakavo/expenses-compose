@@ -7,7 +7,7 @@ import com.avocado.expensescompose.domain.income.models.IncomeWithExpenses
 class GetIncomeByIdWithExpensesUseCase(
   private val incomesClient: IncomesClient
 ) {
-  suspend operator fun invoke(incomeId: String, paymentDate: String): MyResult<IncomeWithExpenses> {
-    return incomesClient.getIncomeByIdWithExpenses(incomeId, paymentDate)
+  suspend operator fun invoke(paymentDate: String): MyResult<IncomeWithExpenses> {
+    return incomesClient.getIncomeByIdWithExpenses(paymentDate)
   }
 }

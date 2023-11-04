@@ -56,7 +56,6 @@ sealed class BackPress {
 }
 
 data class NavigationIncomeDetails(
-  val incomeId: String,
   val paymentDate: LocalDateTime?
 )
 
@@ -200,12 +199,11 @@ fun IncomeItem(
       .wrapContentHeight()
       .clickable {
         //TODO Passing id is not necessary anymore
-//        onNavigate(
-//          NavigationIncomeDetails(
-//            incomeId = item.id,
-//            paymentDate = item.paymentDate.date
-//          )
-//        )
+        onNavigate(
+          NavigationIncomeDetails(
+            paymentDate = items[0].paymentDate.date
+          )
+        )
       },
     elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
   ) {
