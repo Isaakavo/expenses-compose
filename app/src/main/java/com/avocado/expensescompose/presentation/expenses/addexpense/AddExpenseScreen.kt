@@ -39,17 +39,24 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.avocado.expensescompose.R
+import com.avocado.expensescompose.domain.tags.models.Tag
 import com.avocado.expensescompose.presentation.topbar.AppBar
 
 @Composable
-fun AddExpenseScreen() {
+fun AddExpenseScreen(
+  viewModel: AddExpenseViewModel = hiltViewModel()
+) {
+  val state by viewModel.state.collectAsStateWithLifecycle()
 
+  AddExpenseScreenContent(tags = state.tags)
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun AddExpenseScreenContent() {
+fun AddExpenseScreenContent(tags: List<Tag>) {
   val datePickerState = rememberDatePickerState()
   var openDialog by remember { mutableStateOf(false) }
   var expanded by remember {
@@ -197,10 +204,12 @@ fun AddExpenseScreenContent() {
           Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(text = "Tags disponibles")
             FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-              InputChip(
-                selected = false,
-                onClick = { /*TODO*/ },
-                label = { Text(text = "Tag 1 alv") })
+              tags.map {
+                InputChip(
+                  selected = false,
+                  onClick = { /*TODO*/ },
+                  label = { Text(text = it.name) })
+              }
             }
           }
         }
@@ -223,5 +232,5 @@ fun AddExpenseRow(content: @Composable () -> Unit) {
 @Preview
 @Composable
 fun AddExpenseScreenContentPreview() {
-  AddExpenseScreenContent()
+  AddExpenseScreenContent(tags = emptyList())
 }

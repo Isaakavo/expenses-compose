@@ -40,6 +40,7 @@ import com.avocado.expensescompose.data.adapters.formatDateOnlyMonth
 import com.avocado.expensescompose.data.adapters.formatMoney
 import com.avocado.expensescompose.domain.income.models.Expense
 import com.avocado.expensescompose.domain.income.models.ExpenseTag
+import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.expensescompose.presentation.topbar.IconsActions
 import java.time.LocalDateTime
@@ -48,7 +49,8 @@ import java.time.LocalDateTime
 fun IncomeExpensesScreen(
   viewModel: IncomeWithExpenseViewModel = hiltViewModel(),
   paymentDate: String,
-  onNavigateBack: () -> Unit = {}
+  onNavigateBack: () -> Unit = {},
+  onNavigate: (navigateEvent: NavigateEvent) -> Unit = {}
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
   viewModel.getIncomesWithExpenses(paymentDate)
@@ -60,7 +62,8 @@ fun IncomeExpensesScreen(
     remaining = state.remaining,
     expenseList = state.expensesList,
     isLoading = state.isLoading,
-    onNavigateBack
+    onNavigate = onNavigate,
+    onNavigateBack = onNavigateBack
   )
 }
 
@@ -72,7 +75,8 @@ fun IncomeWithExpensesContent(
   remaining: Double,
   expenseList: List<Expense>,
   isLoading: Boolean = false,
-  onNavigateBack: () -> Unit = {}
+  onNavigateBack: () -> Unit = {},
+  onNavigate: (navigateEvent: NavigateEvent) -> Unit
 ) {
   //TODO add logic to edit income
   // and more menu
@@ -86,7 +90,7 @@ fun IncomeWithExpensesContent(
       )
     )
   }, floatingActionButton = {
-    FABAddExpense()
+    FABAddExpense(onNavigate)
   }) { paddingValues ->
     Surface(
       modifier = Modifier
@@ -248,8 +252,8 @@ fun ExpensesList(expenseList: List<Expense>) {
 }
 
 @Composable
-fun FABAddExpense() {
-  FloatingActionButton(onClick = { /*TODO*/ }) {
+fun FABAddExpense(onNavigate: (navigateEvent: NavigateEvent) -> Unit) {
+  FloatingActionButton(onClick = { onNavigate(NavigateEvent.NavigateAddExpenseScreen) }) {
     Icon(Icons.Rounded.Add, contentDescription = "")
   }
 }
@@ -261,6 +265,7 @@ fun IncomeWithExpenseContent() {
     incomesTotal = 500.0,
     fortnight = "Primera",
     month = "Noviembre",
+    onNavigate = {},
     remaining = 10000.0, expenseList = listOf(
       Expense(
         total = 5500.0,

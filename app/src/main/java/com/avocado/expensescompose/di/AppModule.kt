@@ -3,6 +3,7 @@ package com.avocado.expensescompose.di
 import android.content.Context
 import com.apollographql.apollo3.ApolloClient
 import com.avocado.expensescompose.data.apolloclients.incomes.ApolloIncomesClient
+import com.avocado.expensescompose.data.apolloclients.tags.ApolloTagsClient
 import com.avocado.expensescompose.domain.income.IncomesClient
 import com.avocado.expensescompose.data.interceptor.AuthorizationInterceptor
 import com.avocado.expensescompose.presentation.util.Constants
@@ -12,6 +13,8 @@ import com.avocado.expensescompose.data.repositories.TokenManagerRepository
 import com.avocado.expensescompose.domain.income.usecase.CreateIncomeUseCase
 import com.avocado.expensescompose.domain.income.usecase.GetAllIncomesUseCase
 import com.avocado.expensescompose.domain.income.usecase.GetIncomeByIdWithExpensesUseCase
+import com.avocado.expensescompose.domain.tags.TagsClient
+import com.avocado.expensescompose.domain.tags.usecase.GetTagsUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -71,6 +74,11 @@ object AppModule {
 
   @Provides
   @Singleton
+  fun provideTagsClient(apolloClient: ApolloClient): TagsClient =
+    ApolloTagsClient(apolloClient)
+
+  @Provides
+  @Singleton
   fun provideIncomeUseCase(incomesClient: IncomesClient): GetAllIncomesUseCase =
     GetAllIncomesUseCase(incomesClient)
 
@@ -83,6 +91,11 @@ object AppModule {
   @Singleton
   fun provideGetIncomeByIdWithExpensesUseCase(incomesClient: IncomesClient): GetIncomeByIdWithExpensesUseCase =
     GetIncomeByIdWithExpensesUseCase(incomesClient)
+
+  @Provides
+  @Singleton
+  fun provideGetTagsUseCase(tagsClient: TagsClient): GetTagsUseCase =
+    GetTagsUseCase(tagsClient)
 
   @Provides
   @Singleton

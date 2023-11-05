@@ -9,6 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.avocado.expensescompose.presentation.RoutesConstants
 import com.avocado.expensescompose.presentation.cards.CardsScreen
+import com.avocado.expensescompose.presentation.expenses.addexpense.AddExpenseScreen
 import com.avocado.expensescompose.presentation.incomes.addscreen.AddIncomeScreen
 import com.avocado.expensescompose.presentation.incomes.homescreen.IncomesScreen
 import com.avocado.expensescompose.presentation.incomes.incomewithexpense.IncomeExpensesScreen
@@ -19,6 +20,7 @@ sealed class NavigateEvent {
   object NavigateIncomeExpensesList : NavigateEvent()
   object NavigationAddIncomeScreen : NavigateEvent()
   object NavigateCardsScreen : NavigateEvent()
+  object NavigateAddExpenseScreen : NavigateEvent()
 }
 
 private fun <T> navigate(navigateEvent: NavigateEvent, navController: NavController, param: T) {
@@ -43,6 +45,10 @@ private fun <T> navigate(navigateEvent: NavigateEvent, navController: NavControl
 
     is NavigateEvent.NavigateCardsScreen -> {
       navController.navigate(RoutesConstants.CARDS_SCREEN)
+    }
+
+    is NavigateEvent.NavigateAddExpenseScreen -> {
+      navController.navigate(RoutesConstants.EXPENSE_ADD)
     }
   }
 }
@@ -70,15 +76,25 @@ fun ExpensesApplication() {
         navArgument("paymentDate") { type = NavType.StringType })
     ) { navBackStackEntry ->
       val paymentDate = navBackStackEntry.arguments?.getString("paymentDate") ?: ""
-      IncomeExpensesScreen(paymentDate = paymentDate) {
-        navController.popBackStack()
-      }
+      IncomeExpensesScreen(
+        paymentDate = paymentDate,
+        onNavigateBack = {
+          navController.popBackStack()
+        },
+        onNavigate = {
+          navigate(it, navController, null)
+        }
+      )
     }
 
     composable(RoutesConstants.INCOME_ADD) {
       AddIncomeScreen {
         navController.popBackStack()
       }
+    }
+
+    composable(RoutesConstants.EXPENSE_ADD) {
+      AddExpenseScreen()
     }
 
     composable(RoutesConstants.CARDS_SCREEN) {
