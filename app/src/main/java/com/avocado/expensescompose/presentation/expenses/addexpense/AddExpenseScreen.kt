@@ -1,5 +1,7 @@
 package com.avocado.expensescompose.presentation.expenses.addexpense
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
@@ -35,9 +37,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -47,16 +49,25 @@ import com.avocado.expensescompose.presentation.topbar.AppBar
 
 @Composable
 fun AddExpenseScreen(
-  viewModel: AddExpenseViewModel = hiltViewModel()
+  viewModel: AddExpenseViewModel = hiltViewModel(),
+  context: Context = LocalContext.current,
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
 
-  AddExpenseScreenContent(tags = state.tags)
+  if (state.showToast) {
+    Toast.makeText(context, state.toastMessage, Toast.LENGTH_LONG).show()
+    viewModel.showToast(false)
+  }
+
+  AddExpenseScreenContent(tags = state.tagList, onEvent = viewModel::onEvent)
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun AddExpenseScreenContent(tags: List<Tag>) {
+fun AddExpenseScreenContent(
+  tags: List<Tag>,
+  onEvent: (event: AddExpenseEvent, tagId: String) -> Unit
+) {
   val datePickerState = rememberDatePickerState()
   var openDialog by remember { mutableStateOf(false) }
   var expanded by remember {
@@ -191,6 +202,8 @@ fun AddExpenseScreenContent(tags: List<Tag>) {
           }
         }
         AddExpenseRow {
+          //TODO make a dialog to add the new tags and add the selected tags to
+          // the text field
           Icon(
             painter = painterResource(id = R.drawable.round_sell_24),
             contentDescription = "Tags"
@@ -206,8 +219,8 @@ fun AddExpenseScreenContent(tags: List<Tag>) {
             FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
               tags.map {
                 InputChip(
-                  selected = false,
-                  onClick = { /*TODO*/ },
+                  selected = it.selected,
+                  onClick = { onEvent(AddExpenseEvent.SelectTag, it.id) },
                   label = { Text(text = it.name) })
               }
             }
@@ -229,8 +242,8 @@ fun AddExpenseRow(content: @Composable () -> Unit) {
   }
 }
 
-@Preview
-@Composable
-fun AddExpenseScreenContentPreview() {
-  AddExpenseScreenContent(tags = emptyList())
-}
+//@Preview
+//@Composable
+//fun AddExpenseScreenContentPreview() {
+//  AddExpenseScreenContent(tags = emptyList(), onEvent = (AddExpenseEvent.SelectTag, "") -> Unit)
+//}
