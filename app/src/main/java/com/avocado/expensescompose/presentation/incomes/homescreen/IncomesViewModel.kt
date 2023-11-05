@@ -15,19 +15,25 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+sealed class BackPress {
+  object Idle : BackPress()
+  object InitialTouch : BackPress()
+}
+
 data class IncomeState(
   val incomesMap: Map<String, MutableMap<String, MutableList<Income>?>>? = null,
   val totalByMonth: List<IncomeTotalByMonth?> = emptyList(),
   val showAddButtons: Boolean = false,
-  val backPressState: Boolean = false,
+  val backPressState: BackPress? = null,
   val showToast: Boolean = false,
   val isLoading: Boolean = false,
-  val isInvalidSession: Boolean = false,
   val errorMessage: String = ""
 )
 
 sealed class IncomeEvent {
   object FetchQuery : IncomeEvent()
+  object BackPressInitialTouch : IncomeEvent()
+  object BackPressIdle : IncomeEvent()
 }
 
 @HiltViewModel
@@ -38,6 +44,7 @@ class IncomesViewModel @Inject constructor(
   val state = _state.asStateFlow()
 
   init {
+    Log.d("TEST_QUERY", "View model constructor")
     fetchQuery()
   }
 
@@ -50,10 +57,22 @@ class IncomesViewModel @Inject constructor(
       is IncomeEvent.FetchQuery -> {
         fetchQuery()
       }
+
+      is IncomeEvent.BackPressInitialTouch -> {
+        _state.update {
+          it.copy(backPressState = BackPress.InitialTouch, showToast = true)
+        }
+      }
+
+      is IncomeEvent.BackPressIdle -> {
+        _state.update {
+          it.copy(backPressState = BackPress.Idle)
+        }
+      }
     }
   }
 
-  private fun fetchQuery() {
+  fun fetchQuery() {
     viewModelScope.launch {
       callQuery()
     }
@@ -67,7 +86,10 @@ class IncomesViewModel @Inject constructor(
       if (incomeMonths !== null) {
         val incomeFortnight = income.paymentDate.fortnight ?: return null
         val incomeArr = incomeMonths[incomeFortnight.translate()]
-        incomeArr?.add(income) ?: incomeMonths.put(incomeFortnight.translate(), mutableListOf(income))
+        incomeArr?.add(income) ?: incomeMonths.put(
+          incomeFortnight.translate(),
+          mutableListOf(income)
+        )
       } else {
         val fortnight = income.paymentDate.fortnight ?: return null
         incomesMap[month.name] = mutableMapOf(
