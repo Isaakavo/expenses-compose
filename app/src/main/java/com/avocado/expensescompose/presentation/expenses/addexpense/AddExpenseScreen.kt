@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.avocado.expensescompose.R
+import com.avocado.expensescompose.domain.cards.models.Card
 import com.avocado.expensescompose.domain.tags.models.Tag
 import com.avocado.expensescompose.presentation.topbar.AppBar
 
@@ -59,12 +60,19 @@ fun AddExpenseScreen(
     viewModel.showToast(false)
   }
 
-  AddExpenseScreenContent(tags = state.tagList, onEvent = viewModel::onEvent)
+  AddExpenseScreenContent(
+    cards = state.cardsList,
+    selectedCard = state.selectedCard,
+    tags = state.tagList,
+    onEvent = viewModel::onEvent
+  )
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun AddExpenseScreenContent(
+  cards: List<Card>,
+  selectedCard: Card?,
   tags: List<Tag>,
   onEvent: (event: AddExpenseEvent, tagId: String) -> Unit
 ) {
@@ -175,7 +183,7 @@ fun AddExpenseScreenContent(
           ) {
             OutlinedTextField(
               readOnly = true,
-              value = "",
+              value = selectedCard?.aliasWithBankText() ?: "",
               onValueChange = { },
               label = { Text("Asociar Tarjeta") },
               trailingIcon = {
@@ -192,12 +200,17 @@ fun AddExpenseScreenContent(
                 expanded = false
               }
             ) {
-              DropdownMenuItem(
-                text = {
-                  Text(text = "Tarjeta")
-                },
-                onClick = {}
-              )
+              cards.map {
+                DropdownMenuItem(
+                  text = {
+                    Text(text = "${it.alias}-${it.bank}")
+                  },
+                  onClick = {
+                    onEvent(AddExpenseEvent.SelectCard, it.id)
+                    expanded = false
+                  }
+                )
+              }
             }
           }
         }

@@ -3,6 +3,8 @@ package com.avocado.expensescompose.presentation.expenses.addexpense
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.avocado.expensescompose.data.model.MyResult
+import com.avocado.expensescompose.domain.cards.models.Card
+import com.avocado.expensescompose.domain.cards.usecase.GetCardsUseCase
 import com.avocado.expensescompose.domain.tags.models.Tag
 import com.avocado.expensescompose.domain.tags.usecase.GetTagsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,7 +15,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class AddExpensesState(
+  val cardsList: List<Card> = emptyList(),
   val tagList: List<Tag> = emptyList(),
+  val selectedCard: Card? = null,
   val selectedTags: List<Tag> = emptyList(),
   val showToast: Boolean = false,
   val toastMessage: String = ""
@@ -21,27 +25,25 @@ data class AddExpensesState(
 
 sealed class AddExpenseEvent {
   object SelectTag : AddExpenseEvent()
+  object SelectCard: AddExpenseEvent()
 }
 
 @HiltViewModel
 class AddExpenseViewModel @Inject constructor(
-  private val getTagsUseCase: GetTagsUseCase
+  private val getTagsUseCase: GetTagsUseCase,
+  private val getCardsUseCase: GetCardsUseCase
 ) : ViewModel() {
   private val _state = MutableStateFlow(AddExpensesState())
   val state = _state.asStateFlow()
 
+  companion object {
+    private const val TAG_LIST_MAX_SIZE = 10
+  }
+
   init {
     viewModelScope.launch {
-      when (val tagsResult = getTagsUseCase()) {
-        is MyResult.Success -> {
-          _state.update { it.copy(tagList = tagsResult.data) }
-        }
-
-        is MyResult.Error -> {
-
-        }
-      }
-
+      getAllCards()
+      getAllTags()
     }
   }
 
@@ -50,6 +52,10 @@ class AddExpenseViewModel @Inject constructor(
       is AddExpenseEvent.SelectTag -> {
         addSelectedTag(params as String)
       }
+
+      is AddExpenseEvent.SelectCard -> {
+        addSelectedCard(params as String)
+      }
     }
   }
 
@@ -57,9 +63,16 @@ class AddExpenseViewModel @Inject constructor(
     _state.update { it.copy(showToast = value) }
   }
 
+  private fun addSelectedCard(cardId: String) {
+    val selectedCard = _state.value.cardsList.firstOrNull() { it.id == cardId }
+    if (selectedCard != null) {
+      _state.update { it.copy(selectedCard = selectedCard) }
+    }
+  }
+
   private fun addSelectedTag(tagId: String) {
     val newTagList = _state.value.selectedTags.toMutableList()
-    if (newTagList.size >= 3) {
+    if (newTagList.size >= TAG_LIST_MAX_SIZE) {
       _state.update {
         it.copy(
           showToast = true,
@@ -73,6 +86,30 @@ class AddExpenseViewModel @Inject constructor(
     newTagList.add(selectedTag)
     _state.update {
       it.copy(selectedTags = newTagList.toList())
+    }
+  }
+
+  private suspend fun getAllTags() {
+    when (val tagsResult = getTagsUseCase()) {
+      is MyResult.Success -> {
+        _state.update { it.copy(tagList = tagsResult.data) }
+      }
+
+      is MyResult.Error -> {
+
+      }
+    }
+  }
+
+  private suspend fun getAllCards() {
+    when (val cards = getCardsUseCase()) {
+      is MyResult.Success -> {
+        _state.update { it.copy(cardsList = cards.data) }
+      }
+
+      is MyResult.Error -> {
+
+      }
     }
   }
 }
