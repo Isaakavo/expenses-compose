@@ -1,5 +1,6 @@
 package com.avocado.expensescompose.presentation.expenses.addexpense
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.avocado.expensescompose.data.model.MyResult
@@ -25,7 +26,8 @@ data class AddExpensesState(
 
 sealed class AddExpenseEvent {
   object SelectTag : AddExpenseEvent()
-  object SelectCard: AddExpenseEvent()
+  object SelectCard : AddExpenseEvent()
+  object EmptyCardList : AddExpenseEvent()
 }
 
 @HiltViewModel
@@ -55,6 +57,14 @@ class AddExpenseViewModel @Inject constructor(
 
       is AddExpenseEvent.SelectCard -> {
         addSelectedCard(params as String)
+      }
+
+      is AddExpenseEvent.EmptyCardList -> {
+        _state.update {
+          it.copy(
+            showToast = true, toastMessage = "Agrega una tarjeta para poder selecionarla"
+          )
+        }
       }
     }
   }
@@ -104,6 +114,7 @@ class AddExpenseViewModel @Inject constructor(
   private suspend fun getAllCards() {
     when (val cards = getCardsUseCase()) {
       is MyResult.Success -> {
+        Log.d("AddExpenseViewModel", "SUCCESS -> Obtained ${cards.data.size} cards")
         _state.update { it.copy(cardsList = cards.data) }
       }
 

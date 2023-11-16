@@ -1,6 +1,7 @@
 package com.avocado.expensescompose.presentation.expenses.addexpense
 
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -48,6 +49,8 @@ import com.avocado.expensescompose.domain.cards.models.Card
 import com.avocado.expensescompose.domain.tags.models.Tag
 import com.avocado.expensescompose.presentation.topbar.AppBar
 
+const val ADD_EXPENSE_SCREEN_LOG = "AddExpenseScreen"
+
 @Composable
 fun AddExpenseScreen(
   viewModel: AddExpenseViewModel = hiltViewModel(),
@@ -74,7 +77,7 @@ fun AddExpenseScreenContent(
   cards: List<Card>,
   selectedCard: Card?,
   tags: List<Tag>,
-  onEvent: (event: AddExpenseEvent, tagId: String) -> Unit
+  onEvent: (event: AddExpenseEvent, elementId: String?) -> Unit
 ) {
   val datePickerState = rememberDatePickerState()
   var openDialog by remember { mutableStateOf(false) }
@@ -191,15 +194,20 @@ fun AddExpenseScreenContent(
                   expanded = expanded
                 )
               },
+              enabled = cards.isNotEmpty(),
               modifier = Modifier.menuAnchor()
               // colors = ExposedDropdownMenuDefaults.textFieldColors()
             )
             ExposedDropdownMenu(
-              expanded = expanded,
+              expanded = if (cards.isEmpty()) {
+                onEvent(AddExpenseEvent.EmptyCardList, null)
+                false
+              } else expanded,
               onDismissRequest = {
                 expanded = false
-              }
+              },
             ) {
+              Log.d(ADD_EXPENSE_SCREEN_LOG, "Number of cards: ${cards.size}")
               cards.map {
                 DropdownMenuItem(
                   text = {
