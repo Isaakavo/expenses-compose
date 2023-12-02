@@ -31,6 +31,7 @@ class CreateExpenseUseCase(private val graphQlClient: GraphQlClient) {
     tags: List<Tag>,
     cardId: String?
   ): Flow<MyResult<Expense>> {
+    //TODO add logic to handle input errors
     return graphQlClient.mutate(
       CreateExpenseMutation(
         CreateExpenseInput(

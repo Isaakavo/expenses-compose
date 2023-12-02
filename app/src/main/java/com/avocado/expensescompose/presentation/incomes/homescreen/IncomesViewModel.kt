@@ -87,8 +87,7 @@ class IncomesViewModel @Inject constructor(
         val incomeFortnight = income.paymentDate.fortnight ?: return null
         val incomeArr = incomeMonths[incomeFortnight.translate()]
         incomeArr?.add(income) ?: incomeMonths.put(
-          incomeFortnight.translate(),
-          mutableListOf(income)
+          incomeFortnight.translate(), mutableListOf(income)
         )
       } else {
         val fortnight = income.paymentDate.fortnight ?: return null
@@ -105,28 +104,32 @@ class IncomesViewModel @Inject constructor(
     _state.update { it.copy(isLoading = true) }
 
     try {
-      when (val incomes = getAllIncomesUseCase()) {
-        is MyResult.Success -> {
-          val incomesList = incomes.data.incomesList
-          _state.update {
-            it.copy(
-              incomesMap = getIncomesMap(incomesList),
-              totalByMonth = incomes.data.totalByMonth,
-              isLoading = false
-            )
-          }
-        }
+      viewModelScope.launch {
+        getAllIncomesUseCase()
+          .collect {incomes ->
+          when (incomes) {
+            is MyResult.Success -> {
+              val incomesList = incomes.data.incomesList
+              _state.update {
+                it.copy(
+                  incomesMap = getIncomesMap(incomesList),
+                  totalByMonth = incomes.data.totalByMonth,
+                  isLoading = false
+                )
+              }
+            }
 
-        is MyResult.Error -> {
-          _state.update {
-            it.copy(
-              errorMessage = incomes.uiText ?: ""
-            )
+            is MyResult.Error -> {
+              _state.update {
+                it.copy(
+                  errorMessage = incomes.uiText ?: ""
+                )
+              }
+              Log.d("Incomes List", "Something went wrong ${incomes.uiText}")
+            }
           }
-          Log.d("Incomes List", "Something went wrong ${incomes.uiText}")
         }
       }
-
     } catch (exception: ApolloHttpException) {
       Log.d("JWT", exception.statusCode.toString())
 //      if (exception.statusCode == 401) {

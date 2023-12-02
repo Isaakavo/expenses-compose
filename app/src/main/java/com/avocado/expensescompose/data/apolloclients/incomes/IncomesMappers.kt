@@ -10,6 +10,7 @@ import com.avocado.expensescompose.domain.income.models.Income
 import com.avocado.expensescompose.domain.income.models.IncomeTotalByMonth
 import com.avocado.expensescompose.domain.income.models.PaymentDate
 
+//TODO refactor to keep adapters in correct folder
 fun HomeScreenAllIncomesQuery.Income.toIncome(): Income {
   return Income(
     id = id,

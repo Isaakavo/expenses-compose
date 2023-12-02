@@ -79,11 +79,6 @@ object AppModule {
 
   @Provides
   @Singleton
-  fun provideIncomesClient(apolloClient: ApolloClient): IncomesClient =
-    ApolloIncomesClient(apolloClient)
-
-  @Provides
-  @Singleton
   fun provideTagsClient(apolloClient: ApolloClient): TagsClient =
     ApolloTagsClient(apolloClient)
 
@@ -99,8 +94,13 @@ object AppModule {
 
   @Provides
   @Singleton
-  fun provideIncomeUseCase(incomesClient: IncomesClient): GetAllIncomesUseCase =
-    GetAllIncomesUseCase(incomesClient)
+  fun provideIncomeUseCase(graphQlClient: GraphQlClientImpl): GetAllIncomesUseCase =
+    GetAllIncomesUseCase(graphQlClient)
+
+  @Provides
+  @Singleton
+  fun provideIncomesClient(apolloClient: ApolloClient): IncomesClient =
+    ApolloIncomesClient(apolloClient)
 
   @Provides
   @Singleton
