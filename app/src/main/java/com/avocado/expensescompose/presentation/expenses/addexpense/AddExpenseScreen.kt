@@ -12,10 +12,13 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
@@ -45,6 +48,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.avocado.expensescompose.R
@@ -73,10 +77,14 @@ fun AddExpenseScreen(
     selectedCard = state.selectedCard,
     tags = state.tagList,
     showToast = state.showToast,
+    newTag = state.newTag,
+    newTags = state.newTags,
     concept = state.concept,
     comment = state.comment,
     total = state.total,
     date = state.date,
+    openDateDialog = state.openDateDialog,
+    openTagDialog = state.openTagDialog,
     expenseAdded = state.expenseAdded,
     expenseAddedError = state.expenseAddedError,
     onEvent = viewModel::onEvent
@@ -90,16 +98,19 @@ fun AddExpenseScreenContent(
   selectedCard: Card?,
   tags: List<Tag>,
   showToast: Boolean,
+  newTag: String,
+  newTags: List<String>,
   concept: String,
   comment: String,
   total: String,
   date: String,
+  openDateDialog: Boolean,
+  openTagDialog: Boolean,
   expenseAdded: Boolean,
   expenseAddedError: Boolean,
   onEvent: (event: AddExpenseEvent, elementId: String?) -> Unit
 ) {
   val datePickerState = rememberDatePickerState()
-  var openDialog by remember { mutableStateOf(false) }
   var expanded by remember {
     mutableStateOf(false)
   }
@@ -162,24 +173,12 @@ fun AddExpenseScreenContent(
             painter = painterResource(id = R.drawable.baseline_calendar_month_24),
             contentDescription = "Fecha"
           )
-          OutlinedTextField(
-            value = date,
-            onValueChange = {},
-            label = { Text(text = "Fecha") },
-            interactionSource = remember {
-              MutableInteractionSource()
-            }.also { interactionSource ->
-              LaunchedEffect(key1 = interactionSource) {
-                interactionSource.interactions.collect { interaction ->
-                  if (interaction is PressInteraction.Release) {
-                    openDialog = true
-                  }
-                }
-              }
-            })
-          if (openDialog) {
+          ClickableTextField(value = date, label = "Fecha") {
+            onEvent(AddExpenseEvent.DateDialogOpen, null)
+          }
+          if (openDateDialog) {
             DatePickerDialog(
-              onDismissRequest = { openDialog = false },
+              onDismissRequest = { onEvent(AddExpenseEvent.DateDialogClose, null) },
               confirmButton = {
                 TextButton(
                   onClick = {
@@ -187,14 +186,14 @@ fun AddExpenseScreenContent(
                       val formattedDate = millis.formatDateFromMillis()
                       onEvent(AddExpenseEvent.UpdateDate, formattedDate)
                     }
-                    openDialog = false
+                    onEvent(AddExpenseEvent.DateDialogClose, null)
 
                   }) {
                   Text(text = "Aceptar")
                 }
               },
               dismissButton = {
-                TextButton(onClick = { openDialog = false }) {
+                TextButton(onClick = { onEvent(AddExpenseEvent.DateDialogClose, null) }) {
                   Text(text = "Cancelar")
                 }
               }) {
@@ -265,16 +264,24 @@ fun AddExpenseScreenContent(
           }
         }
         AddExpenseRow {
-          //TODO make a dialog to add the new tags and add the selected tags to
-          // the text field
           Icon(
             painter = painterResource(id = R.drawable.round_sell_24),
             contentDescription = "Tags"
           )
-          OutlinedTextField(
-            value = "",
-            onValueChange = {},
-            label = { Text(text = "Agregar nuevo tag") })
+          ClickableTextField(value = newTags.toString(), label = "Agregar nuevo tag") {
+            onEvent(AddExpenseEvent.TagDialogOpen, null)
+          }
+          if (openTagDialog) {
+            AddTagsDialog(
+              value = newTag,
+              onDismiss = { onEvent(AddExpenseEvent.TagDialogClose, null) },
+              onConfirm = {
+                onEvent(AddExpenseEvent.AddNewTag, null)
+                onEvent(AddExpenseEvent.TagDialogClose, null)
+              },
+              onValueChange = { onEvent(AddExpenseEvent.UpdateNewTag, it) }
+            )
+          }
         }
         Row(modifier = Modifier.fillMaxWidth()) {
           Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -302,6 +309,81 @@ fun AddExpenseRow(content: @Composable () -> Unit) {
     verticalAlignment = Alignment.CenterVertically
   ) {
     content()
+  }
+}
+
+@Composable
+fun ClickableTextField(value: String, label: String, action: () -> Unit) {
+  OutlinedTextField(
+    value = value,
+    onValueChange = {},
+    label = { Text(text = label) },
+    interactionSource = remember {
+      MutableInteractionSource()
+    }.also { interactionSource ->
+      LaunchedEffect(key1 = interactionSource) {
+        interactionSource.interactions.collect { interaction ->
+          if (interaction is PressInteraction.Release) {
+            action()
+          }
+        }
+      }
+    })
+}
+
+@Composable
+fun AddTagsDialog(
+  value: String,
+  onDismiss: () -> Unit,
+  onConfirm: () -> Unit,
+  onValueChange: (String) -> Unit
+) {
+  Dialog(onDismissRequest = { onDismiss() }) {
+    Card(
+      modifier = Modifier
+        .fillMaxWidth()
+        .height(275.dp)
+        .padding(16.dp),
+      shape = RoundedCornerShape(16.dp),
+    ) {
+      Column(
+        modifier = Modifier
+          .fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+      ) {
+        Text(text = "Añadir nuevo tag", modifier = Modifier.padding(16.dp))
+        Row(
+          modifier = Modifier
+            .fillMaxWidth(),
+          horizontalArrangement = Arrangement.Center,
+        ) {
+          OutlinedTextField(
+            value = value,
+            onValueChange = { onValueChange(it) },
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp)
+          )
+        }
+        Row(
+          modifier = Modifier
+            .fillMaxWidth(),
+          horizontalArrangement = Arrangement.Center,
+        ) {
+          TextButton(
+            onClick = { onDismiss() },
+            modifier = Modifier.padding(8.dp),
+          ) {
+            Text("Cancelar")
+          }
+          TextButton(
+            onClick = { onConfirm() },
+            modifier = Modifier.padding(8.dp),
+          ) {
+            Text("Aceptar")
+          }
+        }
+      }
+    }
   }
 }
 

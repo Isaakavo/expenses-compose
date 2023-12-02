@@ -24,7 +24,13 @@ sealed class AddExpenseEvent {
   object UpdateComment : AddExpenseEvent()
   object UpdateTotal : AddExpenseEvent()
   object UpdateDate : AddExpenseEvent()
+  object UpdateNewTag : AddExpenseEvent()
   object AddExpense : AddExpenseEvent()
+  object AddNewTag : AddExpenseEvent()
+  object DateDialogOpen : AddExpenseEvent()
+  object DateDialogClose : AddExpenseEvent()
+  object TagDialogOpen : AddExpenseEvent()
+  object TagDialogClose : AddExpenseEvent()
 }
 
 data class AddExpensesState(
@@ -32,6 +38,8 @@ data class AddExpensesState(
   val tagList: List<Tag> = emptyList(),
   val selectedCard: Card? = null,
   val selectedTags: List<Tag> = emptyList(),
+  val newTag: String = "",
+  val newTags: List<String> = emptyList(),
   val showToast: Boolean = false,
   val toastMessage: String = "",
   val concept: String = "",
@@ -39,7 +47,10 @@ data class AddExpensesState(
   val total: String = "",
   val date: String = "",
   val expenseAdded: Boolean = false,
-  val expenseAddedError: Boolean = false
+  val expenseAddedError: Boolean = false,
+  val openDateDialog: Boolean = false,
+  val openTagDialog: Boolean = false,
+  val cardMenu: Boolean = false
 )
 
 @HiltViewModel
@@ -96,17 +107,25 @@ class AddExpenseViewModel @Inject constructor(
         _state.update { it.copy(date = params as String) }
       }
 
+      is AddExpenseEvent.UpdateNewTag -> {
+        _state.update { it.copy(newTag = params as String) }
+      }
+
       is AddExpenseEvent.AddExpense -> {
+        val selectedTags = _state.value.selectedTags.toMutableList()
+        selectedTags.addAll(_state.value.newTags.map {
+          Tag(id = "", name = it, selected = true)
+        })
         viewModelScope.launch {
           createExpenseUseCase(
             concept = _state.value.concept,
             comment = _state.value.comment,
             date = _state.value.date,
             total = _state.value.total.toDouble(),
-            tags = _state.value.selectedTags,
-            cardId = _state.value.selectedCard?.id
-          ).collect {expenseResult ->
-            when(expenseResult) {
+            tags = selectedTags,
+            cardId = _state.value.selectedCard?.id,
+          ).collect { expenseResult ->
+            when (expenseResult) {
               is MyResult.Success -> {
                 _state.emit(value = AddExpensesState(expenseAdded = true))
               }
@@ -118,6 +137,33 @@ class AddExpenseViewModel @Inject constructor(
 
           }
         }
+      }
+
+      is AddExpenseEvent.AddNewTag -> {
+        val newTagsMutable = _state.value.newTags.toMutableList()
+        newTagsMutable.add(_state.value.newTag)
+        _state.update {
+          it.copy(
+            newTag = "",
+            newTags = newTagsMutable
+          )
+        }
+      }
+
+      is AddExpenseEvent.DateDialogOpen -> {
+        _state.update { it.copy(openDateDialog = true) }
+      }
+
+      is AddExpenseEvent.DateDialogClose -> {
+        _state.update { it.copy(openDateDialog = false) }
+      }
+
+      AddExpenseEvent.TagDialogClose -> {
+        _state.update { it.copy(openTagDialog = false) }
+      }
+
+      AddExpenseEvent.TagDialogOpen -> {
+        _state.update { it.copy(openTagDialog = true) }
       }
     }
   }
