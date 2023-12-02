@@ -170,7 +170,7 @@ fun ExpenseItem(expense: Expense) {
       Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         Text(text = expense.concept, style = MaterialTheme.typography.bodySmall)
         Text(
-          text = expense.createdAt?.formatDateDaysWithMonth() ?: "",
+          text = expense.payBefore?.formatDateDaysWithMonth() ?: "",
           style = MaterialTheme.typography.bodyMedium
         )
       }

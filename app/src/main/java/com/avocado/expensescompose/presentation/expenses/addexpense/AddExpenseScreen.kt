@@ -71,6 +71,10 @@ fun AddExpenseScreen(
     viewModel.resetToast()
   }
 
+  if (state.isAdded) {
+    onPopBackStack()
+  }
+
   AddExpenseScreenContent(
     cards = state.cardsList,
     selectedCard = state.selectedCard,
@@ -191,7 +195,6 @@ fun AddExpenseScreenContent(
                       onEvent(AddExpenseEvent.UpdateDate, formattedDate)
                     }
                     onEvent(AddExpenseEvent.DateDialogClose, null)
-
                   }) {
                   Text(text = "Aceptar")
                 }

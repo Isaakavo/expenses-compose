@@ -53,6 +53,7 @@ data class AddExpensesState(
   val openTagDialog: Boolean = false,
   val openCardMenu: Boolean = false,
   val loadingCard: Boolean = true,
+  val isAdded: Boolean = false
 )
 
 @HiltViewModel
@@ -121,7 +122,7 @@ class AddExpenseViewModel @Inject constructor(
           ).collect { expenseResult ->
             when (expenseResult) {
               is MyResult.Success -> {
-                _state.emit(value = AddExpensesState(expenseAdded = true))
+                _state.emit(value = AddExpensesState(expenseAdded = true, isAdded = true))
               }
 
               is MyResult.Error -> {
