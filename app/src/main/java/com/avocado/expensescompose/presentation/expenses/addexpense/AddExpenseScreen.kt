@@ -64,6 +64,7 @@ const val ADD_EXPENSE_SCREEN_LOG = "AddExpenseScreen"
 fun AddExpenseScreen(
   viewModel: AddExpenseViewModel = hiltViewModel(),
   context: Context = LocalContext.current,
+  onPopBackStack: () -> Unit = {}
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -87,7 +88,8 @@ fun AddExpenseScreen(
     openTagDialog = state.openTagDialog,
     expenseAdded = state.expenseAdded,
     expenseAddedError = state.expenseAddedError,
-    onEvent = viewModel::onEvent
+    onEvent = viewModel::onEvent,
+    onPopBackStack = onPopBackStack
   )
 }
 
@@ -108,7 +110,8 @@ fun AddExpenseScreenContent(
   openTagDialog: Boolean,
   expenseAdded: Boolean,
   expenseAddedError: Boolean,
-  onEvent: (event: AddExpenseEvent, elementId: String?) -> Unit
+  onEvent: (event: AddExpenseEvent, elementId: String?) -> Unit,
+  onPopBackStack: () -> Unit = {}
 ) {
   val datePickerState = rememberDatePickerState()
   var expanded by remember {
@@ -128,9 +131,13 @@ fun AddExpenseScreenContent(
 
   Scaffold(
     topBar = {
-      AppBar(title = "Agregar gasto", buttonText = "Agregar", actionItemOnClick = {
-        onEvent(AddExpenseEvent.AddExpense, null)
-      })
+      AppBar(
+        title = "Agregar gasto", buttonText = "Agregar",
+        actionItemOnClick = {
+          onEvent(AddExpenseEvent.AddExpense, null)
+        },
+        onNavigationIconClick = { onPopBackStack() }
+      )
     },
     snackbarHost = {
       SnackbarHost(hostState = snackBarHostState)

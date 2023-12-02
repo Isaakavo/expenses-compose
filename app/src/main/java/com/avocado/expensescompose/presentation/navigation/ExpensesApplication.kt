@@ -94,7 +94,9 @@ fun ExpensesApplication() {
     }
 
     composable(RoutesConstants.EXPENSE_ADD) {
-      AddExpenseScreen()
+      AddExpenseScreen {
+        navController.popBackStack()
+      }
     }
 
     composable(RoutesConstants.CARDS_SCREEN) {
