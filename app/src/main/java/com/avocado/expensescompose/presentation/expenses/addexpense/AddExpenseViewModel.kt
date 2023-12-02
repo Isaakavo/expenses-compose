@@ -19,7 +19,6 @@ import javax.inject.Inject
 sealed class AddExpenseEvent {
   object SelectTag : AddExpenseEvent()
   object SelectCard : AddExpenseEvent()
-  object EmptyCardList : AddExpenseEvent()
   object UpdateConcept : AddExpenseEvent()
   object UpdateComment : AddExpenseEvent()
   object UpdateTotal : AddExpenseEvent()
@@ -31,6 +30,8 @@ sealed class AddExpenseEvent {
   object DateDialogClose : AddExpenseEvent()
   object TagDialogOpen : AddExpenseEvent()
   object TagDialogClose : AddExpenseEvent()
+  object OpenCardMenu : AddExpenseEvent()
+  object CloseCardMenu : AddExpenseEvent()
 }
 
 data class AddExpensesState(
@@ -50,7 +51,8 @@ data class AddExpensesState(
   val expenseAddedError: Boolean = false,
   val openDateDialog: Boolean = false,
   val openTagDialog: Boolean = false,
-  val cardMenu: Boolean = false
+  val openCardMenu: Boolean = false,
+  val loadingCard: Boolean = true,
 )
 
 @HiltViewModel
@@ -81,14 +83,6 @@ class AddExpenseViewModel @Inject constructor(
 
       is AddExpenseEvent.SelectCard -> {
         addSelectedCard(params as String)
-      }
-
-      is AddExpenseEvent.EmptyCardList -> {
-        _state.update {
-          it.copy(
-            showToast = true, toastMessage = "Agrega una tarjeta para poder selecionarla"
-          )
-        }
       }
 
       is AddExpenseEvent.UpdateConcept -> {
@@ -158,18 +152,30 @@ class AddExpenseViewModel @Inject constructor(
         _state.update { it.copy(openDateDialog = false) }
       }
 
-      AddExpenseEvent.TagDialogClose -> {
+      is AddExpenseEvent.TagDialogClose -> {
         _state.update { it.copy(openTagDialog = false) }
       }
 
-      AddExpenseEvent.TagDialogOpen -> {
+      is AddExpenseEvent.TagDialogOpen -> {
         _state.update { it.copy(openTagDialog = true) }
+      }
+
+      is AddExpenseEvent.OpenCardMenu -> {
+        _state.update { it.copy(openCardMenu = true) }
+      }
+
+      is AddExpenseEvent.CloseCardMenu -> {
+        _state.update { it.copy(openCardMenu = false) }
       }
     }
   }
 
-  fun showToast(value: Boolean) {
-    _state.update { it.copy(showToast = value) }
+  private fun showToast(message: String) {
+    _state.update { it.copy(showToast = true, toastMessage = message) }
+  }
+
+  fun resetToast() {
+    _state.update { it.copy(showToast = false, toastMessage = "") }
   }
 
   private fun addSelectedCard(cardId: String) {
@@ -211,15 +217,19 @@ class AddExpenseViewModel @Inject constructor(
   }
 
   private suspend fun getAllCards() {
+    _state.update { it.copy(loadingCard = true) }
     when (val cards = getCardsUseCase()) {
       is MyResult.Success -> {
         Log.d("AddExpenseViewModel", "SUCCESS -> Obtained ${cards.data.size} cards")
         _state.update { it.copy(cardsList = cards.data) }
-        if (cards.data.isEmpty()) showToast(true)
+        if (cards.data.isEmpty()) {
+          showToast(message = "Agrega una tarjeta para poder selecionarla")
+        }
+        _state.update { it.copy(loadingCard = false) }
       }
 
       is MyResult.Error -> {
-
+        _state.update { it.copy(loadingCard = false) }
       }
     }
   }

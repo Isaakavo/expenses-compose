@@ -38,10 +38,8 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -68,16 +66,16 @@ fun AddExpenseScreen(
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
 
-  if (state.showToast) {
+  if (state.showToast && !state.loadingCard) {
     Toast.makeText(context, state.toastMessage, Toast.LENGTH_LONG).show()
-    viewModel.showToast(false)
+    viewModel.resetToast()
   }
 
   AddExpenseScreenContent(
     cards = state.cardsList,
     selectedCard = state.selectedCard,
     tags = state.tagList,
-    showToast = state.showToast,
+    loadingCard = state.loadingCard,
     newTag = state.newTag,
     newTags = state.newTags,
     concept = state.concept,
@@ -86,6 +84,7 @@ fun AddExpenseScreen(
     date = state.date,
     openDateDialog = state.openDateDialog,
     openTagDialog = state.openTagDialog,
+    openCardMenu = state.openCardMenu,
     expenseAdded = state.expenseAdded,
     expenseAddedError = state.expenseAddedError,
     onEvent = viewModel::onEvent,
@@ -99,7 +98,7 @@ fun AddExpenseScreenContent(
   cards: List<Card>,
   selectedCard: Card?,
   tags: List<Tag>,
-  showToast: Boolean,
+  loadingCard: Boolean,
   newTag: String,
   newTags: List<String>,
   concept: String,
@@ -108,15 +107,13 @@ fun AddExpenseScreenContent(
   date: String,
   openDateDialog: Boolean,
   openTagDialog: Boolean,
+  openCardMenu: Boolean,
   expenseAdded: Boolean,
   expenseAddedError: Boolean,
   onEvent: (event: AddExpenseEvent, elementId: String?) -> Unit,
   onPopBackStack: () -> Unit = {}
 ) {
   val datePickerState = rememberDatePickerState()
-  var expanded by remember {
-    mutableStateOf(false)
-  }
   val scope = rememberCoroutineScope()
   val snackBarHostState = remember { SnackbarHostState() }
 
@@ -227,9 +224,13 @@ fun AddExpenseScreenContent(
             contentDescription = "Credit card"
           )
           ExposedDropdownMenuBox(
-            expanded = expanded,
+            expanded = openCardMenu,
             onExpandedChange = {
-              expanded = !expanded
+              if (openCardMenu) {
+                onEvent(AddExpenseEvent.OpenCardMenu, null)
+              } else {
+                onEvent(AddExpenseEvent.CloseCardMenu, null)
+              }
             }
           ) {
             OutlinedTextField(
@@ -239,7 +240,7 @@ fun AddExpenseScreenContent(
               label = { Text("Asociar Tarjeta") },
               trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(
-                  expanded = expanded
+                  expanded = openCardMenu
                 )
               },
               enabled = cards.isNotEmpty(),
@@ -247,12 +248,11 @@ fun AddExpenseScreenContent(
               // colors = ExposedDropdownMenuDefaults.textFieldColors()
             )
             ExposedDropdownMenu(
-              expanded = if (cards.isEmpty() && showToast) {
-                onEvent(AddExpenseEvent.EmptyCardList, null)
+              expanded = if (cards.isEmpty() && !loadingCard) {
                 false
-              } else expanded,
+              } else openCardMenu,
               onDismissRequest = {
-                expanded = false
+                onEvent(AddExpenseEvent.CloseCardMenu, null)
               },
             ) {
               Log.d(ADD_EXPENSE_SCREEN_LOG, "Number of cards: ${cards.size}")
@@ -263,7 +263,7 @@ fun AddExpenseScreenContent(
                   },
                   onClick = {
                     onEvent(AddExpenseEvent.SelectCard, it.id)
-                    expanded = false
+                    onEvent(AddExpenseEvent.CloseCardMenu, null)
                   }
                 )
               }
