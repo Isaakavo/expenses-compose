@@ -26,6 +26,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -35,6 +37,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,6 +51,8 @@ import com.avocado.expensescompose.R
 import com.avocado.expensescompose.domain.cards.models.Card
 import com.avocado.expensescompose.domain.tags.models.Tag
 import com.avocado.expensescompose.presentation.topbar.AppBar
+import com.avocado.expensescompose.presentation.util.formatDateFromMillis
+import kotlinx.coroutines.launch
 
 const val ADD_EXPENSE_SCREEN_LOG = "AddExpenseScreen"
 
@@ -67,6 +72,13 @@ fun AddExpenseScreen(
     cards = state.cardsList,
     selectedCard = state.selectedCard,
     tags = state.tagList,
+    showToast = state.showToast,
+    concept = state.concept,
+    comment = state.comment,
+    total = state.total,
+    date = state.date,
+    expenseAdded = state.expenseAdded,
+    expenseAddedError = state.expenseAddedError,
     onEvent = viewModel::onEvent
   )
 }
@@ -77,6 +89,13 @@ fun AddExpenseScreenContent(
   cards: List<Card>,
   selectedCard: Card?,
   tags: List<Tag>,
+  showToast: Boolean,
+  concept: String,
+  comment: String,
+  total: String,
+  date: String,
+  expenseAdded: Boolean,
+  expenseAddedError: Boolean,
   onEvent: (event: AddExpenseEvent, elementId: String?) -> Unit
 ) {
   val datePickerState = rememberDatePickerState()
@@ -84,10 +103,26 @@ fun AddExpenseScreenContent(
   var expanded by remember {
     mutableStateOf(false)
   }
+  val scope = rememberCoroutineScope()
+  val snackBarHostState = remember { SnackbarHostState() }
+
+  //TODO implement snack bar
+  LaunchedEffect(Unit) {
+    if (expenseAdded || expenseAddedError) {
+      scope.launch {
+        snackBarHostState.showSnackbar(if (expenseAdded) "Gasto añadido correctamente" else "Ocurrió un error al añadir el gasto")
+      }
+    }
+  }
 
   Scaffold(
     topBar = {
-      AppBar(title = "Agregar gasto")
+      AppBar(title = "Agregar gasto", buttonText = "Agregar", actionItemOnClick = {
+        onEvent(AddExpenseEvent.AddExpense, null)
+      })
+    },
+    snackbarHost = {
+      SnackbarHost(hostState = snackBarHostState)
     }
   ) { paddingValues ->
     Surface(
@@ -107,14 +142,20 @@ fun AddExpenseScreenContent(
             painter = painterResource(id = R.drawable.round_description_24),
             contentDescription = "Credit card"
           )
-          OutlinedTextField(value = "", onValueChange = {}, label = { Text(text = "Concepto") })
+          OutlinedTextField(
+            value = concept,
+            onValueChange = { onEvent(AddExpenseEvent.UpdateConcept, it) },
+            label = { Text(text = "Concepto") })
         }
         AddExpenseRow {
           Icon(
             painter = painterResource(R.drawable.round_comment_24),
             contentDescription = "Comment"
           )
-          OutlinedTextField(value = "", onValueChange = { }, label = { Text(text = "Comentario") })
+          OutlinedTextField(
+            value = comment,
+            onValueChange = { onEvent(AddExpenseEvent.UpdateComment, it) },
+            label = { Text(text = "Comentario") })
         }
         AddExpenseRow {
           Icon(
@@ -122,9 +163,9 @@ fun AddExpenseScreenContent(
             contentDescription = "Fecha"
           )
           OutlinedTextField(
-            value = "",
+            value = date,
             onValueChange = {},
-            label = { Text(text = "Quincena") },
+            label = { Text(text = "Fecha") },
             interactionSource = remember {
               MutableInteractionSource()
             }.also { interactionSource ->
@@ -143,7 +184,8 @@ fun AddExpenseScreenContent(
                 TextButton(
                   onClick = {
                     datePickerState.selectedDateMillis?.let { millis ->
-                      //viewModel.setFormattedDate(millis)
+                      val formattedDate = millis.formatDateFromMillis()
+                      onEvent(AddExpenseEvent.UpdateDate, formattedDate)
                     }
                     openDialog = false
 
@@ -167,8 +209,8 @@ fun AddExpenseScreenContent(
             contentDescription = "total"
           )
           OutlinedTextField(
-            value = "",
-            onValueChange = { },
+            value = total,
+            onValueChange = { onEvent(AddExpenseEvent.UpdateTotal, it) },
             label = { Text(text = "Total") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
           )
@@ -199,7 +241,7 @@ fun AddExpenseScreenContent(
               // colors = ExposedDropdownMenuDefaults.textFieldColors()
             )
             ExposedDropdownMenu(
-              expanded = if (cards.isEmpty()) {
+              expanded = if (cards.isEmpty() && showToast) {
                 onEvent(AddExpenseEvent.EmptyCardList, null)
                 false
               } else expanded,

@@ -7,7 +7,7 @@ import com.apollographql.apollo3.exception.ApolloException
 import com.avocado.HomeScreenAllIncomesQuery
 import com.avocado.CreateIncomeMutation
 import com.avocado.IncomeByIdWithExpensesListQuery
-import com.avocado.expensescompose.data.adapters.formatDateForRequest
+import com.avocado.expensescompose.presentation.util.formatDateForRequest
 import com.avocado.expensescompose.data.adapters.graphql.scalar.Date
 import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.domain.income.IncomesClient

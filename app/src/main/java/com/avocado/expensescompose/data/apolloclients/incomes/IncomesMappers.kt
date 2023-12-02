@@ -2,6 +2,7 @@ package com.avocado.expensescompose.data.apolloclients.incomes
 
 import com.avocado.HomeScreenAllIncomesQuery
 import com.avocado.IncomeByIdWithExpensesListQuery
+import com.avocado.expensescompose.domain.cards.models.Card
 import com.avocado.expensescompose.domain.income.models.Expense
 import com.avocado.expensescompose.domain.income.models.ExpenseTag
 import com.avocado.expensescompose.domain.income.models.Fortnight
@@ -42,7 +43,8 @@ fun IncomeByIdWithExpensesListQuery.Expense.toExpense(): Expense {
     payBefore = payBefore.date,
     createdAt = createdAt?.date,
     updatedAt = updatedAt?.date,
-    tags = tags.map { ExpenseTag(id = it.id, name = it.name) }
+    tags = tags.map { ExpenseTag(id = it.id, name = it.name) },
+    card = Card(id = card?.id ?: "", bank = card?.bank ?: "", alias = card?.alias ?: "")
   )
 }
 

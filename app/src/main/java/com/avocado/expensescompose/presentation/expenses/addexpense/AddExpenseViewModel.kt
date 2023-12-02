@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.domain.cards.models.Card
 import com.avocado.expensescompose.domain.cards.usecase.GetCardsUseCase
+import com.avocado.expensescompose.domain.expense.CreateExpenseUseCase
 import com.avocado.expensescompose.domain.tags.models.Tag
 import com.avocado.expensescompose.domain.tags.usecase.GetTagsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,25 +16,37 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+sealed class AddExpenseEvent {
+  object SelectTag : AddExpenseEvent()
+  object SelectCard : AddExpenseEvent()
+  object EmptyCardList : AddExpenseEvent()
+  object UpdateConcept : AddExpenseEvent()
+  object UpdateComment : AddExpenseEvent()
+  object UpdateTotal : AddExpenseEvent()
+  object UpdateDate : AddExpenseEvent()
+  object AddExpense : AddExpenseEvent()
+}
+
 data class AddExpensesState(
   val cardsList: List<Card> = emptyList(),
   val tagList: List<Tag> = emptyList(),
   val selectedCard: Card? = null,
   val selectedTags: List<Tag> = emptyList(),
   val showToast: Boolean = false,
-  val toastMessage: String = ""
+  val toastMessage: String = "",
+  val concept: String = "",
+  val comment: String = "",
+  val total: String = "",
+  val date: String = "",
+  val expenseAdded: Boolean = false,
+  val expenseAddedError: Boolean = false
 )
-
-sealed class AddExpenseEvent {
-  object SelectTag : AddExpenseEvent()
-  object SelectCard : AddExpenseEvent()
-  object EmptyCardList : AddExpenseEvent()
-}
 
 @HiltViewModel
 class AddExpenseViewModel @Inject constructor(
   private val getTagsUseCase: GetTagsUseCase,
-  private val getCardsUseCase: GetCardsUseCase
+  private val getCardsUseCase: GetCardsUseCase,
+  private val createExpenseUseCase: CreateExpenseUseCase
 ) : ViewModel() {
   private val _state = MutableStateFlow(AddExpensesState())
   val state = _state.asStateFlow()
@@ -64,6 +77,46 @@ class AddExpenseViewModel @Inject constructor(
           it.copy(
             showToast = true, toastMessage = "Agrega una tarjeta para poder selecionarla"
           )
+        }
+      }
+
+      is AddExpenseEvent.UpdateConcept -> {
+        _state.update { it.copy(concept = params as String) }
+      }
+
+      is AddExpenseEvent.UpdateComment -> {
+        _state.update { it.copy(comment = params as String) }
+      }
+
+      is AddExpenseEvent.UpdateTotal -> {
+        _state.update { it.copy(total = params as String) }
+      }
+
+      is AddExpenseEvent.UpdateDate -> {
+        _state.update { it.copy(date = params as String) }
+      }
+
+      is AddExpenseEvent.AddExpense -> {
+        viewModelScope.launch {
+          createExpenseUseCase(
+            concept = _state.value.concept,
+            comment = _state.value.comment,
+            date = _state.value.date,
+            total = _state.value.total.toDouble(),
+            tags = _state.value.selectedTags,
+            cardId = _state.value.selectedCard?.id
+          ).collect {expenseResult ->
+            when(expenseResult) {
+              is MyResult.Success -> {
+                _state.emit(value = AddExpensesState(expenseAdded = true))
+              }
+
+              is MyResult.Error -> {
+                _state.emit(value = AddExpensesState(expenseAddedError = true))
+              }
+            }
+
+          }
         }
       }
     }
@@ -116,6 +169,7 @@ class AddExpenseViewModel @Inject constructor(
       is MyResult.Success -> {
         Log.d("AddExpenseViewModel", "SUCCESS -> Obtained ${cards.data.size} cards")
         _state.update { it.copy(cardsList = cards.data) }
+        if (cards.data.isEmpty()) showToast(true)
       }
 
       is MyResult.Error -> {

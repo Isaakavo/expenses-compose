@@ -1,5 +1,6 @@
 package com.avocado.expensescompose.domain.income.models
 
+import com.avocado.expensescompose.domain.cards.models.Card
 import java.time.LocalDateTime
 
 data class Expense(
@@ -12,5 +13,6 @@ data class Expense(
   val createdAt: LocalDateTime? = null,
   val updatedAt: LocalDateTime? = null,
   val tags: List<ExpenseTag>,
-  val comment: String? = null
+  val comment: String? = null,
+  val card: Card
 )

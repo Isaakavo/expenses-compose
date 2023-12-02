@@ -35,8 +35,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.avocado.expensescompose.data.adapters.formatDateDaysWithMonth
-import com.avocado.expensescompose.data.adapters.formatDateOnlyMonth
+import com.avocado.expensescompose.presentation.util.formatDateDaysWithMonth
+import com.avocado.expensescompose.presentation.util.formatDateOnlyMonth
 import com.avocado.expensescompose.data.adapters.formatMoney
 import com.avocado.expensescompose.domain.income.models.Expense
 import com.avocado.expensescompose.domain.income.models.ExpenseTag
@@ -182,13 +182,17 @@ fun ExpenseItem(expense: Expense) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
       ) {
-        SuggestionChip(
-          onClick = { /*TODO*/ },
-          label = { Text(text = "Banregio", style = MaterialTheme.typography.bodySmall) })
+        if (expense.card.alias.isNotEmpty()) {
+          SuggestionChip(
+            onClick = { /*TODO*/ },
+            label = { Text(text = expense.card.alias, style = MaterialTheme.typography.bodySmall) })
+        }
 
+        //TODO make this text to always be at the right
         Text(
           text = expense.total.formatMoney(),
           style = MaterialTheme.typography.bodyLarge,
+          textAlign = TextAlign.End,
           fontWeight = FontWeight.SemiBold
         )
 
@@ -231,15 +235,6 @@ fun ExpenseItem(expense: Expense) {
 }
 
 @Composable
-fun ExpenseTags(tags: ExpenseTag) {
-  SuggestionChip(
-    onClick = {},
-    label = { Text(text = tags.name, style = MaterialTheme.typography.bodySmall) },
-    modifier = Modifier.padding(end = 4.dp),
-  )
-}
-
-@Composable
 fun ExpensesList(expenseList: List<Expense>) {
   Text(
     text = "Transacciones", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.End
@@ -274,6 +269,7 @@ fun IncomeWithExpenseContent() {
         createdAt = LocalDateTime.now(),
         comment = "",
         id = "1",
+        card= com.avocado.expensescompose.domain.cards.models.Card(bank = "Test", alias = "alv", id = "kajshdfkajd"),
         tags = listOf(
           ExpenseTag(
             id = "1",
@@ -305,6 +301,7 @@ fun IncomeWithExpenseContent() {
         createdAt = LocalDateTime.now(),
         comment = "",
         id = "1",
+        card= com.avocado.expensescompose.domain.cards.models.Card(bank = "Test", alias = "alv", id = "kajshdfkajd"),
         tags = listOf(
           ExpenseTag(
             id = "1",
@@ -336,6 +333,7 @@ fun IncomeWithExpenseContent() {
         createdAt = LocalDateTime.now(),
         comment = "",
         id = "1",
+        card= com.avocado.expensescompose.domain.cards.models.Card(bank = "Test", alias = "alv", id = "kajshdfkajd"),
         tags = listOf(
           ExpenseTag(
             id = "1",
@@ -367,6 +365,7 @@ fun IncomeWithExpenseContent() {
         createdAt = LocalDateTime.now(),
         comment = "",
         id = "1",
+        card= com.avocado.expensescompose.domain.cards.models.Card(bank = "Test", alias = "alv", id = "kajshdfkajd"),
         tags = listOf(
           ExpenseTag(
             id = "1",

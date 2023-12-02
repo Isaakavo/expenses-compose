@@ -1,0 +1,26 @@
+mutation CreateExpense($input: CreateExpenseInput!) {
+    createExpense(input: $input) {
+        id
+        userId
+        concept
+        comment
+        total
+        payBefore
+        createdAt
+        updatedAt
+        tags {
+            id
+            name
+            createdAt
+            updatedAt
+        }
+        card {
+            id
+            userId
+            alias
+            bank
+            isDigital
+            isDebit
+        }
+    }
+}

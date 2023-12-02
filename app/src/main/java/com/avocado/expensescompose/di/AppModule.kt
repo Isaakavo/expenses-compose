@@ -2,6 +2,7 @@ package com.avocado.expensescompose.di
 
 import android.content.Context
 import com.apollographql.apollo3.ApolloClient
+import com.avocado.expensescompose.data.apolloclients.GraphQlClientImpl
 import com.avocado.expensescompose.data.apolloclients.cards.ApolloCardsClient
 import com.avocado.expensescompose.data.apolloclients.incomes.ApolloIncomesClient
 import com.avocado.expensescompose.data.apolloclients.tags.ApolloTagsClient
@@ -13,6 +14,7 @@ import com.avocado.expensescompose.data.repositories.AuthRepository
 import com.avocado.expensescompose.data.repositories.TokenManagerRepository
 import com.avocado.expensescompose.domain.cards.CardsClient
 import com.avocado.expensescompose.domain.cards.usecase.GetCardsUseCase
+import com.avocado.expensescompose.domain.expense.CreateExpenseUseCase
 import com.avocado.expensescompose.domain.income.usecase.CreateIncomeUseCase
 import com.avocado.expensescompose.domain.income.usecase.GetAllIncomesUseCase
 import com.avocado.expensescompose.domain.income.usecase.GetIncomeByIdWithExpensesUseCase
@@ -72,6 +74,11 @@ object AppModule {
 
   @Provides
   @Singleton
+  fun provideGraphQlClient(apolloClient: ApolloClient): GraphQlClientImpl =
+    GraphQlClientImpl(apolloClient)
+
+  @Provides
+  @Singleton
   fun provideIncomesClient(apolloClient: ApolloClient): IncomesClient =
     ApolloIncomesClient(apolloClient)
 
@@ -84,6 +91,11 @@ object AppModule {
   @Singleton
   fun provideCardsClient(apolloClient: ApolloClient): CardsClient =
     ApolloCardsClient(apolloClient)
+
+  @Provides
+  @Singleton
+  fun provideExpensesUseCase(graphQlClient: GraphQlClientImpl): CreateExpenseUseCase =
+    CreateExpenseUseCase(graphQlClient)
 
   @Provides
   @Singleton
