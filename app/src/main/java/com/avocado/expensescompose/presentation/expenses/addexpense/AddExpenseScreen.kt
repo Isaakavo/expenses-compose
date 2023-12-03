@@ -230,15 +230,15 @@ fun AddExpenseScreenContent(
             expanded = openCardMenu,
             onExpandedChange = {
               if (openCardMenu) {
-                onEvent(AddExpenseEvent.OpenCardMenu, null)
-              } else {
                 onEvent(AddExpenseEvent.CloseCardMenu, null)
+              } else {
+                onEvent(AddExpenseEvent.OpenCardMenu, null)
               }
             }
           ) {
             OutlinedTextField(
               readOnly = true,
-              value = selectedCard?.aliasWithBankText() ?: "",
+              value = selectedCard?.aliasWithBankText() ?: selectedCard?.bank ?: "",
               onValueChange = { },
               label = { Text("Asociar Tarjeta") },
               trailingIcon = {
