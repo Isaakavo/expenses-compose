@@ -189,19 +189,39 @@ class AddExpenseViewModel @Inject constructor(
   private fun addSelectedTag(tagId: String) {
     val newTagList = _state.value.selectedTags.toMutableList()
     if (newTagList.size >= TAG_LIST_MAX_SIZE) {
+      newTagList.last().selected = false
+      newTagList.removeLast()
       _state.update {
         it.copy(
           showToast = true,
-          toastMessage = "Solo puedes elegir un máximo de 10 tags"
+          toastMessage = "Solo puedes elegir un máximo de 10 tags",
+          selectedTags = newTagList
         )
       }
       return
     }
     val selectedTag = _state.value.tagList.find { it.id == tagId } ?: return
-    selectedTag.selected = true
-    newTagList.add(selectedTag)
-    _state.update {
-      it.copy(selectedTags = newTagList.toList())
+    if (selectedTag.selected) {
+      changeTagState(selectedTag, false, newTagList)
+      return
+    } else {
+      changeTagState(selectedTag, true, newTagList)
+      return
+    }
+  }
+
+  private fun changeTagState(selectedTag: Tag, value: Boolean, newTagList: MutableList<Tag>) {
+    selectedTag.selected = value
+    if (selectedTag.selected) {
+      newTagList.add(selectedTag)
+      _state.update {
+        it.copy(selectedTags = newTagList.toList())
+      }
+    } else {
+      val selectedTags = newTagList.filter { it.selected }
+      _state.update {
+        it.copy(selectedTags = selectedTags)
+      }
     }
   }
 
