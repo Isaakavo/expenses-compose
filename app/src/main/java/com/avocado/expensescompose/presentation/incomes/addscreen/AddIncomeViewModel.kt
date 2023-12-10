@@ -6,8 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.avocado.expensescompose.data.adapters.formatDateToISO
-import com.avocado.expensescompose.data.adapters.formatDateWithYear
+import com.avocado.expensescompose.presentation.util.formatDateToISO
+import com.avocado.expensescompose.presentation.util.formatDateWithYear
 import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.domain.income.models.Income
 import com.avocado.expensescompose.domain.income.usecase.CreateIncomeUseCase

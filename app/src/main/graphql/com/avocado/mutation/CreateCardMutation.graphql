@@ -1,0 +1,10 @@
+mutation CreateCard($input: CreateCardInput) {
+    createCard(input: $input) {
+        id
+        bank
+        isDebit
+        isDigital
+        alias
+        userId
+    }
+}

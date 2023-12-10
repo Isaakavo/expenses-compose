@@ -6,6 +6,22 @@ enum Fortnight {
   SECOND
 }
 
+interface Total {
+  date: String!
+
+  total: Float!
+}
+
+"""
+The `String` scalar type represents textual data, represented as UTF-8 character sequences. The String type is most often used by GraphQL to represent free-form human-readable text.
+"""
+scalar String
+
+"""
+The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](https://en.wikipedia.org/wiki/IEEE_floating_point).
+"""
+scalar Float
+
 type PaymentDate {
   date: Date!
 
@@ -31,18 +47,16 @@ The `ID` scalar type represents a unique identifier, often used to refetch an ob
 """
 scalar ID
 
-"""
-The `String` scalar type represents textual data, represented as UTF-8 character sequences. The String type is most often used by GraphQL to represent free-form human-readable text.
-"""
-scalar String
-
-"""
-The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](https://en.wikipedia.org/wiki/IEEE_floating_point).
-"""
-scalar Float
-
-type IncomeTotalByMonth {
+type TotalByMonth implements Total {
   date: String!
+
+  total: Float!
+}
+
+type TotalByFortnight implements Total {
+  date: String!
+
+  fortnight: String!
 
   total: Float!
 }
@@ -50,15 +64,42 @@ type IncomeTotalByMonth {
 type IncomesList {
   incomes: [Income!]!
 
-  totalByMonth: [IncomeTotalByMonth!]!
+  totalByMonth: [TotalByMonth!]!
 
   total: Float!
+}
+
+type Card {
+  id: ID!
+
+  userId: ID!
+
+  alias: String
+
+  bank: String!
+
+  isDigital: Boolean
+
+  isDebit: Boolean
+}
+
+"""
+The `Boolean` scalar type represents `true` or `false`.
+"""
+scalar Boolean
+
+type CardListWithExpenses {
+  expenses: [Expense]
+
+  totalByMonth: [TotalByMonth]
+
+  totalByFortnight: [TotalByFortnight]
 }
 
 type Expense {
   id: ID!
 
-  userId: String!
+  userId: String
 
   concept: String!
 
@@ -70,7 +111,9 @@ type Expense {
 
   updatedAt: Date
 
-  tags: [ExpenseTag]
+  tags: [ExpenseTag!]!
+
+  card: Card
 
   comment: String
 }
@@ -91,6 +134,46 @@ type FinancialBalance {
   debts: Float!
 }
 
+type IncomesListAndExpenses {
+  incomes: [Income!]
+
+  expenses: [Expense!]
+
+  incomesTotal: Float!
+
+  expensesTotal: Float
+
+  remaining: Float
+}
+
+input CreateExpenseInput {
+  cardId: ID
+
+  concept: String!
+
+  total: Float!
+
+  payBefore: Date!
+
+  tags: [ExpenseTagInput!]!
+
+  comment: String
+}
+
+input CreateCardInput {
+  alias: String
+
+  bank: String!
+
+  isDigital: Boolean
+
+  isDebit: Boolean
+}
+
+input PayBeforeInput {
+  payBefore: Date!
+}
+
 input ExpenseTagInput {
   name: String
 }
@@ -100,27 +183,34 @@ type Query {
 
   incomesByMonth(date: Date!): [Income]
 
-  expensesByFortnight(payBefore: Date!): [Expense]
+  expensesByFortnight(input: PayBeforeInput!): [Expense]
 
   expensesByMonth(date: Date!): [Expense]
 
+  incomesAndExpensesByFortnight(input: PayBeforeInput!): IncomesListAndExpenses!
+
   allExpenses: [Expense]
 
-  financialBalanceByFortnight(payBefore: Date!): FinancialBalance
+  financialBalanceByFortnight(input: PayBeforeInput!): FinancialBalance
 
   tags: [ExpenseTag]
+
+  cardList: [Card]
+
+  cardById(cardId: ID!): Card
+
+  cardWithListExpenses(cardId: ID!): CardListWithExpenses
 }
 
 type Mutation {
   createIncome(total: Float!, comment: String, paymentDate: Date!): Income!
 
-  createExpense(concept: String!, total: Float!, payBefore: Date!, tags: [ExpenseTagInput], comment: String): Expense
-}
+  createExpense(input: CreateExpenseInput!): Expense
 
-"""
-The `Boolean` scalar type represents `true` or `false`.
-"""
-scalar Boolean
+  createCard(input: CreateCardInput): Card
+
+  deleteIncomeById(id: ID!): Boolean
+}
 
 """
 A GraphQL Schema defines the capabilities of a GraphQL server. It exposes all available types and directives on the server, as well as the entry points for query, mutation, and subscription operations.

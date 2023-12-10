@@ -1,0 +1,18 @@
+fragment expenseFragment on Expense {
+    id
+    concept
+    comment
+    total
+    payBefore
+    createdAt
+    updatedAt
+    card {
+        id
+        bank
+        alias
+    }
+    tags {
+        id
+        name
+    }
+}

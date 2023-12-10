@@ -1,0 +1,5 @@
+query IncomesByMonth($date: Date!) {
+    incomesByMonth(date: $date) {
+        ...incomeFragment
+    }
+}

@@ -1,0 +1,11 @@
+query HomeScreenAllIncomesQuery {
+    incomesList {
+        incomes {
+            ...incomeFragment
+        }
+        total
+        totalByMonth {
+            ...totalFragment
+        }
+    }
+}

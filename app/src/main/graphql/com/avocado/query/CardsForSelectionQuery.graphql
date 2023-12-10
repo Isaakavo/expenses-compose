@@ -1,0 +1,7 @@
+query AllCardsQuery {
+    cardList {
+        id
+        alias
+        bank
+    }
+}

@@ -1,0 +1,11 @@
+fragment incomeFragment on Income {
+    id
+    userId
+    comment
+    total
+    createdAt
+    paymentDate {
+        date
+        fortnight
+    }
+}
