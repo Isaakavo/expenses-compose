@@ -53,8 +53,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.avocado.expensescompose.R
 import com.avocado.expensescompose.presentation.util.formatDateDaysWithMonth
 import com.avocado.expensescompose.data.adapters.formatMoney
+import com.avocado.expensescompose.data.model.total.Total
 import com.avocado.expensescompose.domain.income.models.Income
-import com.avocado.expensescompose.domain.income.models.IncomeTotalByMonth
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import kotlinx.coroutines.CoroutineScope
@@ -114,7 +114,7 @@ fun IncomesScreen(
 fun IncomeScreenContent(
   isLoading: Boolean,
   incomesMap: Map<String, MutableMap<String, MutableList<Income>?>>?,
-  totalByMonth: List<IncomeTotalByMonth?>,
+  totalByMonth: List<Total?>,
   drawerState: DrawerState,
   scope: CoroutineScope,
   onNavigate: (navigateEvent: NavigateEvent, income: NavigationIncomeDetails?) -> Unit,

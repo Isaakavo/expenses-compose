@@ -1,4 +1,4 @@
-package com.avocado.expensescompose.presentation.cards
+package com.avocado.expensescompose.presentation.cards.cardsscreen
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -42,6 +42,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.avocado.expensescompose.domain.cards.models.Card
+import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.expensescompose.presentation.topbar.IconsActions
 import kotlinx.coroutines.launch
@@ -49,7 +50,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun CardsScreen(
   viewModel: CardsScreenViewModel = hiltViewModel(),
-  onPopBackStack: () -> Unit = {}
+  onPopBackStack: () -> Unit = {},
+  onNavigate: (navigateEvent: NavigateEvent, cardId: String) -> Unit
 ) {
 
   val state by viewModel.state.collectAsStateWithLifecycle()
@@ -66,7 +68,8 @@ fun CardsScreen(
     isDigital = state.isDigital,
     isAdded = state.isAdded,
     onEvent = viewModel::onEvent,
-    onPopBackStack = onPopBackStack
+    onPopBackStack = onPopBackStack,
+    onNavigate = onNavigate
   )
 }
 
@@ -84,6 +87,7 @@ fun CardsScreenContent(
   isAdded: Boolean,
   onEvent: (event: CardsScreenEvents, cardType: String) -> Unit,
   onPopBackStack: () -> Unit,
+  onNavigate: (navigateEvent: NavigateEvent, cardId: String) -> Unit
 ) {
 
   val scope = rememberCoroutineScope()
@@ -161,9 +165,11 @@ fun CardsScreenContent(
       ) {
         items(cardsList) { card ->
           CardItem(
+            id = card.id,
             alias = card.alias,
             bank = card.bank,
-            cardType = if (card.isDebit == true) "Tarjeta de débito" else "Tarjeta de crédito"
+            cardType = if (card.isDebit == true) "Tarjeta de débito" else "Tarjeta de crédito",
+            onNavigate = onNavigate
           )
         }
       }
@@ -173,15 +179,18 @@ fun CardsScreenContent(
 
 @Composable
 fun CardItem(
+  id: String,
   alias: String,
   bank: String,
-  cardType: String
+  cardType: String,
+  onNavigate: (navigateEvent: NavigateEvent, cardId: String) -> Unit
 ) {
   Card(
     shape = RoundedCornerShape(16.dp),
     modifier = Modifier
       .fillMaxWidth()
-      .clickable { }) {
+      .clickable { onNavigate(NavigateEvent.NavigateCardsWithExpenseScreen, id) }
+  ) {
     Column(
       modifier = Modifier.padding(16.dp),
       verticalArrangement = Arrangement.spacedBy(8.dp)

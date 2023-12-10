@@ -231,6 +231,7 @@ fun ExpenseItem(expense: Expense) {
   }
 }
 
+// Refactor this to make this composable re usable in cards with expense list
 @Composable
 fun ExpensesList(expenseList: List<Expense>) {
   Text(

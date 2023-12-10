@@ -5,8 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apollographql.apollo3.exception.ApolloHttpException
 import com.avocado.expensescompose.data.model.MyResult
+import com.avocado.expensescompose.data.model.total.Total
 import com.avocado.expensescompose.domain.income.models.Income
-import com.avocado.expensescompose.domain.income.models.IncomeTotalByMonth
 import com.avocado.expensescompose.domain.income.usecase.GetAllIncomesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +22,7 @@ sealed class BackPress {
 
 data class IncomeState(
   val incomesMap: Map<String, MutableMap<String, MutableList<Income>?>>? = null,
-  val totalByMonth: List<IncomeTotalByMonth?> = emptyList(),
+  val totalByMonth: List<Total?> = emptyList(),
   val showAddButtons: Boolean = false,
   val backPressState: BackPress? = null,
   val showToast: Boolean = false,
