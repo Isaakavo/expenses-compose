@@ -41,7 +41,6 @@ import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.expensescompose.presentation.topbar.IconsActions
-import java.time.LocalDateTime
 
 @Composable
 fun IncomeExpensesScreen(
