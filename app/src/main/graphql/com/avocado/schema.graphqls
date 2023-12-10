@@ -10,6 +10,8 @@ interface Total {
   date: String!
 
   total: Float!
+
+  month: String!
 }
 
 """
@@ -51,10 +53,14 @@ type TotalByMonth implements Total {
   date: String!
 
   total: Float!
+
+  month: String!
 }
 
 type TotalByFortnight implements Total {
   date: String!
+
+  month: String!
 
   fortnight: Fortnight!
 

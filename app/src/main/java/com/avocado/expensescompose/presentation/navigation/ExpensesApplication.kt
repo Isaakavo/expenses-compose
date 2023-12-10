@@ -9,6 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.avocado.expensescompose.presentation.RoutesConstants
 import com.avocado.expensescompose.presentation.cards.cardsscreen.CardsScreen
+import com.avocado.expensescompose.presentation.cards.expensesbycard.ExpensesByCardScreen
 import com.avocado.expensescompose.presentation.cards.expensestotalbycard.ExpensesTotalByCardScreen
 import com.avocado.expensescompose.presentation.expenses.addexpense.AddExpenseScreen
 import com.avocado.expensescompose.presentation.incomes.addscreen.AddIncomeScreen
@@ -23,6 +24,7 @@ sealed class NavigateEvent {
   object NavigateCardsScreen : NavigateEvent()
   object NavigateAddExpenseScreen : NavigateEvent()
   object NavigateCardsWithExpenseScreen : NavigateEvent()
+  object NavigateExpensesByCardScreen : NavigateEvent()
 }
 
 private fun <T> navigate(navigateEvent: NavigateEvent, navController: NavController, param: T) {
@@ -57,6 +59,10 @@ private fun <T> navigate(navigateEvent: NavigateEvent, navController: NavControl
 
     is NavigateEvent.NavigateAddExpenseScreen -> {
       navController.navigate(RoutesConstants.EXPENSE_ADD)
+    }
+
+    is NavigateEvent.NavigateExpensesByCardScreen -> {
+      navController.navigate("${RoutesConstants.EXPENSES_CARD_SCREEN}/$param")
     }
   }
 }
@@ -131,7 +137,28 @@ fun ExpensesApplication() {
       })
     ) { navBackStackEntry ->
       val cardId = navBackStackEntry.arguments?.getString("cardId") ?: ""
-      ExpensesTotalByCardScreen(cardId = cardId, onPopBackStack = { navController.popBackStack() },)
+      ExpensesTotalByCardScreen(
+        cardId = cardId,
+        onPopBackStack = { navController.popBackStack() },
+        onNavigate = { event, param ->
+          navigate(event, navController, param)
+        })
+    }
+
+    // Expenses by card Screen
+    composable(
+      "${RoutesConstants.EXPENSES_CARD_SCREEN}/{payBefore}/{cardId}",
+      arguments = listOf(
+        navArgument("cardId") { type = NavType.StringType },
+        navArgument("payBefore") { type = NavType.StringType })
+    ) { navBackStackEntry ->
+      val cardId = navBackStackEntry.arguments?.getString("cardId").orEmpty()
+      val payBefore = navBackStackEntry.arguments?.getString("payBefore").orEmpty()
+      ExpensesByCardScreen(
+        cardId = cardId,
+        payBefore = payBefore,
+        onPopBackStack = { navController.popBackStack() }
+      )
     }
   }
 }

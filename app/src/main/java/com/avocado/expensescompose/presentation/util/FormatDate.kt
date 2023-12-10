@@ -45,10 +45,21 @@ fun String.formatDateForRequest(): LocalDateTime? = try {
   null
 }
 
+fun String.formatDateForRequestPayBefore(): LocalDateTime? = try {
+  val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+  val localDateValue = LocalDate.parse(this, formatter)
+  localDateValue.atStartOfDay()
+} catch (e: Exception) {
+  Log.d("Format date for Request", "Error al convertir la cadena a LocalDateTime: ${e.message}")
+  null
+}
+
+
 fun Long.formatDateFromMillis(): String = try {
   val currentTime = LocalTime.now().hour.toLong()
   val convertedDate =
-    Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).plusHours(currentTime).toLocalDateTime()
+    Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).plusHours(currentTime)
+      .toLocalDateTime()
   convertedDate.formatDateWithYear()
 } catch (e: Exception) {
   Log.d("formatDateFromMillis", "Error al convertir la cadena a LocalDateTime: ${e.message}")

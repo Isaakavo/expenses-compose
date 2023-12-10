@@ -1,5 +1,6 @@
 package com.avocado.expensescompose.presentation.cards.expensestotalbycard
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,6 +30,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.avocado.expensescompose.data.adapters.formatMoney
 import com.avocado.expensescompose.data.model.total.Total
 import com.avocado.expensescompose.data.model.total.TotalFortnight
+import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.expensescompose.presentation.topbar.IconsActions
 
@@ -37,6 +39,7 @@ fun ExpensesTotalByCardScreen(
   viewModel: ExpensesTotalByCardViewModel = hiltViewModel(),
   cardId: String,
   onPopBackStack: () -> Unit = {},
+  onNavigate: (navigateEvent: NavigateEvent, param: String) -> Unit,
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
   viewModel.fetchData(cardId)
@@ -44,12 +47,14 @@ fun ExpensesTotalByCardScreen(
   CardWithExpenseContent(
     totalByMonth = state.totalByMonthList,
     totalByFortnight = state.totalByFortnight,
+    cardId = cardId,
     cardAlias = state.cardAlias,
     cardBank = state.cardBank,
     openDropDownMenu = state.openDropDownMenu,
     dataSelector = state.dataSelector,
     onPopBackStack = onPopBackStack,
-    onEvent = viewModel::onEvent
+    onEvent = viewModel::onEvent,
+    onNavigate = onNavigate
   )
 }
 
@@ -57,12 +62,14 @@ fun ExpensesTotalByCardScreen(
 fun CardWithExpenseContent(
   totalByMonth: List<Total>,
   totalByFortnight: List<TotalFortnight>,
+  cardId: String,
   cardAlias: String,
   cardBank: String,
   openDropDownMenu: Boolean,
   dataSelector: DataSelector,
   onPopBackStack: () -> Unit = {},
-  onEvent: (event: ExpensesTotalByCardEvent) -> Unit
+  onEvent: (event: ExpensesTotalByCardEvent) -> Unit,
+  onNavigate: (navigateEvent: NavigateEvent, param: String) -> Unit
 ) {
 
   Scaffold(
@@ -89,7 +96,11 @@ fun CardWithExpenseContent(
         CardDataDropDownMenu(openDropDownMenu = openDropDownMenu, onEvent = onEvent)
         when (dataSelector) {
           DataSelector.FORTNIGHT -> {
-            TotalByFortnight(totalByFortnight = totalByFortnight)
+            TotalByFortnight(
+              totalByFortnight = totalByFortnight,
+              cardId = cardId,
+              onNavigate = onNavigate
+            )
           }
 
           DataSelector.MONTH -> {
@@ -102,13 +113,24 @@ fun CardWithExpenseContent(
 }
 
 @Composable
-fun TotalByFortnight(totalByFortnight: List<TotalFortnight>) {
+fun TotalByFortnight(
+  totalByFortnight: List<TotalFortnight>,
+  cardId: String,
+  onNavigate: (navigateEvent: NavigateEvent, param: String) -> Unit
+) {
   LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
     items(totalByFortnight) { item ->
-      Card(modifier = Modifier.fillMaxWidth()) {
+      Card(modifier = Modifier
+        .fillMaxWidth()
+        .clickable {
+          onNavigate(
+            NavigateEvent.NavigateExpensesByCardScreen,
+            "${item.date}/$cardId"
+          )
+        }) {
         Column(modifier = Modifier.padding(12.dp)) {
           Row(modifier = Modifier.fillMaxWidth()) {
-            Text(text = item.date ?: "", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+            Text(text = item.month ?: "", fontSize = 22.sp, fontWeight = FontWeight.Bold)
 
           }
           Row(
