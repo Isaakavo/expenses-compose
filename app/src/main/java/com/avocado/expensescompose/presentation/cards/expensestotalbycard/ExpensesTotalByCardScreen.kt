@@ -104,7 +104,7 @@ fun CardWithExpenseContent(
           }
 
           DataSelector.MONTH -> {
-            TotalByMonth(totalByMonth = totalByMonth)
+            TotalByMonth(totalByMonth = totalByMonth, cardId = cardId, onNavigate = onNavigate)
           }
         }
       }
@@ -125,7 +125,7 @@ fun TotalByFortnight(
         .clickable {
           onNavigate(
             NavigateEvent.NavigateExpensesByCardScreen,
-            "${item.date}/$cardId"
+            "${item.date}/$cardId/${DataSelector.FORTNIGHT}"
           )
         }) {
         Column(modifier = Modifier.padding(12.dp)) {
@@ -146,21 +146,28 @@ fun TotalByFortnight(
   }
 }
 
-// TODO make the cards clickable so we can fetch the expenses associated to this fortnight/month
-// if its by month, make the request to ExpensesByMonthQuery
-// if its by fortnight, make it using expensesByFortnightQuery and calculate the date to send based on
-// first or second fortnight
 @Composable
-fun TotalByMonth(totalByMonth: List<Total>) {
+fun TotalByMonth(
+  totalByMonth: List<Total>,
+  cardId: String,
+  onNavigate: (navigateEvent: NavigateEvent, param: String) -> Unit
+) {
   LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
     items(totalByMonth) { item ->
-      Card(modifier = Modifier.fillMaxWidth()) {
+      Card(modifier = Modifier
+        .fillMaxWidth()
+        .clickable {
+          onNavigate(
+            NavigateEvent.NavigateExpensesByCardScreen,
+            "${item.date}/$cardId/${DataSelector.MONTH}"
+          )
+        }) {
         Column(modifier = Modifier.padding(12.dp)) {
           Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
           ) {
-            Text(text = item.date ?: "", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+            Text(text = item.month ?: "", fontSize = 22.sp, fontWeight = FontWeight.Bold)
             Text(text = item.total?.formatMoney().orEmpty())
           }
         }

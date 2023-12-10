@@ -1,5 +1,6 @@
 package com.avocado.expensescompose.presentation.cards.expensesbycard
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.avocado.expensescompose.data.model.expense.Expense
+import com.avocado.expensescompose.presentation.cards.expensestotalbycard.DataSelector
 import com.avocado.expensescompose.presentation.incomes.incomewithexpense.ExpensesList
 import com.avocado.expensescompose.presentation.topbar.AppBar
 
@@ -22,13 +24,25 @@ fun ExpensesByCardScreen(
   viewModel: ExpensesByCardViewModel = hiltViewModel(),
   cardId: String,
   payBefore: String,
+  querySelector: DataSelector,
   onPopBackStack: () -> Unit = {},
 ) {
 
   val state by viewModel.state.collectAsStateWithLifecycle()
 
   LaunchedEffect(key1 = Unit) {
-    viewModel.getExpensesByFortnight(payBefore = payBefore, cardId = cardId)
+    when (querySelector) {
+      DataSelector.FORTNIGHT -> {
+        Log.d("ExpensesByCardScreen", "Querying fortnight")
+        viewModel.getExpensesByFortnight(payBefore = payBefore, cardId = cardId)
+      }
+
+      DataSelector.MONTH -> {
+        Log.d("ExpensesByCardScreen", "Querying month")
+        viewModel.getExpensesByMonth(payBefore = payBefore, cardId = cardId)
+      }
+    }
+
   }
 
   ExpensesByCardContent(expensesList = state.expensesList, onPopBackStack = onPopBackStack)

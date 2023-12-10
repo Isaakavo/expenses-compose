@@ -31,7 +31,7 @@ public final class ExpensesTotalByCardViewModel_HiltModules {
 
     @Binds
     @IntoMap
-    @StringKey("com.avocado.expensescompose.presentation.cards.cardswithexpenses.ExpensesTotalByCardViewModel")
+    @StringKey("com.avocado.expensescompose.presentation.cards.expensestotalbycard.ExpensesTotalByCardViewModel")
     @HiltViewModelMap
     public abstract ViewModel binds(ExpensesTotalByCardViewModel vm);
   }
@@ -46,7 +46,7 @@ public final class ExpensesTotalByCardViewModel_HiltModules {
     @IntoSet
     @HiltViewModelMap.KeySet
     public static String provide() {
-      return "com.avocado.expensescompose.presentation.cards.cardswithexpenses.ExpensesTotalByCardViewModel";
+      return "com.avocado.expensescompose.presentation.cards.expensestotalbycard.ExpensesTotalByCardViewModel";
     }
   }
 }

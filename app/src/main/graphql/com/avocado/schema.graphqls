@@ -191,7 +191,7 @@ type Query {
 
   expensesByFortnight(input: PayBeforeInput!): [Expense]
 
-  expensesByMonth(date: Date!): [Expense]
+  expensesByMonth(input: PayBeforeInput!): [Expense]
 
   incomesAndExpensesByFortnight(input: PayBeforeInput!): IncomesListAndExpenses!
 
