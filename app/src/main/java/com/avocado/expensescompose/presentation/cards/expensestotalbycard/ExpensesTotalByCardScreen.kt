@@ -1,4 +1,4 @@
-package com.avocado.expensescompose.presentation.cards.cardswithexpenses
+package com.avocado.expensescompose.presentation.cards.expensestotalbycard
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
