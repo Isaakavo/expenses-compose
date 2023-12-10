@@ -39,11 +39,13 @@ fun ExpensesTotalByCardScreen(
   onPopBackStack: () -> Unit = {},
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
-  viewModel.getExpensesByCardId(cardId)
+  viewModel.fetchData(cardId)
 
   CardWithExpenseContent(
     totalByMonth = state.totalByMonthList,
     totalByFortnight = state.totalByFortnight,
+    cardAlias = state.cardAlias,
+    cardBank = state.cardBank,
     openDropDownMenu = state.openDropDownMenu,
     dataSelector = state.dataSelector,
     onPopBackStack = onPopBackStack,
@@ -55,6 +57,8 @@ fun ExpensesTotalByCardScreen(
 fun CardWithExpenseContent(
   totalByMonth: List<Total>,
   totalByFortnight: List<TotalFortnight>,
+  cardAlias: String,
+  cardBank: String,
   openDropDownMenu: Boolean,
   dataSelector: DataSelector,
   onPopBackStack: () -> Unit = {},
@@ -63,7 +67,7 @@ fun CardWithExpenseContent(
 
   Scaffold(
     topBar = {
-      AppBar(title = "Gastos Tarjeta ", actionsList = listOf(
+      AppBar(title = cardAlias.ifEmpty { cardBank }, actionsList = listOf(
         IconsActions(
           icon = Icons.Rounded.MoreVert,
           action = { onEvent(ExpensesTotalByCardEvent.OpenDropDownMenu) })
@@ -83,7 +87,6 @@ fun CardWithExpenseContent(
         verticalArrangement = Arrangement.spacedBy(22.dp)
       ) {
         CardDataDropDownMenu(openDropDownMenu = openDropDownMenu, onEvent = onEvent)
-        // ExpensesList(expenseList = expenseList)
         when (dataSelector) {
           DataSelector.FORTNIGHT -> {
             TotalByFortnight(totalByFortnight = totalByFortnight)

@@ -1,0 +1,6 @@
+query CardById($cardId: ID!) {
+    cardById(cardId: $cardId) {
+        alias
+        bank
+    }
+}
