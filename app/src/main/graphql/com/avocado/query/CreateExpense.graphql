@@ -1,0 +1,5 @@
+mutation CreateExpense($input: CreateExpenseInput!) {
+    createExpense(input: $input) {
+        ...expenseFragment
+    }
+}

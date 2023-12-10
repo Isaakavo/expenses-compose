@@ -1,0 +1,5 @@
+query ExpensesByFortnight($input: PayBeforeInput!) {
+    expensesByFortnight(input: $input) {
+        ...expenseFragment
+    }
+}

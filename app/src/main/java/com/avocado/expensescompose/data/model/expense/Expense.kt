@@ -1,6 +1,7 @@
-package com.avocado.expensescompose.domain.income.models
+package com.avocado.expensescompose.data.model.expense
 
 import com.avocado.expensescompose.domain.cards.models.Card
+import com.avocado.expensescompose.domain.income.models.ExpenseTag
 import java.time.LocalDateTime
 
 data class Expense(

@@ -1,9 +1,9 @@
 package com.avocado.expensescompose.domain.income.usecase
 
 import com.avocado.HomeScreenAllIncomesQuery
+import com.avocado.expensescompose.data.adapters.graphql.fragments.toIncome
+import com.avocado.expensescompose.data.adapters.graphql.fragments.toTotal
 import com.avocado.expensescompose.data.apolloclients.GraphQlClient
-import com.avocado.expensescompose.data.apolloclients.incomes.toIncome
-import com.avocado.expensescompose.data.apolloclients.incomes.toTotalByMonth
 import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.domain.income.models.Incomes
 import kotlinx.coroutines.flow.map
@@ -17,10 +17,10 @@ class GetAllIncomesUseCase(
       val responseIncome = it.data
       if (responseIncome != null) {
         val incomesList = responseIncome.incomesList?.incomes?.map { item ->
-          item.toIncome()
+          item.incomeFragment.toIncome()
         }
         val totalByMonth = responseIncome.incomesList?.totalByMonth?.map { totalByMonth ->
-          totalByMonth.toTotalByMonth()
+          totalByMonth.totalFragment.toTotal()
         }
 
         MyResult.Success(

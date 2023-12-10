@@ -31,15 +31,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.avocado.expensescompose.presentation.util.formatDateDaysWithMonth
 import com.avocado.expensescompose.presentation.util.formatDateOnlyMonth
 import com.avocado.expensescompose.data.adapters.formatMoney
-import com.avocado.expensescompose.domain.income.models.Expense
-import com.avocado.expensescompose.domain.income.models.ExpenseTag
+import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.expensescompose.presentation.topbar.IconsActions
@@ -253,143 +251,143 @@ fun FABAddExpense(onNavigate: (navigateEvent: NavigateEvent) -> Unit) {
   }
 }
 
-@Preview
-@Composable
-fun IncomeWithExpenseContent() {
-  IncomeWithExpensesContent(
-    incomesTotal = 500.0,
-    fortnight = "Primera",
-    month = "Noviembre",
-    onNavigate = {},
-    remaining = 10000.0, expenseList = listOf(
-      Expense(
-        total = 5500.0,
-        incomeId = "1",
-        concept = "Gasto de prueba",
-        createdAt = LocalDateTime.now(),
-        comment = "",
-        id = "1",
-        card= com.avocado.expensescompose.domain.cards.models.Card(bank = "Test", alias = "alv", id = "kajshdfkajd"),
-        tags = listOf(
-          ExpenseTag(
-            id = "1",
-            name = "Tag de prueba",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          ), ExpenseTag(
-            id = "1",
-            name = "Tag de prueba 2",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          ), ExpenseTag(
-            id = "1",
-            name = "Tag de prueba",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          ), ExpenseTag(
-            id = "1",
-            name = "Tag de prueba 2",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          )
-        )
-      ),
-      Expense(
-        total = 5500.0,
-        incomeId = "1",
-        concept = "Gasto de prueba",
-        createdAt = LocalDateTime.now(),
-        comment = "",
-        id = "1",
-        card= com.avocado.expensescompose.domain.cards.models.Card(bank = "Test", alias = "alv", id = "kajshdfkajd"),
-        tags = listOf(
-          ExpenseTag(
-            id = "1",
-            name = "Tag de prueba",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          ), ExpenseTag(
-            id = "1",
-            name = "Tag de prueba 2",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          ), ExpenseTag(
-            id = "1",
-            name = "Tag de prueba",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          ), ExpenseTag(
-            id = "1",
-            name = "Tag de prueba 2",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          )
-        )
-      ),
-      Expense(
-        total = 5500.0,
-        incomeId = "1",
-        concept = "Gasto de prueba",
-        createdAt = LocalDateTime.now(),
-        comment = "",
-        id = "1",
-        card= com.avocado.expensescompose.domain.cards.models.Card(bank = "Test", alias = "alv", id = "kajshdfkajd"),
-        tags = listOf(
-          ExpenseTag(
-            id = "1",
-            name = "Tag de prueba",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          ), ExpenseTag(
-            id = "1",
-            name = "Tag de prueba 2",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          ), ExpenseTag(
-            id = "1",
-            name = "Tag de prueba",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          ), ExpenseTag(
-            id = "1",
-            name = "Tag de prueba 2",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          )
-        )
-      ),
-      Expense(
-        total = 5500.0,
-        incomeId = "1",
-        concept = "Gasto de prueba",
-        createdAt = LocalDateTime.now(),
-        comment = "",
-        id = "1",
-        card= com.avocado.expensescompose.domain.cards.models.Card(bank = "Test", alias = "alv", id = "kajshdfkajd"),
-        tags = listOf(
-          ExpenseTag(
-            id = "1",
-            name = "Tag de prueba",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          ), ExpenseTag(
-            id = "1",
-            name = "Tag de prueba 2",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          ), ExpenseTag(
-            id = "1",
-            name = "Tag de prueba",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          ), ExpenseTag(
-            id = "1",
-            name = "Tag de prueba 2",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          )
-        )
-      )
-    )
-  )
-}
+//@Preview
+////@Composable
+//fun IncomeWithExpenseContent() {
+//  IncomeWithExpensesContent(
+//    incomesTotal = 500.0,
+//    fortnight = "Primera",
+//    month = "Noviembre",
+//    onNavigate = {},
+//    remaining = 10000.0, expenseList = listOf(
+//      Expense(
+//        total = 5500.0,
+//        incomeId = "1",
+//        concept = "Gasto de prueba",
+//        createdAt = LocalDateTime.now(),
+//        comment = "",
+//        id = "1",
+//        card= com.avocado.expensescompose.domain.cards.models.Card(bank = "Test", alias = "alv", id = "kajshdfkajd"),
+//        tags = listOf(
+//          ExpenseTag(
+//            id = "1",
+//            name = "Tag de prueba",
+//            createdAt = LocalDateTime.now(),
+//            updatedAt = LocalDateTime.now()
+//          ), ExpenseTag(
+//            id = "1",
+//            name = "Tag de prueba 2",
+//            createdAt = LocalDateTime.now(),
+//            updatedAt = LocalDateTime.now()
+//          ), ExpenseTag(
+//            id = "1",
+//            name = "Tag de prueba",
+//            createdAt = LocalDateTime.now(),
+//            updatedAt = LocalDateTime.now()
+//          ), ExpenseTag(
+//            id = "1",
+//            name = "Tag de prueba 2",
+//            createdAt = LocalDateTime.now(),
+//            updatedAt = LocalDateTime.now()
+//          )
+//        )
+//      ),
+//      Expense(
+//        total = 5500.0,
+//        incomeId = "1",
+//        concept = "Gasto de prueba",
+//        createdAt = LocalDateTime.now(),
+//        comment = "",
+//        id = "1",
+//        card= com.avocado.expensescompose.domain.cards.models.Card(bank = "Test", alias = "alv", id = "kajshdfkajd"),
+//        tags = listOf(
+//          ExpenseTag(
+//            id = "1",
+//            name = "Tag de prueba",
+//            createdAt = LocalDateTime.now(),
+//            updatedAt = LocalDateTime.now()
+//          ), ExpenseTag(
+//            id = "1",
+//            name = "Tag de prueba 2",
+//            createdAt = LocalDateTime.now(),
+//            updatedAt = LocalDateTime.now()
+//          ), ExpenseTag(
+//            id = "1",
+//            name = "Tag de prueba",
+//            createdAt = LocalDateTime.now(),
+//            updatedAt = LocalDateTime.now()
+//          ), ExpenseTag(
+//            id = "1",
+//            name = "Tag de prueba 2",
+//            createdAt = LocalDateTime.now(),
+//            updatedAt = LocalDateTime.now()
+//          )
+//        )
+//      ),
+//      Expense(
+//        total = 5500.0,
+//        incomeId = "1",
+//        concept = "Gasto de prueba",
+//        createdAt = LocalDateTime.now(),
+//        comment = "",
+//        id = "1",
+//        card= com.avocado.expensescompose.domain.cards.models.Card(bank = "Test", alias = "alv", id = "kajshdfkajd"),
+//        tags = listOf(
+//          ExpenseTag(
+//            id = "1",
+//            name = "Tag de prueba",
+//            createdAt = LocalDateTime.now(),
+//            updatedAt = LocalDateTime.now()
+//          ), ExpenseTag(
+//            id = "1",
+//            name = "Tag de prueba 2",
+//            createdAt = LocalDateTime.now(),
+//            updatedAt = LocalDateTime.now()
+//          ), ExpenseTag(
+//            id = "1",
+//            name = "Tag de prueba",
+//            createdAt = LocalDateTime.now(),
+//            updatedAt = LocalDateTime.now()
+//          ), ExpenseTag(
+//            id = "1",
+//            name = "Tag de prueba 2",
+//            createdAt = LocalDateTime.now(),
+//            updatedAt = LocalDateTime.now()
+//          )
+//        )
+//      ),
+//      Expense(
+//        total = 5500.0,
+//        incomeId = "1",
+//        concept = "Gasto de prueba",
+//        createdAt = LocalDateTime.now(),
+//        comment = "",
+//        id = "1",
+//        card= com.avocado.expensescompose.domain.cards.models.Card(bank = "Test", alias = "alv", id = "kajshdfkajd"),
+//        tags = listOf(
+//          ExpenseTag(
+//            id = "1",
+//            name = "Tag de prueba",
+//            createdAt = LocalDateTime.now(),
+//            updatedAt = LocalDateTime.now()
+//          ), ExpenseTag(
+//            id = "1",
+//            name = "Tag de prueba 2",
+//            createdAt = LocalDateTime.now(),
+//            updatedAt = LocalDateTime.now()
+//          ), ExpenseTag(
+//            id = "1",
+//            name = "Tag de prueba",
+//            createdAt = LocalDateTime.now(),
+//            updatedAt = LocalDateTime.now()
+//          ), ExpenseTag(
+//            id = "1",
+//            name = "Tag de prueba 2",
+//            createdAt = LocalDateTime.now(),
+//            updatedAt = LocalDateTime.now()
+//          )
+//        )
+//      )
+//    )
+//  )
+//}

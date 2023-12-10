@@ -2,6 +2,7 @@ package com.avocado.expensescompose.data.apolloclients.tags
 
 import com.apollographql.apollo3.ApolloClient
 import com.avocado.TagsQuery
+import com.avocado.expensescompose.data.adapters.graphql.toTag
 import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.domain.tags.TagsClient
 import com.avocado.expensescompose.domain.tags.models.Tag

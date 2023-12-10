@@ -3,7 +3,7 @@ package com.avocado.expensescompose.presentation.incomes.incomewithexpense
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.avocado.expensescompose.data.model.MyResult
-import com.avocado.expensescompose.domain.income.models.Expense
+import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.domain.income.models.Income
 import com.avocado.expensescompose.domain.income.usecase.GetIncomeByIdWithExpensesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel

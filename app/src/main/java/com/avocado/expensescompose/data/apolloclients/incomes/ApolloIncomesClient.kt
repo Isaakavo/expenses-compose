@@ -7,6 +7,9 @@ import com.apollographql.apollo3.exception.ApolloException
 import com.avocado.HomeScreenAllIncomesQuery
 import com.avocado.CreateIncomeMutation
 import com.avocado.IncomeByIdWithExpensesListQuery
+import com.avocado.expensescompose.data.adapters.graphql.fragments.toExpense
+import com.avocado.expensescompose.data.adapters.graphql.fragments.toIncome
+import com.avocado.expensescompose.data.adapters.graphql.fragments.toTotal
 import com.avocado.expensescompose.presentation.util.formatDateForRequest
 import com.avocado.expensescompose.data.adapters.graphql.scalar.Date
 import com.avocado.expensescompose.data.model.MyResult
@@ -28,10 +31,10 @@ class ApolloIncomesClient(private val apolloClient: ApolloClient) : IncomesClien
     try {
       val responseIncome = apolloClient.query(HomeScreenAllIncomesQuery()).execute().data
       val incomesList = responseIncome?.incomesList?.incomes?.map { item ->
-        item.toIncome()
+        item.incomeFragment.toIncome()
       }
       val totalByMonth = responseIncome?.incomesList?.totalByMonth?.map {
-        it.toTotalByMonth()
+        it.totalFragment.toTotal()
       }
 
       return MyResult.Success(
@@ -56,11 +59,11 @@ class ApolloIncomesClient(private val apolloClient: ApolloClient) : IncomesClien
       )
       val incomeWithExpenses = apolloClient.query(input)
         .execute().data?.incomesAndExpensesByFortnight
-      val incomes = incomeWithExpenses?.incomes?.map {
-        it.toIncome()
+      val incomes = incomeWithExpenses?.incomes?.map {income ->
+        income.incomeFragment.toIncome()
       }
       val expensesList = incomeWithExpenses?.expenses?.map { expense ->
-        expense.toExpense()
+        expense.expenseFragment.toExpense()
       }
       return MyResult.Success(
         IncomeWithExpenses(
@@ -89,7 +92,7 @@ class ApolloIncomesClient(private val apolloClient: ApolloClient) : IncomesClien
           paymentDate = Date(paymentDate),
           comment = Optional.present(comment)
         )
-      ).execute().data?.createIncome
+      ).execute().data?.createIncome?.incomeFragment
         ?: return MyResult.Error(uiText = "Error extracting the response")
 
       return MyResult.Success(

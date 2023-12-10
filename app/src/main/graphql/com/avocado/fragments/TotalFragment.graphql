@@ -1,0 +1,4 @@
+fragment totalFragment on Total {
+    date
+    total
+}

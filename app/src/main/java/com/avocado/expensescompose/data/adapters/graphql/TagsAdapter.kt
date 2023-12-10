@@ -1,4 +1,4 @@
-package com.avocado.expensescompose.data.apolloclients.tags
+package com.avocado.expensescompose.data.adapters.graphql
 
 import com.avocado.TagsQuery
 import com.avocado.expensescompose.domain.tags.models.Tag

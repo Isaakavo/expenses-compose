@@ -6,6 +6,22 @@ enum Fortnight {
   SECOND
 }
 
+interface Total {
+  date: String!
+
+  total: Float!
+}
+
+"""
+The `String` scalar type represents textual data, represented as UTF-8 character sequences. The String type is most often used by GraphQL to represent free-form human-readable text.
+"""
+scalar String
+
+"""
+The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](https://en.wikipedia.org/wiki/IEEE_floating_point).
+"""
+scalar Float
+
 type PaymentDate {
   date: Date!
 
@@ -31,18 +47,16 @@ The `ID` scalar type represents a unique identifier, often used to refetch an ob
 """
 scalar ID
 
-"""
-The `String` scalar type represents textual data, represented as UTF-8 character sequences. The String type is most often used by GraphQL to represent free-form human-readable text.
-"""
-scalar String
-
-"""
-The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](https://en.wikipedia.org/wiki/IEEE_floating_point).
-"""
-scalar Float
-
-type IncomeTotalByMonth {
+type TotalByMonth implements Total {
   date: String!
+
+  total: Float!
+}
+
+type TotalByFortnight implements Total {
+  date: String!
+
+  fortnight: String!
 
   total: Float!
 }
@@ -50,7 +64,7 @@ type IncomeTotalByMonth {
 type IncomesList {
   incomes: [Income!]!
 
-  totalByMonth: [IncomeTotalByMonth!]!
+  totalByMonth: [TotalByMonth!]!
 
   total: Float!
 }
@@ -73,6 +87,14 @@ type Card {
 The `Boolean` scalar type represents `true` or `false`.
 """
 scalar Boolean
+
+type CardListWithExpenses {
+  expenses: [Expense]
+
+  totalByMonth: [TotalByMonth]
+
+  totalByFortnight: [TotalByFortnight]
+}
 
 type Expense {
   id: ID!
@@ -176,6 +198,8 @@ type Query {
   cardList: [Card]
 
   cardById(cardId: ID!): Card
+
+  cardWithListExpenses(cardId: ID!): CardListWithExpenses
 }
 
 type Mutation {

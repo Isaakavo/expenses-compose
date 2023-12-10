@@ -71,9 +71,9 @@ fun AddExpenseScreen(
     viewModel.resetToast()
   }
 
-  if (state.isAdded) {
-    onPopBackStack()
-  }
+//  if (state.isAdded) {
+//    onPopBackStack()
+//  }
 
   AddExpenseScreenContent(
     cards = state.cardsList,
@@ -122,7 +122,7 @@ fun AddExpenseScreenContent(
   val snackBarHostState = remember { SnackbarHostState() }
 
   //TODO implement snack bar
-  LaunchedEffect(Unit) {
+  LaunchedEffect(key1 = snackBarHostState) {
     if (expenseAdded || expenseAddedError) {
       scope.launch {
         snackBarHostState.showSnackbar(if (expenseAdded) "Gasto añadido correctamente" else "Ocurrió un error al añadir el gasto")

@@ -122,7 +122,14 @@ class AddExpenseViewModel @Inject constructor(
           ).collect { expenseResult ->
             when (expenseResult) {
               is MyResult.Success -> {
-                _state.emit(value = AddExpensesState(expenseAdded = true, isAdded = true))
+                _state.emit(
+                  value = AddExpensesState(
+                    expenseAdded = true,
+                    isAdded = true,
+                    cardsList = _state.value.cardsList,
+                    tagList = _state.value.tagList
+                  )
+                )
               }
 
               is MyResult.Error -> {

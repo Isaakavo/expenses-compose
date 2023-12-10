@@ -1,14 +1,11 @@
 query HomeScreenAllIncomesQuery {
     incomesList {
         incomes {
-            id
-            userId
             ...incomeFragment
         }
         total
         totalByMonth {
-            total
-            date
+            ...totalFragment
         }
     }
 }
