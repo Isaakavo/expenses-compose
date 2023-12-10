@@ -1,14 +1,11 @@
-query CardsWithListExpenses($cardId: ID!) {
-    cardWithListExpenses(cardId: $cardId) {
+query ExpensesTotalByCardId($cardId: ID!) {
+    expensesTotalByCardId(cardId: $cardId) {
         totalByMonth {
             ...totalFragment
         }
         totalByFortnight {
             ...totalFragment
             fortnight
-        }
-        expenses {
-            ...expenseFragment
         }
     }
 }

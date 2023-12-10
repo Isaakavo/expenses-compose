@@ -9,7 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.avocado.expensescompose.presentation.RoutesConstants
 import com.avocado.expensescompose.presentation.cards.cardsscreen.CardsScreen
-import com.avocado.expensescompose.presentation.cards.cardswithexpenses.CardWithExpenseScreen
+import com.avocado.expensescompose.presentation.cards.cardswithexpenses.ExpensesTotalByCardScreen
 import com.avocado.expensescompose.presentation.expenses.addexpense.AddExpenseScreen
 import com.avocado.expensescompose.presentation.incomes.addscreen.AddIncomeScreen
 import com.avocado.expensescompose.presentation.incomes.homescreen.IncomesScreen
@@ -131,7 +131,7 @@ fun ExpensesApplication() {
       })
     ) { navBackStackEntry ->
       val cardId = navBackStackEntry.arguments?.getString("cardId") ?: ""
-      CardWithExpenseScreen(cardId = cardId)
+      ExpensesTotalByCardScreen(cardId = cardId, onPopBackStack = { navController.popBackStack() },)
     }
   }
 }

@@ -56,7 +56,7 @@ type TotalByMonth implements Total {
 type TotalByFortnight implements Total {
   date: String!
 
-  fortnight: String!
+  fortnight: Fortnight!
 
   total: Float!
 }
@@ -88,9 +88,7 @@ The `Boolean` scalar type represents `true` or `false`.
 """
 scalar Boolean
 
-type CardListWithExpenses {
-  expenses: [Expense]
-
+type TotalByCardId {
   totalByMonth: [TotalByMonth]
 
   totalByFortnight: [TotalByFortnight]
@@ -172,6 +170,8 @@ input CreateCardInput {
 
 input PayBeforeInput {
   payBefore: Date!
+
+  cardId: ID
 }
 
 input ExpenseTagInput {
@@ -199,7 +199,7 @@ type Query {
 
   cardById(cardId: ID!): Card
 
-  cardWithListExpenses(cardId: ID!): CardListWithExpenses
+  expensesTotalByCardId(cardId: ID!): TotalByCardId
 }
 
 type Mutation {
