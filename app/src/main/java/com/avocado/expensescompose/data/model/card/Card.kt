@@ -1,4 +1,4 @@
-package com.avocado.expensescompose.domain.cards.models
+package com.avocado.expensescompose.data.model.card
 
 data class Card(
   val id: String,

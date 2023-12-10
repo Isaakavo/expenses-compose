@@ -9,6 +9,7 @@ import com.avocado.expensescompose.data.adapters.graphql.fragments.toExpense
 import com.avocado.expensescompose.data.adapters.graphql.scalar.Date
 import com.avocado.expensescompose.data.adapters.graphql.utils.validateData
 import com.avocado.expensescompose.data.apolloclients.GraphQlClientImpl
+import com.avocado.expensescompose.data.model.card.Card
 import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.data.model.successOrError
 import com.avocado.expensescompose.presentation.util.formatDateForRequestPayBefore
@@ -21,7 +22,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class ExpensesByCardState(
-  val expensesList: List<Expense> = emptyList()
+  val expensesList: List<Expense> = emptyList(),
+  val card: Card? = null
 )
 
 @HiltViewModel

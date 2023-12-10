@@ -9,7 +9,7 @@ import com.avocado.CreateCardMutation
 import com.avocado.expensescompose.data.apolloclients.GraphQlClientImpl
 import com.avocado.expensescompose.data.apolloclients.cards.toCard
 import com.avocado.expensescompose.data.model.MyResult
-import com.avocado.expensescompose.domain.cards.models.Card
+import com.avocado.expensescompose.data.model.card.Card
 import com.avocado.type.CreateCardInput
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

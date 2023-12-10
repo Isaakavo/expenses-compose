@@ -4,7 +4,7 @@ import com.apollographql.apollo3.ApolloClient
 import com.avocado.AllCardsQuery
 import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.domain.cards.CardsClient
-import com.avocado.expensescompose.domain.cards.models.Card
+import com.avocado.expensescompose.data.model.card.Card
 
 class ApolloCardsClient(private val apolloClient: ApolloClient) : CardsClient {
   override suspend fun getAllCards(): MyResult<List<Card>> {

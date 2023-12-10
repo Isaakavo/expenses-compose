@@ -1,7 +1,7 @@
 package com.avocado.expensescompose.data.adapters.graphql.fragments
 
 import com.avocado.expensescompose.data.model.expense.Expense
-import com.avocado.expensescompose.domain.cards.models.Card
+import com.avocado.expensescompose.data.model.card.Card
 import com.avocado.expensescompose.domain.income.models.ExpenseTag
 import com.avocado.fragment.ExpenseFragment
 

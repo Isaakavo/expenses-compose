@@ -267,7 +267,7 @@ fun FABAddExpense(onNavigate: (navigateEvent: NavigateEvent) -> Unit) {
 //        createdAt = LocalDateTime.now(),
 //        comment = "",
 //        id = "1",
-//        card= com.avocado.expensescompose.domain.cards.models.Card(bank = "Test", alias = "alv", id = "kajshdfkajd"),
+//        card= com.avocado.expensescompose.data.model.card.Card(bank = "Test", alias = "alv", id = "kajshdfkajd"),
 //        tags = listOf(
 //          ExpenseTag(
 //            id = "1",
@@ -299,7 +299,7 @@ fun FABAddExpense(onNavigate: (navigateEvent: NavigateEvent) -> Unit) {
 //        createdAt = LocalDateTime.now(),
 //        comment = "",
 //        id = "1",
-//        card= com.avocado.expensescompose.domain.cards.models.Card(bank = "Test", alias = "alv", id = "kajshdfkajd"),
+//        card= com.avocado.expensescompose.data.model.card.Card(bank = "Test", alias = "alv", id = "kajshdfkajd"),
 //        tags = listOf(
 //          ExpenseTag(
 //            id = "1",
@@ -331,7 +331,7 @@ fun FABAddExpense(onNavigate: (navigateEvent: NavigateEvent) -> Unit) {
 //        createdAt = LocalDateTime.now(),
 //        comment = "",
 //        id = "1",
-//        card= com.avocado.expensescompose.domain.cards.models.Card(bank = "Test", alias = "alv", id = "kajshdfkajd"),
+//        card= com.avocado.expensescompose.data.model.card.Card(bank = "Test", alias = "alv", id = "kajshdfkajd"),
 //        tags = listOf(
 //          ExpenseTag(
 //            id = "1",
@@ -363,7 +363,7 @@ fun FABAddExpense(onNavigate: (navigateEvent: NavigateEvent) -> Unit) {
 //        createdAt = LocalDateTime.now(),
 //        comment = "",
 //        id = "1",
-//        card= com.avocado.expensescompose.domain.cards.models.Card(bank = "Test", alias = "alv", id = "kajshdfkajd"),
+//        card= com.avocado.expensescompose.data.model.card.Card(bank = "Test", alias = "alv", id = "kajshdfkajd"),
 //        tags = listOf(
 //          ExpenseTag(
 //            id = "1",

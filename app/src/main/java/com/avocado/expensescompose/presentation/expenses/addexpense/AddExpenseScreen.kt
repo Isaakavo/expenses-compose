@@ -50,7 +50,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.avocado.expensescompose.R
-import com.avocado.expensescompose.domain.cards.models.Card
+import com.avocado.expensescompose.data.model.card.Card
 import com.avocado.expensescompose.domain.tags.models.Tag
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.expensescompose.presentation.util.formatDateFromMillis

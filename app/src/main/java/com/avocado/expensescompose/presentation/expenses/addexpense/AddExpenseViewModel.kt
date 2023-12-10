@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.avocado.expensescompose.data.model.MyResult
-import com.avocado.expensescompose.domain.cards.models.Card
+import com.avocado.expensescompose.data.model.card.Card
 import com.avocado.expensescompose.domain.cards.usecase.GetCardsUseCase
 import com.avocado.expensescompose.domain.expense.CreateExpenseUseCase
 import com.avocado.expensescompose.domain.tags.models.Tag
