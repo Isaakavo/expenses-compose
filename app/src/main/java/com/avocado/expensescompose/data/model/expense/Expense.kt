@@ -15,5 +15,5 @@ data class Expense(
   val updatedAt: LocalDateTime? = null,
   val tags: List<ExpenseTag>,
   val comment: String? = null,
-  val card: Card
+  val card: Card? = null
 )
