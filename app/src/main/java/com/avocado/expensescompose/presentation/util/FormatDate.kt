@@ -24,6 +24,12 @@ fun LocalDateTime.formatDateOnlyMonth(): String {
   return this.format(format)
 }
 
+fun String.formatDateOnlyMonth(): String {
+  val format = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.getDefault())
+  // TODO find a way to translate this
+  return LocalDate.parse(this, format).month.name
+}
+
 fun String.formatDateToISO(): LocalDateTime? {
   val originalFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
   return try {

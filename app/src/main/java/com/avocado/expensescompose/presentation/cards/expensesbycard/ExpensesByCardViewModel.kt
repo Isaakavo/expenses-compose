@@ -23,6 +23,7 @@ import javax.inject.Inject
 
 data class ExpensesByCardState(
   val expensesList: List<Expense> = emptyList(),
+  val expenseTotal: Double = 0.0,
   val card: Card? = null
 )
 
@@ -42,9 +43,16 @@ class ExpensesByCardViewModel @Inject constructor(private val graphQlClientImpl:
         }.collect { collectResult ->
           collectResult.successOrError(onSuccess = { successResult ->
             val data = successResult.data
-            val expensesList = data?.mapNotNull { it?.expenseFragment?.toExpense() }.orEmpty()
+            val expensesList =
+              data?.expenses?.mapNotNull { it?.expenseFragment?.toExpense() }.orEmpty()
+            val expenseTotal = data?.expensesTotal ?: 0.0
             this.launch {
-              _state.emit(ExpensesByCardState(expensesList = expensesList))
+              _state.emit(
+                ExpensesByCardState(
+                  expensesList = expensesList,
+                  expenseTotal = expenseTotal
+                )
+              )
             }
           }, onError = { error -> ExpensesByCardState() })
         }
@@ -63,9 +71,16 @@ class ExpensesByCardViewModel @Inject constructor(private val graphQlClientImpl:
           collectResult.successOrError(
             onSuccess = { successResult ->
               val data = successResult.data
-              val expensesList = data?.mapNotNull { it?.expenseFragment?.toExpense() }.orEmpty()
+              val expensesList =
+                data?.expenses?.mapNotNull { it?.expenseFragment?.toExpense() }.orEmpty()
+              val expenseTotal = data?.expensesTotal ?: 0.0
               this.launch {
-                _state.emit(ExpensesByCardState(expensesList = expensesList))
+                _state.emit(
+                  ExpensesByCardState(
+                    expensesList = expensesList,
+                    expenseTotal = expenseTotal
+                  )
+                )
               }
             }, onError = {}
           )

@@ -150,6 +150,12 @@ type IncomesListAndExpenses {
   remaining: Float
 }
 
+type ExpensesBy {
+  expenses: [Expense]
+
+  expensesTotal: Float
+}
+
 input CreateExpenseInput {
   cardId: ID
 
@@ -189,9 +195,9 @@ type Query {
 
   incomesByMonth(date: Date!): [Income]
 
-  expensesByFortnight(input: PayBeforeInput!): [Expense]
+  expensesByFortnight(input: PayBeforeInput!): ExpensesBy
 
-  expensesByMonth(input: PayBeforeInput!): [Expense]
+  expensesByMonth(input: PayBeforeInput!): ExpensesBy
 
   incomesAndExpensesByFortnight(input: PayBeforeInput!): IncomesListAndExpenses!
 
