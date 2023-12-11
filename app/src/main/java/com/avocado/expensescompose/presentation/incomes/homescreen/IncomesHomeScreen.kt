@@ -77,20 +77,13 @@ fun IncomesScreen(
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
 
-  IncomeScreenContent(
-    isLoading = state.isLoading,
-    incomesMap = state.incomesMap,
-    totalByMonth = state.totalByMonth,
-    drawerState = drawerState,
-    scope = scope,
-    onNavigate = onNavigate
-  ) {
-    viewModel.onEvent(it)
-  }
-
   if (state.showToast) {
     Toast.makeText(context, "Presiona de nuevo para salir", Toast.LENGTH_LONG).show()
     viewModel.updateToast(false)
+  }
+
+  LaunchedEffect(Unit) {
+    viewModel.fetchQuery()
   }
 
   LaunchedEffect(key1 = state.backPressState) {
@@ -107,6 +100,17 @@ fun IncomesScreen(
       onNavigate(NavigateEvent.NavigateLogin, null)
     }
     viewModel.onEvent(IncomeEvent.BackPressInitialTouch)
+  }
+
+  IncomeScreenContent(
+    isLoading = state.isLoading,
+    incomesMap = state.incomesMap,
+    totalByMonth = state.totalByMonth,
+    drawerState = drawerState,
+    scope = scope,
+    onNavigate = onNavigate
+  ) {
+    viewModel.onEvent(it)
   }
 }
 

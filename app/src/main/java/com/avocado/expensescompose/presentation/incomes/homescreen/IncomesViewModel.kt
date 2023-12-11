@@ -43,11 +43,6 @@ class IncomesViewModel @Inject constructor(
   private val _state = MutableStateFlow(IncomeState())
   val state = _state.asStateFlow()
 
-  init {
-    Log.d("TEST_QUERY", "View model constructor")
-    fetchQuery()
-  }
-
   fun updateToast(show: Boolean) = _state.update {
     it.copy(showToast = show)
   }
