@@ -2,6 +2,7 @@ package com.avocado.expensescompose.di
 
 import android.content.Context
 import com.apollographql.apollo3.ApolloClient
+import com.avocado.expensescompose.BuildConfig
 import com.avocado.expensescompose.data.apolloclients.GraphQlClientImpl
 import com.avocado.expensescompose.data.apolloclients.cards.ApolloCardsClient
 import com.avocado.expensescompose.data.apolloclients.incomes.ApolloIncomesClient
@@ -62,7 +63,7 @@ object AppModule {
     tokenManagerRepository: TokenManagerRepository
   ): ApolloClient =
     ApolloClient.Builder()
-      .serverUrl("http://10.0.2.2:4000/graphql")
+      .serverUrl(BuildConfig.GRAPHQL_ENDPOINT)
       .addHttpInterceptor(
         AuthorizationInterceptor(
           authClient = authClient,
