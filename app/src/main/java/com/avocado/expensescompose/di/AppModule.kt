@@ -16,7 +16,6 @@ import com.avocado.expensescompose.domain.cards.CardsClient
 import com.avocado.expensescompose.domain.cards.usecase.GetCardsUseCase
 import com.avocado.expensescompose.domain.expense.CreateExpenseUseCase
 import com.avocado.expensescompose.domain.income.usecase.CreateIncomeUseCase
-import com.avocado.expensescompose.domain.income.usecase.GetAllIncomesUseCase
 import com.avocado.expensescompose.domain.income.usecase.GetIncomeByIdWithExpensesUseCase
 import com.avocado.expensescompose.domain.tags.TagsClient
 import com.avocado.expensescompose.domain.tags.usecase.GetTagsUseCase
@@ -91,11 +90,6 @@ object AppModule {
   @Singleton
   fun provideExpensesUseCase(graphQlClient: GraphQlClientImpl): CreateExpenseUseCase =
     CreateExpenseUseCase(graphQlClient)
-
-  @Provides
-  @Singleton
-  fun provideIncomeUseCase(graphQlClient: GraphQlClientImpl): GetAllIncomesUseCase =
-    GetAllIncomesUseCase(graphQlClient)
 
   @Provides
   @Singleton

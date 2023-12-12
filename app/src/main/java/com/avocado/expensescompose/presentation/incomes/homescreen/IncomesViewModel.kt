@@ -3,14 +3,21 @@ package com.avocado.expensescompose.presentation.incomes.homescreen
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.apollographql.apollo3.exception.ApolloHttpException
+import com.apollographql.apollo3.exception.ApolloException
+import com.avocado.HomeScreenAllIncomesQuery
+import com.avocado.expensescompose.data.adapters.graphql.fragments.toIncome
+import com.avocado.expensescompose.data.adapters.graphql.fragments.toTotal
+import com.avocado.expensescompose.data.apolloclients.GraphQlClientImpl
 import com.avocado.expensescompose.data.model.MyResult
+import com.avocado.expensescompose.data.model.successOrError
 import com.avocado.expensescompose.data.model.total.Total
 import com.avocado.expensescompose.domain.income.models.Income
-import com.avocado.expensescompose.domain.income.usecase.GetAllIncomesUseCase
+import com.avocado.expensescompose.domain.income.models.Incomes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -38,7 +45,7 @@ sealed class IncomeEvent {
 
 @HiltViewModel
 class IncomesViewModel @Inject constructor(
-  private val getAllIncomesUseCase: GetAllIncomesUseCase
+  private val graphQlClientImpl: GraphQlClientImpl
 ) : ViewModel() {
   private val _state = MutableStateFlow(IncomeState())
   val state = _state.asStateFlow()
@@ -100,33 +107,59 @@ class IncomesViewModel @Inject constructor(
 
     try {
       viewModelScope.launch {
-        getAllIncomesUseCase()
-          .collect {incomes ->
-          when (incomes) {
-            is MyResult.Success -> {
-              val incomesList = incomes.data.incomesList
-              _state.update {
-                it.copy(
-                  incomesMap = getIncomesMap(incomesList),
-                  totalByMonth = incomes.data.totalByMonth,
-                  isLoading = false
-                )
-              }
+        graphQlClientImpl.query(HomeScreenAllIncomesQuery()).map {
+          val responseIncome = it.data
+          if (responseIncome != null) {
+            val incomesList = responseIncome.incomesList?.incomes?.map { item ->
+              item.incomeFragment.toIncome()
+            }
+            val totalByMonth = responseIncome.incomesList?.totalByMonth?.map { totalByMonth ->
+              totalByMonth.totalFragment.toTotal()
             }
 
-            is MyResult.Error -> {
-              _state.update {
-                it.copy(
-                  errorMessage = incomes.uiText ?: ""
-                )
-              }
-              Log.d("Incomes List", "Something went wrong ${incomes.uiText}")
-            }
+            MyResult.Success(
+              Incomes(
+                incomesList = incomesList ?: emptyList(),
+                totalByMonth = totalByMonth ?: emptyList(),
+                total = responseIncome.incomesList?.total ?: 0.0
+              )
+            )
+          } else {
+            MyResult.Error(uiText = "error", data = null)
           }
         }
+          .catch {
+            Log.d("INCOMES_VIEW_MODEL", it.message.toString())
+            // TODO find a way to detect the type of apollo error and create an error screen
+            _state.emit(IncomeState(isLoading = false))
+          }
+          .collect { incomes ->
+            incomes.successOrError(
+              onSuccess = { success ->
+                val incomesList = success.data.incomesList
+                this.launch {
+                  _state.emit(
+                    IncomeState(
+                      incomesMap = getIncomesMap(incomesList),
+                      totalByMonth = success.data.totalByMonth,
+                      isLoading = false
+                    )
+                  )
+                }
+              },
+              onError = { error ->
+                _state.update {
+                  it.copy(
+                    errorMessage = error.uiText ?: ""
+                  )
+                }
+                Log.d("Incomes List", "Something went wrong ${error.uiText}")
+              })
+          }
+
       }
-    } catch (exception: ApolloHttpException) {
-      Log.d("JWT", exception.statusCode.toString())
+    } catch (exception: ApolloException) {
+
 //      if (exception.statusCode == 401) {
 //
 //      }
