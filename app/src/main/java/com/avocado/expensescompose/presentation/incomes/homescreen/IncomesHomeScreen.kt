@@ -57,6 +57,7 @@ import com.avocado.expensescompose.data.model.total.Total
 import com.avocado.expensescompose.domain.income.models.Income
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.topbar.AppBar
+import com.avocado.expensescompose.presentation.util.formatDateOnlyMonth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -189,7 +190,7 @@ fun IncomeScreenContent(
             ) {
               items(incomesMap.toList()) { income ->
                 val currentTotal = totalByMonth.find { totalByMont ->
-                  totalByMont?.date?.uppercase(Locale.ROOT) == income.first
+                  totalByMont?.date?.formatDateOnlyMonth()?.uppercase(Locale.ROOT) == income.first
                 }?.total ?: 0.0
                 IncomeMonth(monthTotal = currentTotal, incomeMonth = income.first)
                 income.second.map { fortnightIncome ->
