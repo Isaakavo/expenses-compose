@@ -3,8 +3,6 @@ package com.avocado.expensescompose.presentation.expenses.addexpense
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -19,8 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -52,8 +48,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.model.card.Card
 import com.avocado.expensescompose.domain.tags.models.Tag
+import com.avocado.expensescompose.presentation.shared.ClickableTextField
+import com.avocado.expensescompose.presentation.shared.DateDialog
 import com.avocado.expensescompose.presentation.topbar.AppBar
-import com.avocado.expensescompose.presentation.util.formatDateFromMillis
 import kotlinx.coroutines.launch
 
 const val ADD_EXPENSE_SCREEN_LOG = "AddExpenseScreen"
@@ -177,37 +174,16 @@ fun AddExpenseScreenContent(
             label = { Text(text = "Comentario") })
         }
         AddExpenseRow {
-          Icon(
-            painter = painterResource(id = R.drawable.baseline_calendar_month_24),
-            contentDescription = "Fecha"
+          DateDialog(
+            date = date,
+            textFieldText = "Fecha",
+            iconResource = R.drawable.baseline_calendar_month_24,
+            openDateDialog = openDateDialog,
+            datePickerState = datePickerState,
+            onConfirm = { formattedDate -> onEvent(AddExpenseEvent.UpdateDate, formattedDate) },
+            onDismiss = { onEvent(AddExpenseEvent.DateDialogClose, null) },
+            onSelectTextField = { onEvent(AddExpenseEvent.DateDialogOpen, null) }
           )
-          ClickableTextField(value = date, label = "Fecha") {
-            onEvent(AddExpenseEvent.DateDialogOpen, null)
-          }
-          if (openDateDialog) {
-            DatePickerDialog(
-              onDismissRequest = { onEvent(AddExpenseEvent.DateDialogClose, null) },
-              confirmButton = {
-                TextButton(
-                  onClick = {
-                    datePickerState.selectedDateMillis?.let { millis ->
-                      val formattedDate = millis.formatDateFromMillis()
-                      onEvent(AddExpenseEvent.UpdateDate, formattedDate)
-                    }
-                    onEvent(AddExpenseEvent.DateDialogClose, null)
-                  }) {
-                  Text(text = "Aceptar")
-                }
-              },
-              dismissButton = {
-                TextButton(onClick = { onEvent(AddExpenseEvent.DateDialogClose, null) }) {
-                  Text(text = "Cancelar")
-                }
-              }) {
-              DatePicker(state = datePickerState)
-            }
-          }
-
         }
         AddExpenseRow {
           Icon(
@@ -320,25 +296,6 @@ fun AddExpenseRow(content: @Composable () -> Unit) {
   ) {
     content()
   }
-}
-
-@Composable
-fun ClickableTextField(value: String, label: String, action: () -> Unit) {
-  OutlinedTextField(
-    value = value,
-    onValueChange = {},
-    label = { Text(text = label) },
-    interactionSource = remember {
-      MutableInteractionSource()
-    }.also { interactionSource ->
-      LaunchedEffect(key1 = interactionSource) {
-        interactionSource.interactions.collect { interaction ->
-          if (interaction is PressInteraction.Release) {
-            action()
-          }
-        }
-      }
-    })
 }
 
 @Composable

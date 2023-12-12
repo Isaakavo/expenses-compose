@@ -7,7 +7,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.avocado.expensescompose.presentation.util.formatDateToISO
-import com.avocado.expensescompose.presentation.util.formatDateWithYear
 import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.domain.income.models.Income
 import com.avocado.expensescompose.domain.income.usecase.CreateIncomeUseCase
@@ -16,21 +15,26 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import javax.inject.Inject
 
 sealed class AddIncomeEvent {
   object InsertIncome : AddIncomeEvent()
+  object UpdateDate : AddIncomeEvent()
+  object DateDialogOpen : AddIncomeEvent()
+  object DateDialogClose : AddIncomeEvent()
 }
 
 data class AddIncomeState(
   val insertedIncome: Income? = null,
   val isInserted: Boolean = false,
-  val userMessage: String = ""
+  val userMessage: String = "",
+  val date: String = "",
+  val openDateDialog: Boolean = false,
 )
 
+// TODO refactor this code to use events to update the values
 @HiltViewModel
 class AddIncomeViewModel @Inject constructor(
   private val createIncomeUseCase: CreateIncomeUseCase
@@ -42,22 +46,12 @@ class AddIncomeViewModel @Inject constructor(
   var initialDate by mutableLongStateOf(
     LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
   )
-  var paymentDate by mutableStateOf(LocalDateTime.now().formatDateWithYear())
-    private set
 
   var total by mutableStateOf("0.0")
     private set
 
   var comments by mutableStateOf("")
     private set
-
-  //TODO validate dates, when selecting a date is taking the day before
-  fun setFormattedDate(dateInMilliSeconds: Long) {
-    val convertedDate =
-      Instant.ofEpochMilli(dateInMilliSeconds).atZone(ZoneId.systemDefault()).toLocalDateTime()
-    paymentDate = convertedDate.formatDateWithYear()
-    initialDate = dateInMilliSeconds
-  }
 
   fun setComment(input: String) {
     comments = input
@@ -78,13 +72,13 @@ class AddIncomeViewModel @Inject constructor(
     }
   }
 
-  fun onEvent(addIncomeEvent: AddIncomeEvent) {
+  fun onEvent(addIncomeEvent: AddIncomeEvent, param: String? = null) {
     when (addIncomeEvent) {
       is AddIncomeEvent.InsertIncome -> {
         viewModelScope.launch {
           val insertedIncome = createIncomeUseCase(
             total = total.toDouble(),
-            paymentDate = paymentDate.formatDateToISO() ?: LocalDateTime.now(),
+            paymentDate = _state.value.date.formatDateToISO() ?: LocalDateTime.now(),
             comment = comments
           )
 
@@ -101,6 +95,18 @@ class AddIncomeViewModel @Inject constructor(
             }
           }
         }
+      }
+
+      AddIncomeEvent.UpdateDate -> {
+        _state.update { it.copy(date = param.orEmpty()) }
+      }
+
+      AddIncomeEvent.DateDialogClose -> {
+        _state.update { it.copy(openDateDialog = false) }
+      }
+
+      AddIncomeEvent.DateDialogOpen -> {
+        _state.update { it.copy(openDateDialog = true) }
       }
     }
   }

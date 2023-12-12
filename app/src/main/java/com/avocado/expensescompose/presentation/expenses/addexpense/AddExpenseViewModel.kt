@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.data.model.card.Card
+import com.avocado.expensescompose.data.model.successOrError
 import com.avocado.expensescompose.domain.cards.usecase.GetCardsUseCase
 import com.avocado.expensescompose.domain.expense.CreateExpenseUseCase
 import com.avocado.expensescompose.domain.tags.models.Tag
@@ -120,23 +121,27 @@ class AddExpenseViewModel @Inject constructor(
             tags = selectedTags,
             cardId = _state.value.selectedCard?.id,
           ).collect { expenseResult ->
-            when (expenseResult) {
-              is MyResult.Success -> {
-                _state.emit(
-                  value = AddExpensesState(
-                    expenseAdded = true,
-                    isAdded = true,
-                    cardsList = _state.value.cardsList,
-                    tagList = _state.value.tagList
+            expenseResult.successOrError(
+              onSuccess = {
+                this.launch {
+                  restartTags()
+                  _state.emit(
+                    value = AddExpensesState(
+                      expenseAdded = true,
+                      isAdded = true,
+                      cardsList = _state.value.cardsList,
+                      tagList = _state.value.tagList,
+                      date = _state.value.date
+                    )
                   )
-                )
+                }
+              },
+              onError = {
+                this.launch {
+                  _state.emit(value = AddExpensesState(expenseAddedError = true))
+                }
               }
-
-              is MyResult.Error -> {
-                _state.emit(value = AddExpensesState(expenseAddedError = true))
-              }
-            }
-
+            )
           }
         }
       }
@@ -260,5 +265,9 @@ class AddExpenseViewModel @Inject constructor(
         _state.update { it.copy(loadingCard = false) }
       }
     }
+  }
+
+  private fun restartTags() {
+    _state.value.tagList.map { it.selected = false }
   }
 }
