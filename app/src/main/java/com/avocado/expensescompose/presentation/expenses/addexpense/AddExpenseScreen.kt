@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -141,6 +140,18 @@ fun AddExpenseScreenContent(
           .verticalScroll(state = rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(12.dp)
       ) {
+
+        DateDialog(
+          date = date,
+          iconResource = R.drawable.baseline_calendar_month_24,
+          openDateDialog = openDateDialog,
+          datePickerState = datePickerState,
+          onConfirm = { formattedDate -> onEvent(AddExpenseEvent.UpdateDate, formattedDate) },
+          onDismiss = { onEvent(AddExpenseEvent.DateDialogClose, null) },
+          onSelectTextField = { onEvent(AddExpenseEvent.DateDialogOpen, null) }
+        )
+
+
         AddExpenseRow {
           Icon(
             painter = painterResource(id = R.drawable.round_description_24),
@@ -151,28 +162,7 @@ fun AddExpenseScreenContent(
             onValueChange = { onEvent(AddExpenseEvent.UpdateConcept, it) },
             label = { Text(text = "Concepto") })
         }
-        AddExpenseRow {
-          Icon(
-            painter = painterResource(R.drawable.round_comment_24),
-            contentDescription = "Comment"
-          )
-          OutlinedTextField(
-            value = comment,
-            onValueChange = { onEvent(AddExpenseEvent.UpdateComment, it) },
-            label = { Text(text = "Comentario") })
-        }
-        AddExpenseRow {
-          DateDialog(
-            date = date,
-            textFieldText = "Fecha",
-            iconResource = R.drawable.baseline_calendar_month_24,
-            openDateDialog = openDateDialog,
-            datePickerState = datePickerState,
-            onConfirm = { formattedDate -> onEvent(AddExpenseEvent.UpdateDate, formattedDate) },
-            onDismiss = { onEvent(AddExpenseEvent.DateDialogClose, null) },
-            onSelectTextField = { onEvent(AddExpenseEvent.DateDialogOpen, null) }
-          )
-        }
+
         AddExpenseRow {
           Icon(
             painter = painterResource(id = R.drawable.round_attach_money_24),
@@ -185,6 +175,18 @@ fun AddExpenseScreenContent(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
           )
         }
+
+        AddExpenseRow {
+          Icon(
+            painter = painterResource(R.drawable.round_comment_24),
+            contentDescription = "Comment"
+          )
+          OutlinedTextField(
+            value = comment,
+            onValueChange = { onEvent(AddExpenseEvent.UpdateComment, it) },
+            label = { Text(text = "Comentario") })
+        }
+
         AddExpenseRow {
           Icon(
             painter = painterResource(id = R.drawable.baseline_credit_card_24),
@@ -212,6 +214,7 @@ fun AddExpenseScreenContent(
             }
           }
         }
+
         AddExpenseRow {
           Icon(
             painter = painterResource(id = R.drawable.round_sell_24),
@@ -291,7 +294,6 @@ fun DropDownMenu(
 @Composable
 fun AddExpenseRow(content: @Composable () -> Unit) {
   Row(
-    modifier = Modifier.fillMaxWidth(),
     horizontalArrangement = Arrangement.spacedBy(12.dp),
     verticalAlignment = Alignment.CenterVertically
   ) {

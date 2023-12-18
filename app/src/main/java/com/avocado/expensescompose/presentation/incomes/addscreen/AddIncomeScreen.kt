@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -62,19 +63,11 @@ fun AddIncomeScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp)
       ) {
-        OutlinedTextField(
-          value = viewModel.total,
-          label = { Text(text = "Total") },
-          onValueChange = { viewModel.setTotalIncome(it) },
-          keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
-        )
-
-
         DateDialog(
           date = state.date,
-          textFieldText = "Fecha de pago",
           openDateDialog = state.openDateDialog,
           datePickerState = datePickerState,
+          modifier = Modifier.fillMaxWidth(),
           onConfirm = { formattedDate ->
             viewModel.onEvent(
               AddIncomeEvent.UpdateDate,
@@ -83,6 +76,12 @@ fun AddIncomeScreen(
           },
           onDismiss = { viewModel.onEvent(AddIncomeEvent.DateDialogClose) },
           onSelectTextField = { viewModel.onEvent(AddIncomeEvent.DateDialogOpen) }
+        )
+        OutlinedTextField(
+          value = viewModel.total,
+          label = { Text(text = "Total") },
+          onValueChange = { viewModel.setTotalIncome(it) },
+          keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
         )
 
         OutlinedTextField(

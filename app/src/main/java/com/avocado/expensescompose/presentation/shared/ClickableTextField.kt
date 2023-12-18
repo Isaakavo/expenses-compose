@@ -1,28 +1,15 @@
 package com.avocado.expensescompose.presentation.shared
 
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.PressInteraction
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 
 @Composable
-fun ClickableTextField(value: String, label: String, action: () -> Unit) {
-  OutlinedTextField(
-    value = value,
-    onValueChange = {},
-    label = { Text(text = label) },
-    interactionSource = remember {
-      MutableInteractionSource()
-    }.also { interactionSource ->
-      LaunchedEffect(key1 = interactionSource) {
-        interactionSource.interactions.collect { interaction ->
-          if (interaction is PressInteraction.Release) {
-            action()
-          }
-        }
-      }
-    })
+fun ClickableText(text: String, modifier: Modifier,action: () -> Unit) {
+  Text(
+    text = text,
+    modifier = modifier.wrapContentSize().clickable { action() },
+  )
 }

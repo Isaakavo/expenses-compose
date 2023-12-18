@@ -10,6 +10,7 @@ import com.avocado.expensescompose.presentation.util.formatDateToISO
 import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.domain.income.models.Income
 import com.avocado.expensescompose.domain.income.usecase.CreateIncomeUseCase
+import com.avocado.expensescompose.presentation.util.formatDateWithYear
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -42,6 +43,10 @@ class AddIncomeViewModel @Inject constructor(
 
   private val _state = MutableStateFlow(AddIncomeState())
   val state = _state.asStateFlow()
+
+  init {
+    _state.update { it.copy(date = LocalDateTime.now().formatDateWithYear()) }
+  }
 
   var initialDate by mutableLongStateOf(
     LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()

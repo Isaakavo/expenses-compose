@@ -1,6 +1,5 @@
 package com.avocado.expensescompose.presentation.expenses.addexpense
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apollographql.apollo3.api.Optional
@@ -14,6 +13,7 @@ import com.avocado.expensescompose.data.apolloclients.GraphQlClientImpl
 import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.data.model.card.Card
 import com.avocado.expensescompose.data.model.successOrError
+import com.avocado.expensescompose.presentation.util.formatDateDaysWithMonth
 import com.avocado.type.Category
 import com.avocado.type.CreateExpenseInput
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 sealed class AddExpenseEvent {
@@ -66,17 +67,11 @@ class AddExpenseViewModel @Inject constructor(
   private val _state = MutableStateFlow(AddExpensesState())
   val state = _state.asStateFlow()
 
-  companion object {
-    private const val TAG_LIST_MAX_SIZE = 10
-  }
-
   init {
     viewModelScope.launch {
       getAllCards()
-      Category.values().map {
-        Log.d("Categories", it.name)
-      }
     }
+    _state.update { it.copy(date = LocalDateTime.now().formatDateDaysWithMonth()) }
   }
 
   fun <T> onEvent(event: AddExpenseEvent, params: T) {

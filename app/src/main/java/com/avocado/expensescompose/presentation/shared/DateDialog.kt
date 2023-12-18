@@ -1,5 +1,9 @@
 package com.avocado.expensescompose.presentation.shared
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DatePickerState
@@ -8,31 +12,39 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import com.avocado.expensescompose.presentation.util.formatDateFromMillis
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DateDialog(
+  modifier: Modifier = Modifier,
   date: String,
-  textFieldText: String,
   iconResource: Int? = null,
   openDateDialog: Boolean,
   datePickerState: DatePickerState,
   onConfirm: (String) -> Unit,
-  onDismiss: ()  -> Unit,
+  onDismiss: () -> Unit,
   onSelectTextField: () -> Unit,
 ) {
-  if (iconResource != null) {
-    Icon(
-      painter = painterResource(id = iconResource),
-      contentDescription = "Fecha"
-    )
+  Row(
+    horizontalArrangement = Arrangement.Center,
+    modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+  ) {
+    if (iconResource != null) {
+      Icon(
+        painter = painterResource(id = iconResource),
+        contentDescription = "Fecha"
+      )
+    }
+    ClickableText(text = date, modifier = modifier) {
+      onSelectTextField()
+      // onEvent(AddExpenseEvent.DateDialogOpen, null)
+    }
   }
-  ClickableTextField(value = date, label = textFieldText) {
-    onSelectTextField()
-    // onEvent(AddExpenseEvent.DateDialogOpen, null)
-  }
+
   if (openDateDialog) {
     DatePickerDialog(
       onDismissRequest = { onDismiss() },
