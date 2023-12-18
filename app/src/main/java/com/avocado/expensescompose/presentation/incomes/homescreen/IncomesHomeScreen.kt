@@ -1,7 +1,5 @@
 package com.avocado.expensescompose.presentation.incomes.homescreen
 
-import android.content.Context
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
@@ -24,7 +22,6 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
@@ -71,104 +68,86 @@ data class NavigationIncomeDetails(
 @Composable
 fun IncomesScreen(
   viewModel: IncomesViewModel = hiltViewModel(),
-  context: Context = LocalContext.current,
-  scope: CoroutineScope = rememberCoroutineScope(),
-  drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
   onNavigate: (navigateEvent: NavigateEvent, income: NavigationIncomeDetails?) -> Unit
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
 
-  if (state.showToast) {
-    Toast.makeText(context, "Presiona de nuevo para salir", Toast.LENGTH_LONG).show()
-    viewModel.updateToast(false)
-  }
-
-  LaunchedEffect(Unit) {
-    viewModel.fetchQuery()
-  }
-
-  LaunchedEffect(key1 = state.backPressState) {
-    if (state.backPressState == BackPress.InitialTouch) {
-      Log.d("IncomesScreen", "Backpress state called if")
-      delay(2000)
-      viewModel.onEvent(IncomeEvent.BackPressIdle)
-    }
-  }
-
-  BackHandler(true) {
-    if (state.backPressState == BackPress.InitialTouch) {
-      Log.d("IncomesScreen", "Backpress initial touch called if")
-      onNavigate(NavigateEvent.NavigateLogin, null)
-    }
-    viewModel.onEvent(IncomeEvent.BackPressInitialTouch)
-  }
-
   IncomeScreenContent(
+    backPressState = state.backPressState,
     isLoading = state.isLoading,
     incomesMap = state.incomesMap,
     totalByMonth = state.totalByMonth,
-    drawerState = drawerState,
-    scope = scope,
-    onNavigate = onNavigate
-  ) {
-    viewModel.onEvent(it)
-  }
+    showToast = state.showToast,
+    onNavigate = onNavigate,
+    onEvent = viewModel::onEvent
+  )
 }
 
 @Composable
 fun IncomeScreenContent(
+  backPressState: BackPress?,
   isLoading: Boolean,
   incomesMap: Map<String, MutableMap<String, MutableList<Income>?>>?,
   totalByMonth: List<Total?>,
-  drawerState: DrawerState,
-  scope: CoroutineScope,
+  showToast: Boolean,
   onNavigate: (navigateEvent: NavigateEvent, income: NavigationIncomeDetails?) -> Unit,
   onEvent: (IncomeEvent) -> Unit = {}
 ) {
-  ModalNavigationDrawer(drawerState = drawerState, drawerContent = {
-    ModalDrawerSheet {
-      Row(modifier = Modifier.padding(start = 16.dp, top = 12.dp, bottom = 24.dp)) {
-        Text(text = "Expenses App", style = MaterialTheme.typography.bodyLarge)
-      }
-      Divider(thickness = 1.dp)
-      Row(
-        modifier = Modifier
-          .padding(start = 12.dp, end = 12.dp, top = 6.dp)
-          .fillMaxWidth()
-      ) {
-        FilledTonalButton(
-          onClick = { onNavigate(NavigateEvent.NavigateCardsScreen, null) },
-          contentPadding = PaddingValues(start = 24.dp)
+  val scope: CoroutineScope = rememberCoroutineScope()
+  val drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+
+  ModalNavigationDrawer(
+    drawerState = drawerState,
+    drawerContent = {
+      ModalDrawerSheet {
+        Row(modifier = Modifier.padding(start = 16.dp, top = 12.dp, bottom = 24.dp)) {
+          Text(text = "Expenses App", style = MaterialTheme.typography.bodyLarge)
+        }
+        Divider(thickness = 1.dp)
+        Row(
+          modifier = Modifier
+            .padding(start = 12.dp, end = 12.dp, top = 6.dp)
+            .fillMaxWidth()
         ) {
-          Icon(
-            painter = painterResource(id = R.drawable.baseline_credit_card_24),
-            contentDescription = ""
-          )
-          Spacer(modifier = Modifier.width(10.dp))
-          Text(text = "Tarjetas", textAlign = TextAlign.Start)
-          Spacer(modifier = Modifier.weight(1f))
+          FilledTonalButton(
+            onClick = { onNavigate(NavigateEvent.NavigateCardsScreen, null) },
+            contentPadding = PaddingValues(start = 24.dp)
+          ) {
+            Icon(
+              painter = painterResource(id = R.drawable.baseline_credit_card_24),
+              contentDescription = ""
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(text = "Tarjetas", textAlign = TextAlign.Start)
+            Spacer(modifier = Modifier.weight(1f))
+          }
         }
       }
     }
-  }) {
-    Scaffold(topBar = {
-      AppBar(title = "Ingresos",
-        navigationIcon = Icons.Rounded.Menu,
-        buttonText = "Refrescar",
-        onNavigationIconClick = {
-          scope.launch {
-            drawerState.apply {
-              if (isClosed) open() else close()
+  ) {
+    Scaffold(
+      topBar = {
+        AppBar(
+          title = "Ingresos",
+          navigationIcon = Icons.Rounded.Menu,
+          buttonText = "Refrescar",
+          onNavigationIconClick = {
+            scope.launch {
+              drawerState.apply {
+                if (isClosed) open() else close()
+              }
             }
           }
-        }) {
-        onEvent(IncomeEvent.FetchQuery)
+        ) {
+//        onEvent(IncomeEvent.FetchQuery)
+        }
+      },
+      floatingActionButton = {
+        FabAddIncome {
+          onNavigate(NavigateEvent.NavigationAddIncomeScreen, null)
+        }
       }
-    }, floatingActionButton = {
-      FabAddIncome {
-        onNavigate(NavigateEvent.NavigationAddIncomeScreen, null)
-      }
-    }) { paddingValues ->
+    ) { paddingValues ->
       Surface(
         modifier = Modifier
           .fillMaxSize()
@@ -180,7 +159,7 @@ fun IncomeScreenContent(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
           ) {
-            CircularProgressIndicator(strokeWidth = 6.dp)
+            //CircularProgressIndicator(strokeWidth = 6.dp)
           }
         } else {
           if (incomesMap?.isNotEmpty() == true) {
@@ -221,6 +200,26 @@ fun IncomeScreenContent(
           }
         }
       }
+
+      LaunchedEffect(key1 = backPressState) {
+        if (backPressState == BackPress.InitialTouch) {
+          delay(2000)
+          onEvent(IncomeEvent.BackPressIdle)
+        }
+      }
+
+      BackHandler(true) {
+        if (backPressState == BackPress.InitialTouch) {
+          onNavigate(NavigateEvent.NavigateLogin, null)
+        }
+        onEvent(IncomeEvent.BackPressInitialTouch)
+      }
+
+      if (showToast) {
+        Toast.makeText(LocalContext.current, "Presiona de nuevo para salir", Toast.LENGTH_LONG)
+          .show()
+        onEvent(IncomeEvent.CloseToast)
+      }
     }
   }
 }
@@ -237,7 +236,6 @@ fun IncomeItem(
       .fillMaxWidth()
       .wrapContentHeight()
       .clickable {
-        //TODO Passing id is not necessary anymore
         onNavigate(
           NavigateEvent.NavigateIncomeExpensesList, NavigationIncomeDetails(
             paymentDate = items[0].paymentDate.date

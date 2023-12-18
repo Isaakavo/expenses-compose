@@ -1,11 +1,11 @@
 package com.avocado.expensescompose.presentation.login
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.domain.login.usecase.LoginUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,14 +13,21 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+sealed class LoginEvent {
+  object UpdateUsername : LoginEvent()
+  object UpdatePassword : LoginEvent()
+  object ToggleViewPassword : LoginEvent()
+  object Login : LoginEvent()
+  object SetIsSuccess : LoginEvent()
+}
+
 data class LoginUiState(
   val username: String = "isaakhaas96@gmail.com",
   val password: String = "Weisses9622!",
   val isLoading: Boolean = false,
   val shouldShowPassword: Boolean = false,
   var userMessage: String? = null,
-  var isSuccess: Boolean = false,
-  val retryLogin: Boolean = false
+  var isSuccess: Boolean = false
 )
 
 @HiltViewModel
@@ -31,30 +38,31 @@ class LoginViewModel @Inject constructor(
   private val _uiState = MutableStateFlow(LoginUiState())
   val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
-  fun updateUsername(newValue: String) {
-    _uiState.update {
-      it.copy(username = newValue)
+  fun onEvent(event: LoginEvent, value: String) {
+    when (event) {
+      LoginEvent.ToggleViewPassword -> _uiState.update {
+        it.copy(shouldShowPassword = !it.shouldShowPassword)
+      }
+
+      LoginEvent.UpdatePassword -> _uiState.update {
+        it.copy(password = value)
+      }
+
+      LoginEvent.UpdateUsername -> _uiState.update {
+        it.copy(username = value)
+      }
+
+      LoginEvent.Login -> login()
+
+      LoginEvent.SetIsSuccess -> _uiState.update {
+        it.copy(isSuccess = false)
+      }
     }
   }
 
-  fun updatePassword(newValue: String) {
-    _uiState.update {
-      it.copy(password = newValue)
-    }
-  }
-
-  fun onToggleViewPassword() {
-    _uiState.update {
-      it.copy(shouldShowPassword = !it.shouldShowPassword)
-    }
-  }
-
-  //TODO if the token is available, remove the password field and add a
-  // "is not you? change your account option
-  // When a user changes the account, delete all saved tokens and make the call to the api
-  // to validate the user
+  //TODO refactor this
   fun login() {
-    viewModelScope.launch(Dispatchers.IO) {
+    viewModelScope.launch {
       _uiState.update {
         it.copy(isLoading = true)
       }
@@ -62,9 +70,6 @@ class LoginViewModel @Inject constructor(
         email = uiState.value.username,
         password = uiState.value.password
       )
-      _uiState.update {
-        it.copy(isLoading = false)
-      }
 
       if (loginResult.emailError != null) {
         _uiState.update {
@@ -79,8 +84,9 @@ class LoginViewModel @Inject constructor(
 
       when (loginResult.result) {
         is MyResult.Success -> {
+          Log.d("LoginViewModel", "Setting success")
           _uiState.update {
-            it.copy(isSuccess = true)
+            it.copy(isSuccess = true, isLoading = false)
           }
         }
 

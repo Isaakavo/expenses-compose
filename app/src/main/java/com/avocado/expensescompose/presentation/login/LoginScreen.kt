@@ -14,6 +14,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,17 +25,40 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import com.avocado.expensescompose.R
-import com.avocado.expensescompose.presentation.RoutesConstants
+import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 
 
 @Composable
 fun LoginScreen(
-  navController: NavHostController, viewModel: LoginViewModel = hiltViewModel()
+  viewModel: LoginViewModel = hiltViewModel(),
+  onNavigate: (navigateEvent: NavigateEvent, shouldNavigate: Boolean) -> Unit,
 ) {
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+  LaunchedEffect(key1 = uiState.isSuccess) {
+    onNavigate(NavigateEvent.NavigateIncomeOverview, uiState.isSuccess)
+  }
+
+  LoginScreenContent(
+    username = uiState.username,
+    password = uiState.password,
+    userMessage = uiState.userMessage ?: "",
+    shouldShowPassword = uiState.shouldShowPassword,
+    isLoading = uiState.isLoading,
+    onEvent = viewModel::onEvent,
+  )
+}
+
+@Composable
+fun LoginScreenContent(
+  username: String,
+  password: String,
+  userMessage: String,
+  shouldShowPassword: Boolean,
+  isLoading: Boolean,
+  onEvent: (event: LoginEvent, value: String) -> Unit,
+) {
   Box(modifier = Modifier.fillMaxSize()) {
     Column(
       modifier = Modifier.fillMaxSize(),
@@ -43,17 +67,17 @@ fun LoginScreen(
     ) {
       Text(text = "Iniciar Sesión", modifier = Modifier)
       OutlinedTextField(
-        value = uiState.username,
-        onValueChange = viewModel::updateUsername,
+        value = username,
+        onValueChange = { onEvent(LoginEvent.UpdateUsername, it) },
         placeholder = { Text(text = "User name") },
       )
       OutlinedTextField(
-        value = uiState.password,
-        onValueChange = viewModel::updatePassword,
+        value = password,
+        onValueChange = { onEvent(LoginEvent.UpdatePassword, it) },
         placeholder = { Text(text = "Password") },
         trailingIcon = {
-          IconButton(onClick = { viewModel.onToggleViewPassword() }) {
-            if (uiState.shouldShowPassword) Icon(
+          IconButton(onClick = { onEvent(LoginEvent.ToggleViewPassword, "") }) {
+            if (shouldShowPassword) Icon(
               painter = painterResource(id = R.drawable.baseline_visibility_24),
               contentDescription = "Mostrar contraseña"
             )
@@ -63,35 +87,26 @@ fun LoginScreen(
             )
           }
         },
-        visualTransformation = if (uiState.shouldShowPassword) VisualTransformation.None else PasswordVisualTransformation()
+        visualTransformation = if (shouldShowPassword) VisualTransformation.None else PasswordVisualTransformation()
       )
 
-      Button(onClick = { viewModel.login() }) {
+      Button(onClick = { onEvent(LoginEvent.Login, "") }) {
         Row(horizontalArrangement = Arrangement.SpaceBetween) {
-          if (uiState.isLoading) {
+          if (isLoading) {
             CircularProgressIndicator(
               color = Color.White,
               strokeWidth = 2.dp,
               modifier = Modifier
-                  .size(18.dp)
-                  .padding(top = 1.dp, end = 4.dp)
+                .size(18.dp)
+                .padding(top = 1.dp, end = 4.dp)
             )
           }
           Text(text = "Iniciar Sesión")
         }
       }
 
-      //TODO validate if this works
-      if (uiState.retryLogin) {
-        viewModel.login()
-      }
-
-      if (uiState.userMessage?.isNotBlank() == true) {
-        Text(text = uiState.userMessage!!)
-      }
-
-      if (uiState.isSuccess) {
-        navController.navigate(RoutesConstants.INCOME_OVERVIEW)
+      if (userMessage.isNotBlank()) {
+        Text(text = userMessage)
       }
     }
   }

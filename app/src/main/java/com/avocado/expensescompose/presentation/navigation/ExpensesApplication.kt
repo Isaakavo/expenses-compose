@@ -20,6 +20,7 @@ import com.avocado.expensescompose.presentation.login.LoginScreen
 
 sealed class NavigateEvent {
   object NavigateLogin : NavigateEvent()
+  object NavigateIncomeOverview : NavigateEvent()
   object NavigateIncomeExpensesList : NavigateEvent()
   object NavigationAddIncomeScreen : NavigateEvent()
   object NavigateCardsScreen : NavigateEvent()
@@ -38,6 +39,10 @@ private fun <T> navigate(navigateEvent: NavigateEvent, navController: NavControl
           inclusive = true
         }
       }
+    }
+
+    is NavigateEvent.NavigateIncomeOverview -> {
+      navController.navigate(RoutesConstants.INCOME_OVERVIEW)
     }
 
     is NavigateEvent.NavigateIncomeExpensesList -> {
@@ -75,7 +80,13 @@ fun ExpensesApplication() {
 
     // Login Screen
     composable(RoutesConstants.LOGIN_SCREEN) {
-      LoginScreen(navController)
+      LoginScreen(
+        onNavigate = {event, shouldNavigate ->
+          if (shouldNavigate) {
+            navigate(event, navController, null)
+          }
+        }
+      )
     }
 
     // Incomes Screen

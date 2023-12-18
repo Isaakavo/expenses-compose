@@ -1,9 +1,7 @@
 package com.avocado.expensescompose.presentation.incomes.homescreen
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.apollographql.apollo3.exception.ApolloException
 import com.avocado.HomeScreenAllIncomesQuery
 import com.avocado.expensescompose.data.adapters.graphql.fragments.toIncome
 import com.avocado.expensescompose.data.adapters.graphql.fragments.toTotal
@@ -31,16 +29,18 @@ data class IncomeState(
   val incomesMap: Map<String, MutableMap<String, MutableList<Income>?>>? = null,
   val totalByMonth: List<Total?> = emptyList(),
   val showAddButtons: Boolean = false,
-  val backPressState: BackPress? = null,
+  val backPressState: BackPress = BackPress.Idle,
   val showToast: Boolean = false,
   val isLoading: Boolean = false,
   val errorMessage: String = ""
 )
 
 sealed class IncomeEvent {
-  object FetchQuery : IncomeEvent()
+  //  object FetchQuery : IncomeEvent()
   object BackPressInitialTouch : IncomeEvent()
   object BackPressIdle : IncomeEvent()
+  object CloseToast : IncomeEvent()
+  object OpenToast : IncomeEvent()
 }
 
 @HiltViewModel
@@ -50,15 +50,14 @@ class IncomesViewModel @Inject constructor(
   private val _state = MutableStateFlow(IncomeState())
   val state = _state.asStateFlow()
 
-  fun updateToast(show: Boolean) = _state.update {
-    it.copy(showToast = show)
+  init {
+    viewModelScope.launch {
+      getAllIncomes()
+    }
   }
 
   fun onEvent(incomeEvent: IncomeEvent) {
     when (incomeEvent) {
-      is IncomeEvent.FetchQuery -> {
-        fetchQuery()
-      }
 
       is IncomeEvent.BackPressInitialTouch -> {
         _state.update {
@@ -71,12 +70,18 @@ class IncomesViewModel @Inject constructor(
           it.copy(backPressState = BackPress.Idle)
         }
       }
-    }
-  }
 
-  fun fetchQuery() {
-    viewModelScope.launch {
-      callQuery()
+      IncomeEvent.CloseToast -> {
+        _state.update {
+          it.copy(showToast = false)
+        }
+      }
+
+      IncomeEvent.OpenToast -> {
+        _state.update {
+          it.copy(showToast = true)
+        }
+      }
     }
   }
 
@@ -102,68 +107,52 @@ class IncomesViewModel @Inject constructor(
     return incomesMap.toMap()
   }
 
-  private suspend fun callQuery() {
+  private suspend fun getAllIncomes() {
     _state.update { it.copy(isLoading = true) }
-
-    try {
-      viewModelScope.launch {
-        graphQlClientImpl.query(HomeScreenAllIncomesQuery()).map {
-          val responseIncome = it.data
-          if (responseIncome != null) {
-            val incomesList = responseIncome.incomesList?.incomes?.map { item ->
-              item.incomeFragment.toIncome()
-            }
-            val totalByMonth = responseIncome.incomesList?.totalByMonth?.map { totalByMonth ->
-              totalByMonth.totalFragment.toTotal()
-            }
-
-            MyResult.Success(
-              Incomes(
-                incomesList = incomesList ?: emptyList(),
-                totalByMonth = totalByMonth ?: emptyList(),
-                total = responseIncome.incomesList?.total ?: 0.0
-              )
-            )
-          } else {
-            MyResult.Error(uiText = "error", data = null)
-          }
+    graphQlClientImpl.query(HomeScreenAllIncomesQuery()).map {
+      val responseIncome = it.data
+      if (responseIncome != null) {
+        val incomesList = responseIncome.incomesList?.incomes?.map { item ->
+          item.incomeFragment.toIncome()
         }
-          .catch {
-            Log.d("INCOMES_VIEW_MODEL", it.message.toString())
-            // TODO find a way to detect the type of apollo error and create an error screen
-            _state.emit(IncomeState(isLoading = false))
-          }
-          .collect { incomes ->
-            incomes.successOrError(
-              onSuccess = { success ->
-                val incomesList = success.data.incomesList
-                this.launch {
-                  _state.emit(
-                    IncomeState(
-                      incomesMap = getIncomesMap(incomesList),
-                      totalByMonth = success.data.totalByMonth,
-                      isLoading = false
-                    )
-                  )
-                }
-              },
-              onError = { error ->
-                _state.update {
-                  it.copy(
-                    errorMessage = error.uiText ?: ""
-                  )
-                }
-                Log.d("Incomes List", "Something went wrong ${error.uiText}")
-              })
-          }
+        val totalByMonth = responseIncome.incomesList?.totalByMonth?.map { totalByMonth ->
+          totalByMonth.totalFragment.toTotal()
+        }
 
+        MyResult.Success(
+          Incomes(
+            incomesList = incomesList ?: emptyList(),
+            totalByMonth = totalByMonth ?: emptyList(),
+            total = responseIncome.incomesList?.total ?: 0.0
+          )
+        )
+      } else {
+        MyResult.Error(uiText = "error", data = null)
       }
-    } catch (exception: ApolloException) {
-
-//      if (exception.statusCode == 401) {
-//
-//      }
     }
-
+      .catch {
+        // TODO find a way to detect the type of apollo error and create an error screen
+        _state.emit(IncomeState(isLoading = false))
+      }
+      .collect { incomes ->
+        incomes.successOrError(
+          onSuccess = { success ->
+            val incomesList = success.data.incomesList
+            _state.update {
+              it.copy(
+                incomesMap = getIncomesMap(incomesList),
+                totalByMonth = success.data.totalByMonth,
+                isLoading = false
+              )
+            }
+          },
+          onError = { error ->
+            _state.update {
+              it.copy(
+                errorMessage = error.uiText ?: ""
+              )
+            }
+          })
+      }
   }
 }
