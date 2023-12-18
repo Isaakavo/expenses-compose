@@ -1,18 +1,15 @@
 fragment expenseFragment on Expense {
     id
-    concept
+    category
+    createdAt
     comment
+    concept
     total
     payBefore
-    createdAt
     updatedAt
     card {
         id
         bank
         alias
-    }
-    tags {
-        id
-        name
     }
 }

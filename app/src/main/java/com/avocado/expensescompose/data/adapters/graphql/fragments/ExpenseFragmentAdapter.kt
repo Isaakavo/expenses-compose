@@ -13,6 +13,5 @@ fun ExpenseFragment.toExpense(): Expense = Expense(
   payBefore = payBefore.date,
   createdAt = createdAt?.date,
   updatedAt = updatedAt?.date,
-  tags = tags.map { ExpenseTag(id = it.id, name = it.name) },
   card = Card(id = card?.id ?: "", bank = card?.bank ?: "", alias = card?.alias ?: "")
 )

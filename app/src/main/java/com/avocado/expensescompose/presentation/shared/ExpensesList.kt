@@ -129,29 +129,6 @@ fun ExpenseListPreview() {
           bank = "Test",
           alias = "Tarjeta",
           id = "kajshdfkajd"
-        ),
-        tags = listOf(
-          ExpenseTag(
-            id = "1",
-            name = "Tag de prueba",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          ), ExpenseTag(
-            id = "1",
-            name = "Tag de prueba 2",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          ), ExpenseTag(
-            id = "1",
-            name = "Tag de prueba",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          ), ExpenseTag(
-            id = "1",
-            name = "Tag de prueba 2",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          )
         )
       ),
       Expense(
@@ -164,29 +141,6 @@ fun ExpenseListPreview() {
         card = com.avocado.expensescompose.data.model.card.Card(
           bank = "Test",
           id = "kajshdfkajd"
-        ),
-        tags = listOf(
-          ExpenseTag(
-            id = "1",
-            name = "Tag de prueba",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          ), ExpenseTag(
-            id = "1",
-            name = "Tag de prueba 2",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          ), ExpenseTag(
-            id = "1",
-            name = "Tag de prueba",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          ), ExpenseTag(
-            id = "1",
-            name = "Tag de prueba 2",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          )
         )
       ),
       Expense(
@@ -200,29 +154,6 @@ fun ExpenseListPreview() {
           bank = "Test",
           alias = "alv",
           id = "kajshdfkajd"
-        ),
-        tags = listOf(
-          ExpenseTag(
-            id = "1",
-            name = "Tag de prueba",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          ), ExpenseTag(
-            id = "1",
-            name = "Tag de prueba 2",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          ), ExpenseTag(
-            id = "1",
-            name = "Tag de prueba",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          ), ExpenseTag(
-            id = "1",
-            name = "Tag de prueba 2",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          )
         )
       ),
       Expense(
@@ -236,29 +167,6 @@ fun ExpenseListPreview() {
           bank = "Test",
           alias = "alv",
           id = "kajshdfkajd"
-        ),
-        tags = listOf(
-          ExpenseTag(
-            id = "1",
-            name = "Tag de prueba",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          ), ExpenseTag(
-            id = "1",
-            name = "Tag de prueba 2",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          ), ExpenseTag(
-            id = "1",
-            name = "Tag de prueba",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          ), ExpenseTag(
-            id = "1",
-            name = "Tag de prueba 2",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          )
         )
       ),
       Expense(
@@ -267,30 +175,7 @@ fun ExpenseListPreview() {
         concept = "Gasto de prueba sin tarjeta",
         createdAt = LocalDateTime.now(),
         comment = "",
-        id = "1",
-        tags = listOf(
-          ExpenseTag(
-            id = "1",
-            name = "Tag de prueba",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          ), ExpenseTag(
-            id = "1",
-            name = "Tag de prueba 2",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          ), ExpenseTag(
-            id = "1",
-            name = "Tag de prueba",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          ), ExpenseTag(
-            id = "1",
-            name = "Tag de prueba 2",
-            createdAt = LocalDateTime.now(),
-            updatedAt = LocalDateTime.now()
-          )
-        )
+        id = "1"
       ),
     )
   )

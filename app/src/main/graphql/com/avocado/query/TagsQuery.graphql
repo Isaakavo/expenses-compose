@@ -1,6 +1,0 @@
-query TagsQuery {
-  tags {
-    id
-    name
-  }
-}

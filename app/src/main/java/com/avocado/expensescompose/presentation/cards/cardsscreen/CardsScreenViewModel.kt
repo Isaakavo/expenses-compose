@@ -6,8 +6,8 @@ import com.apollographql.apollo3.api.Optional
 import com.apollographql.apollo3.exception.ApolloException
 import com.avocado.AllCardsQuery
 import com.avocado.CreateCardMutation
+import com.avocado.expensescompose.data.adapters.graphql.types.toCard
 import com.avocado.expensescompose.data.apolloclients.GraphQlClientImpl
-import com.avocado.expensescompose.data.apolloclients.cards.toCard
 import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.data.model.card.Card
 import com.avocado.type.CreateCardInput

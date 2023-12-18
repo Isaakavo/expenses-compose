@@ -4,6 +4,7 @@ import com.apollographql.apollo3.api.Adapter
 import com.apollographql.apollo3.api.CustomScalarAdapters
 import com.apollographql.apollo3.api.json.JsonReader
 import com.apollographql.apollo3.api.json.JsonWriter
+import com.avocado.expensescompose.presentation.util.formatDateToISO
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -25,3 +26,5 @@ val dateAdapter = object : Adapter<Date> {
     }
 
 }
+
+fun String.adaptDateForInput() = Date(this.formatDateToISO() ?: LocalDateTime.now())

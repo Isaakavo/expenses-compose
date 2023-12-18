@@ -1,4 +1,4 @@
-package com.avocado.expensescompose.data.apolloclients.cards
+package com.avocado.expensescompose.data.adapters.graphql.types
 
 import com.avocado.AllCardsQuery
 import com.avocado.expensescompose.data.model.card.Card

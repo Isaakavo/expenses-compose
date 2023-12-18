@@ -4,22 +4,15 @@ import android.content.Context
 import com.apollographql.apollo3.ApolloClient
 import com.avocado.expensescompose.BuildConfig
 import com.avocado.expensescompose.data.apolloclients.GraphQlClientImpl
-import com.avocado.expensescompose.data.apolloclients.cards.ApolloCardsClient
 import com.avocado.expensescompose.data.apolloclients.incomes.ApolloIncomesClient
-import com.avocado.expensescompose.data.apolloclients.tags.ApolloTagsClient
 import com.avocado.expensescompose.domain.income.IncomesClient
 import com.avocado.expensescompose.data.interceptor.AuthorizationInterceptor
 import com.avocado.expensescompose.presentation.util.Constants
 import com.avocado.expensescompose.data.network.LoginJwtClient
 import com.avocado.expensescompose.data.repositories.AuthRepository
 import com.avocado.expensescompose.data.repositories.TokenManagerRepository
-import com.avocado.expensescompose.domain.cards.CardsClient
-import com.avocado.expensescompose.domain.cards.usecase.GetCardsUseCase
-import com.avocado.expensescompose.domain.expense.CreateExpenseUseCase
 import com.avocado.expensescompose.domain.income.usecase.CreateIncomeUseCase
 import com.avocado.expensescompose.domain.income.usecase.GetIncomeByIdWithExpensesUseCase
-import com.avocado.expensescompose.domain.tags.TagsClient
-import com.avocado.expensescompose.domain.tags.usecase.GetTagsUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -79,21 +72,6 @@ object AppModule {
 
   @Provides
   @Singleton
-  fun provideTagsClient(apolloClient: ApolloClient): TagsClient =
-    ApolloTagsClient(apolloClient)
-
-  @Provides
-  @Singleton
-  fun provideCardsClient(apolloClient: ApolloClient): CardsClient =
-    ApolloCardsClient(apolloClient)
-
-  @Provides
-  @Singleton
-  fun provideExpensesUseCase(graphQlClient: GraphQlClientImpl): CreateExpenseUseCase =
-    CreateExpenseUseCase(graphQlClient)
-
-  @Provides
-  @Singleton
   fun provideIncomesClient(apolloClient: ApolloClient): IncomesClient =
     ApolloIncomesClient(apolloClient)
 
@@ -106,16 +84,6 @@ object AppModule {
   @Singleton
   fun provideGetIncomeByIdWithExpensesUseCase(incomesClient: IncomesClient): GetIncomeByIdWithExpensesUseCase =
     GetIncomeByIdWithExpensesUseCase(incomesClient)
-
-  @Provides
-  @Singleton
-  fun provideGetTagsUseCase(tagsClient: TagsClient): GetTagsUseCase =
-    GetTagsUseCase(tagsClient)
-
-  @Provides
-  @Singleton
-  fun provideGetCardsUseCase(cardsClient: CardsClient): GetCardsUseCase =
-    GetCardsUseCase(cardsClient)
 
   @Provides
   @Singleton

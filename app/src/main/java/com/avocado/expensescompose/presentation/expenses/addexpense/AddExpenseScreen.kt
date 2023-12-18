@@ -6,30 +6,24 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.InputChip
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,15 +36,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.model.card.Card
-import com.avocado.expensescompose.domain.tags.models.Tag
-import com.avocado.expensescompose.presentation.shared.ClickableTextField
 import com.avocado.expensescompose.presentation.shared.DateDialog
 import com.avocado.expensescompose.presentation.topbar.AppBar
+import com.avocado.type.Category
 import kotlinx.coroutines.launch
 
 const val ADD_EXPENSE_SCREEN_LOG = "AddExpenseScreen"
@@ -75,17 +67,15 @@ fun AddExpenseScreen(
   AddExpenseScreenContent(
     cards = state.cardsList,
     selectedCard = state.selectedCard,
-    tags = state.tagList,
+    categories = state.category,
     loadingCard = state.loadingCard,
-    newTag = state.newTag,
-    newTags = state.newTags,
     concept = state.concept,
     comment = state.comment,
     total = state.total,
     date = state.date,
     openDateDialog = state.openDateDialog,
-    openTagDialog = state.openTagDialog,
     openCardMenu = state.openCardMenu,
+    openCategoryList = state.openCategoryList,
     expenseAdded = state.expenseAdded,
     expenseAddedError = state.expenseAddedError,
     onEvent = viewModel::onEvent,
@@ -98,17 +88,15 @@ fun AddExpenseScreen(
 fun AddExpenseScreenContent(
   cards: List<Card>,
   selectedCard: Card?,
-  tags: List<Tag>,
+  categories: Category,
   loadingCard: Boolean,
-  newTag: String,
-  newTags: List<String>,
   concept: String,
   comment: String,
   total: String,
   date: String,
   openDateDialog: Boolean,
-  openTagDialog: Boolean,
   openCardMenu: Boolean,
+  openCategoryList: Boolean,
   expenseAdded: Boolean,
   expenseAddedError: Boolean,
   onEvent: (event: AddExpenseEvent, elementId: String?) -> Unit,
@@ -202,50 +190,25 @@ fun AddExpenseScreenContent(
             painter = painterResource(id = R.drawable.baseline_credit_card_24),
             contentDescription = "Credit card"
           )
-          ExposedDropdownMenuBox(
+          DropDownMenu(
             expanded = openCardMenu,
-            onExpandedChange = {
-              if (openCardMenu) {
-                onEvent(AddExpenseEvent.CloseCardMenu, null)
-              } else {
-                onEvent(AddExpenseEvent.OpenCardMenu, null)
-              }
-            }
+            textFieldLabel = "Asociar Tarjeta",
+            textFieldValue = selectedCard?.aliasWithBankText() ?: selectedCard?.bank ?: "",
+            textFieldEnabled = cards.isNotEmpty(),
+            dropDownMenuEnabled = cards.isEmpty() && !loadingCard,
+            onOpenEvent = { onEvent(AddExpenseEvent.OpenCardMenu, null) },
+            onCloseEvent = { onEvent(AddExpenseEvent.CloseCardMenu, null) }
           ) {
-            OutlinedTextField(
-              readOnly = true,
-              value = selectedCard?.aliasWithBankText() ?: selectedCard?.bank ?: "",
-              onValueChange = { },
-              label = { Text("Asociar Tarjeta") },
-              trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(
-                  expanded = openCardMenu
-                )
-              },
-              enabled = cards.isNotEmpty(),
-              modifier = Modifier.menuAnchor()
-              // colors = ExposedDropdownMenuDefaults.textFieldColors()
-            )
-            ExposedDropdownMenu(
-              expanded = if (cards.isEmpty() && !loadingCard) {
-                false
-              } else openCardMenu,
-              onDismissRequest = {
-                onEvent(AddExpenseEvent.CloseCardMenu, null)
-              },
-            ) {
-              Log.d(ADD_EXPENSE_SCREEN_LOG, "Number of cards: ${cards.size}")
-              cards.map {
-                DropdownMenuItem(
-                  text = {
-                    Text(text = "${it.alias}-${it.bank}")
-                  },
-                  onClick = {
-                    onEvent(AddExpenseEvent.SelectCard, it.id)
-                    onEvent(AddExpenseEvent.CloseCardMenu, null)
-                  }
-                )
-              }
+            cards.map {
+              DropdownMenuItem(
+                text = {
+                  Text(text = "${it.alias}-${it.bank}")
+                },
+                onClick = {
+                  onEvent(AddExpenseEvent.SelectCard, it.id)
+                  onEvent(AddExpenseEvent.CloseCardMenu, null)
+                }
+              )
             }
           }
         }
@@ -254,35 +217,73 @@ fun AddExpenseScreenContent(
             painter = painterResource(id = R.drawable.round_sell_24),
             contentDescription = "Tags"
           )
-          ClickableTextField(value = newTags.toString(), label = "Agregar nuevo tag") {
-            onEvent(AddExpenseEvent.TagDialogOpen, null)
-          }
-          if (openTagDialog) {
-            AddTagsDialog(
-              value = newTag,
-              onDismiss = { onEvent(AddExpenseEvent.TagDialogClose, null) },
-              onConfirm = {
-                onEvent(AddExpenseEvent.AddNewTag, null)
-                onEvent(AddExpenseEvent.TagDialogClose, null)
-              },
-              onValueChange = { onEvent(AddExpenseEvent.UpdateNewTag, it) }
-            )
-          }
-        }
-        Row(modifier = Modifier.fillMaxWidth()) {
-          Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(text = "Tags disponibles")
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-              tags.map {
-                InputChip(
-                  selected = it.selected,
-                  onClick = { onEvent(AddExpenseEvent.SelectTag, it.id) },
-                  label = { Text(text = it.name) })
-              }
+          DropDownMenu(
+            expanded = openCategoryList,
+            textFieldLabel = "Categorias",
+            textFieldValue = categories.name,
+            onOpenEvent = { onEvent(AddExpenseEvent.CategoryListOpen, null) },
+            onCloseEvent = { onEvent(AddExpenseEvent.CategoryListClose, null) }) {
+            Category.values().map {
+              Log.d("Categories", it.name)
+              DropdownMenuItem(
+                text = {
+                  Text(text = it.name)
+                },
+                onClick = {
+                  onEvent(AddExpenseEvent.SelectCategory, it.name)
+                  onEvent(AddExpenseEvent.CategoryListClose, null)
+                }
+              )
             }
           }
         }
       }
+    }
+  }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DropDownMenu(
+  expanded: Boolean,
+  textFieldLabel: String,
+  textFieldValue: String,
+  textFieldEnabled: Boolean = true,
+  dropDownMenuEnabled: Boolean = false,
+  onOpenEvent: () -> Unit,
+  onCloseEvent: () -> Unit,
+  menuItems: @Composable () -> Unit
+) {
+  ExposedDropdownMenuBox(
+    expanded = expanded,
+    onExpandedChange = {
+      if (expanded) {
+        onCloseEvent()
+      } else {
+        onOpenEvent()
+      }
+    }
+  ) {
+    OutlinedTextField(
+      readOnly = true,
+      value = textFieldValue,
+      onValueChange = { },
+      label = { Text(textFieldLabel) },
+      trailingIcon = {
+        ExposedDropdownMenuDefaults.TrailingIcon(
+          expanded = expanded
+        )
+      },
+      enabled = textFieldEnabled,
+      modifier = Modifier.menuAnchor()
+    )
+    ExposedDropdownMenu(
+      expanded = if (dropDownMenuEnabled) false else expanded,
+      onDismissRequest = {
+        onCloseEvent()
+      },
+    ) {
+      menuItems()
     }
   }
 }
@@ -295,62 +296,6 @@ fun AddExpenseRow(content: @Composable () -> Unit) {
     verticalAlignment = Alignment.CenterVertically
   ) {
     content()
-  }
-}
-
-@Composable
-fun AddTagsDialog(
-  value: String,
-  onDismiss: () -> Unit,
-  onConfirm: () -> Unit,
-  onValueChange: (String) -> Unit
-) {
-  Dialog(onDismissRequest = { onDismiss() }) {
-    Card(
-      modifier = Modifier
-        .fillMaxWidth()
-        .height(275.dp)
-        .padding(16.dp),
-      shape = RoundedCornerShape(16.dp),
-    ) {
-      Column(
-        modifier = Modifier
-          .fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-      ) {
-        Text(text = "Añadir nuevo tag", modifier = Modifier.padding(16.dp))
-        Row(
-          modifier = Modifier
-            .fillMaxWidth(),
-          horizontalArrangement = Arrangement.Center,
-        ) {
-          OutlinedTextField(
-            value = value,
-            onValueChange = { onValueChange(it) },
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp)
-          )
-        }
-        Row(
-          modifier = Modifier
-            .fillMaxWidth(),
-          horizontalArrangement = Arrangement.Center,
-        ) {
-          TextButton(
-            onClick = { onDismiss() },
-            modifier = Modifier.padding(8.dp),
-          ) {
-            Text("Cancelar")
-          }
-          TextButton(
-            onClick = { onConfirm() },
-            modifier = Modifier.padding(8.dp),
-          ) {
-            Text("Aceptar")
-          }
-        }
-      }
-    }
   }
 }
 

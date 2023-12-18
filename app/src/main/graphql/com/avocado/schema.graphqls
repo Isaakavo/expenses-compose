@@ -6,6 +6,34 @@ enum Fortnight {
   SECOND
 }
 
+enum Category {
+  BILLS
+
+  CAR
+
+  CLOTHES
+
+  COMMUNICATION
+
+  EATING_OUT
+
+  ENTERTAINMENT
+
+  FOOD
+
+  GIFTS
+
+  HEALTH
+
+  HOUSE
+
+  PETS
+
+  SPORTS
+
+  TRANSPORT
+}
+
 interface Total {
   date: String!
 
@@ -115,21 +143,11 @@ type Expense {
 
   updatedAt: Date
 
-  tags: [ExpenseTag!]!
-
   card: Card
 
   comment: String
-}
 
-type ExpenseTag {
-  id: ID!
-
-  name: String!
-
-  createdAt: Date
-
-  updatedAt: Date
+  category: Category!
 }
 
 type FinancialBalance {
@@ -165,9 +183,9 @@ input CreateExpenseInput {
 
   payBefore: Date!
 
-  tags: [ExpenseTagInput!]!
-
   comment: String
+
+  category: Category!
 }
 
 input CreateCardInput {
@@ -186,10 +204,6 @@ input PayBeforeInput {
   cardId: ID
 }
 
-input ExpenseTagInput {
-  name: String
-}
-
 type Query {
   incomesList: IncomesList
 
@@ -204,8 +218,6 @@ type Query {
   allExpenses: [Expense]
 
   financialBalanceByFortnight(input: PayBeforeInput!): FinancialBalance
-
-  tags: [ExpenseTag]
 
   cardList: [Card]
 
