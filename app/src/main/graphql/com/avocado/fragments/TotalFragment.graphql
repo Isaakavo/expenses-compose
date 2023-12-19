@@ -2,4 +2,5 @@ fragment totalFragment on Total {
     date
     month
     total
+    year
 }

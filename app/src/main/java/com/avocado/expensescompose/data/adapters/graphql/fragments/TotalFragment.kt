@@ -7,12 +7,14 @@ import com.avocado.fragment.TotalFragment
 fun TotalFragment.toTotal(): Total = Total(
   date = date,
   month = month,
-  total = total
+  total = total,
+  year = year
 )
 
 fun TotalFragment.toTotalFortnight(fortnight: String): TotalFortnight = TotalFortnight(
   date = date,
   month = month,
   total = total,
-  fortnight = fortnight
+  fortnight = fortnight,
+  year = year
 )

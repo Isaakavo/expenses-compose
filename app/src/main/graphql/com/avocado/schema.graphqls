@@ -42,6 +42,8 @@ interface Total {
   total: Float!
 
   month: String!
+
+  year: String!
 }
 
 """
@@ -85,6 +87,8 @@ type TotalByMonth implements Total {
   total: Float!
 
   month: String!
+
+  year: String!
 }
 
 type TotalByFortnight implements Total {
@@ -95,6 +99,8 @@ type TotalByFortnight implements Total {
   fortnight: Fortnight!
 
   total: Float!
+
+  year: String!
 }
 
 type IncomesList {
