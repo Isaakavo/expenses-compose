@@ -33,14 +33,13 @@ fun ExpensesByCardScreen(
   viewModel: ExpensesByCardViewModel = hiltViewModel(),
   cardId: String,
   payBefore: String,
-  querySelector: DataSelector,
   onPopBackStack: () -> Unit = {},
 ) {
 
   val state by viewModel.state.collectAsStateWithLifecycle()
 
   LaunchedEffect(key1 = Unit) {
-    when (querySelector) {
+    when (state.querySelector) {
       DataSelector.FORTNIGHT -> {
         Log.d("ExpensesByCardScreen", "Querying fortnight")
         viewModel.getExpensesByFortnight(payBefore = payBefore, cardId = cardId)
@@ -103,7 +102,11 @@ fun CardExpensesDetails(expensesTotal: Double, payBefore: String) {
         modifier = Modifier
           .fillMaxWidth()
       ) {
-        Text(text = payBefore.formatDateOnlyMonth(), fontSize = 18.sp, fontWeight = FontWeight.Normal)
+        Text(
+          text = payBefore.formatDateOnlyMonth(),
+          fontSize = 18.sp,
+          fontWeight = FontWeight.Normal
+        )
       }
       Row(
         modifier = Modifier

@@ -12,6 +12,7 @@ import com.avocado.expensescompose.data.apolloclients.GraphQlClientImpl
 import com.avocado.expensescompose.data.model.card.Card
 import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.data.model.successOrError
+import com.avocado.expensescompose.presentation.cards.expensestotalbycard.DataSelector
 import com.avocado.expensescompose.presentation.util.formatDateForRequestPayBefore
 import com.avocado.type.PayBeforeInput
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,7 +25,8 @@ import javax.inject.Inject
 data class ExpensesByCardState(
   val expensesList: List<Expense> = emptyList(),
   val expenseTotal: Double = 0.0,
-  val card: Card? = null
+  val card: Card? = null,
+  val querySelector: DataSelector = DataSelector.FORTNIGHT
 )
 
 @HiltViewModel

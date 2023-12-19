@@ -19,6 +19,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,7 +43,9 @@ fun ExpensesTotalByCardScreen(
   onNavigate: (navigateEvent: NavigateEvent, param: String) -> Unit,
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
-  viewModel.fetchData(cardId)
+  LaunchedEffect(key1 = Unit) {
+    viewModel.fetchData(cardId)
+  }
 
   CardWithExpenseContent(
     totalByMonth = state.totalByMonthList,
@@ -125,7 +128,7 @@ fun TotalByFortnight(
         .clickable {
           onNavigate(
             NavigateEvent.NavigateExpensesByCardScreen,
-            "${item.date}/$cardId/${DataSelector.FORTNIGHT}"
+            "${item.date}/$cardId"
           )
         }) {
         Column(modifier = Modifier.padding(12.dp)) {
@@ -159,7 +162,7 @@ fun TotalByMonth(
         .clickable {
           onNavigate(
             NavigateEvent.NavigateExpensesByCardScreen,
-            "${item.date}/$cardId/${DataSelector.MONTH}"
+            "${item.date}/$cardId"
           )
         }) {
         Column(modifier = Modifier.padding(12.dp)) {
@@ -192,10 +195,16 @@ fun CardDataDropDownMenu(
         onDismissRequest = { onEvent(ExpensesTotalByCardEvent.CloseDropDownMenu) }) {
         DropdownMenuItem(
           text = { Text(text = "Quincenal") },
-          onClick = { onEvent(ExpensesTotalByCardEvent.FortnightData) })
+          onClick = {
+            onEvent(ExpensesTotalByCardEvent.FortnightData)
+            onEvent(ExpensesTotalByCardEvent.CloseDropDownMenu)
+          })
         DropdownMenuItem(
           text = { Text(text = "Mensual") },
-          onClick = { onEvent(ExpensesTotalByCardEvent.MonthData) })
+          onClick = {
+            onEvent(ExpensesTotalByCardEvent.MonthData)
+            onEvent(ExpensesTotalByCardEvent.CloseDropDownMenu)
+          })
       }
     }
   }

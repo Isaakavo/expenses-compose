@@ -20,6 +20,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -41,7 +42,10 @@ fun IncomeExpensesScreen(
   onNavigate: (navigateEvent: NavigateEvent) -> Unit = {}
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
-  viewModel.getIncomesWithExpenses(paymentDate)
+
+  LaunchedEffect(key1 = paymentDate) {
+    viewModel.getIncomesWithExpenses(paymentDate)
+  }
 
   IncomeWithExpensesContent(
     incomesTotal = state.incomesTotal,

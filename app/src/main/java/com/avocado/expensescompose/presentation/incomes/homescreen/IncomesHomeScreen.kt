@@ -139,7 +139,6 @@ fun IncomeScreenContent(
             }
           }
         ) {
-//        onEvent(IncomeEvent.FetchQuery)
         }
       },
       floatingActionButton = {
