@@ -27,6 +27,8 @@ enum Category {
 
   HOUSE
 
+  INSURANCE
+
   PETS
 
   SPORTS
