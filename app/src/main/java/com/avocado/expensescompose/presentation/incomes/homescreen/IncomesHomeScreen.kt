@@ -152,7 +152,6 @@ fun IncomeScreenContent(
         AppBar(
           title = "Ingresos",
           navigationIcon = Icons.Rounded.Menu,
-          buttonText = "Refrescar",
           onNavigationIconClick = {
             scope.launch {
               drawerState.apply {
@@ -160,8 +159,7 @@ fun IncomeScreenContent(
               }
             }
           }
-        ) {
-        }
+        )
       },
       snackbarHost = {
         SnackbarHost(hostState = snackBarHostState)

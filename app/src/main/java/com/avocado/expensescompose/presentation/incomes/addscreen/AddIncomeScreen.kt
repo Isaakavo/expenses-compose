@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
@@ -18,8 +19,11 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -66,6 +70,7 @@ fun AddIncomeContent(
   val calendar = Calendar.getInstance()
   calendar.set(2023, 8, 30) // add year, month (Jan), date
   val datePickerState = rememberDatePickerState(initialSelectedDateMillis = initialDate)
+  val focusRequester = remember { FocusRequester() }
 
   Scaffold(
     topBar = {
@@ -106,7 +111,10 @@ fun AddIncomeContent(
           value = total,
           label = { Text(text = "Total") },
           onValueChange = { onEvent(AddIncomeEvent.UpdateTotal, it) },
-          keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+          keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Decimal,
+            imeAction = ImeAction.Next
+          )
         )
 
         OutlinedTextField(
@@ -114,6 +122,13 @@ fun AddIncomeContent(
           label = { Text(text = "Comentarios") },
           onValueChange = { onEvent(AddIncomeEvent.UpdateComment, it) },
           maxLines = 12,
+          keyboardOptions = KeyboardOptions(
+            imeAction = ImeAction.Done
+          ),
+          keyboardActions = KeyboardActions(
+            onNext = { focusRequester.requestFocus() },
+            onDone = { onEvent(AddIncomeEvent.InsertIncome, null) }
+          )
         )
       }
 

@@ -5,7 +5,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -59,9 +58,9 @@ fun AddExpenseScreen(
     viewModel.resetToast()
   }
 
-//  if (state.isAdded) {
-//    onPopBackStack()
-//  }
+  if (state.isAdded) {
+    onPopBackStack()
+  }
 
   AddExpenseScreenContent(
     cards = state.cardsList,
@@ -82,7 +81,7 @@ fun AddExpenseScreen(
   )
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddExpenseScreenContent(
   cards: List<Card>,
@@ -105,7 +104,6 @@ fun AddExpenseScreenContent(
   val scope = rememberCoroutineScope()
   val snackBarHostState = remember { SnackbarHostState() }
 
-  //TODO implement snack bar
   LaunchedEffect(key1 = snackBarHostState) {
     if (expenseAdded || expenseAddedError) {
       scope.launch {
