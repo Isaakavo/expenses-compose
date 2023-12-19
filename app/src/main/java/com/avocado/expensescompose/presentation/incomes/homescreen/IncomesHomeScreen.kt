@@ -32,12 +32,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -67,14 +70,23 @@ data class NavigationIncomeDetails(
 
 @Composable
 fun IncomesScreen(
+  shouldRefresh: Boolean = false,
+  isSuccessLogin: Boolean = false,
   viewModel: IncomesViewModel = hiltViewModel(),
   onNavigate: (navigateEvent: NavigateEvent, income: NavigationIncomeDetails?) -> Unit
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
 
+  LaunchedEffect(key1 = Unit) {
+    if (shouldRefresh || isSuccessLogin) {
+      viewModel.onEvent(IncomeEvent.FetchIncomes)
+    }
+  }
+
   IncomeScreenContent(
     backPressState = state.backPressState,
     isLoading = state.isLoading,
+    shouldRefresh = shouldRefresh,
     incomesMap = state.incomesMap,
     totalByMonth = state.totalByMonth,
     showToast = state.showToast,
@@ -87,6 +99,7 @@ fun IncomesScreen(
 fun IncomeScreenContent(
   backPressState: BackPress?,
   isLoading: Boolean,
+  shouldRefresh: Boolean,
   incomesMap: Map<String, MutableMap<String, MutableList<Income>?>>?,
   totalByMonth: List<Total?>,
   showToast: Boolean,
@@ -95,6 +108,15 @@ fun IncomeScreenContent(
 ) {
   val scope: CoroutineScope = rememberCoroutineScope()
   val drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+  val snackBarHostState = remember { SnackbarHostState() }
+
+  if (shouldRefresh) {
+    LaunchedEffect(key1 = Unit) {
+      scope.launch {
+        snackBarHostState.showSnackbar("Income added successfully")
+      }
+    }
+  }
 
   ModalNavigationDrawer(
     drawerState = drawerState,
@@ -140,6 +162,9 @@ fun IncomeScreenContent(
           }
         ) {
         }
+      },
+      snackbarHost = {
+        SnackbarHost(hostState = snackBarHostState)
       },
       floatingActionButton = {
         FabAddIncome {

@@ -32,12 +32,12 @@ import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 @Composable
 fun LoginScreen(
   viewModel: LoginViewModel = hiltViewModel(),
-  onNavigate: (navigateEvent: NavigateEvent, shouldNavigate: Boolean) -> Unit,
+  onNavigate: (navigateEvent: NavigateEvent, shouldRefresh: Boolean, isSuccessLogin: Boolean) -> Unit,
 ) {
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
   LaunchedEffect(key1 = uiState.isSuccess) {
-    onNavigate(NavigateEvent.NavigateIncomeOverview, uiState.isSuccess)
+    onNavigate(NavigateEvent.NavigateIncomeOverview, false, uiState.isSuccess)
   }
 
   LoginScreenContent(

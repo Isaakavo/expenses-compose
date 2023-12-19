@@ -41,6 +41,7 @@ sealed class IncomeEvent {
   object BackPressIdle : IncomeEvent()
   object CloseToast : IncomeEvent()
   object OpenToast : IncomeEvent()
+  object FetchIncomes : IncomeEvent()
 }
 
 @HiltViewModel
@@ -49,12 +50,6 @@ class IncomesViewModel @Inject constructor(
 ) : ViewModel() {
   private val _state = MutableStateFlow(IncomeState())
   val state = _state.asStateFlow()
-
-  init {
-    viewModelScope.launch {
-      getAllIncomes()
-    }
-  }
 
   fun onEvent(incomeEvent: IncomeEvent) {
     when (incomeEvent) {
@@ -80,6 +75,12 @@ class IncomesViewModel @Inject constructor(
       IncomeEvent.OpenToast -> {
         _state.update {
           it.copy(showToast = true)
+        }
+      }
+
+      IncomeEvent.FetchIncomes -> {
+        viewModelScope.launch {
+          getAllIncomes()
         }
       }
     }

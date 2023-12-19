@@ -1,13 +1,9 @@
 package com.avocado.expensescompose.presentation.incomes.addscreen
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.avocado.expensescompose.presentation.util.formatDateToISO
-import com.avocado.expensescompose.data.model.MyResult
+import com.avocado.expensescompose.data.model.successOrError
 import com.avocado.expensescompose.domain.income.models.Income
 import com.avocado.expensescompose.domain.income.usecase.CreateIncomeUseCase
 import com.avocado.expensescompose.presentation.util.formatDateWithYear
@@ -25,6 +21,8 @@ sealed class AddIncomeEvent {
   object UpdateDate : AddIncomeEvent()
   object DateDialogOpen : AddIncomeEvent()
   object DateDialogClose : AddIncomeEvent()
+  object UpdateTotal : AddIncomeEvent()
+  object UpdateComment : AddIncomeEvent()
 }
 
 data class AddIncomeState(
@@ -33,6 +31,10 @@ data class AddIncomeState(
   val userMessage: String = "",
   val date: String = "",
   val openDateDialog: Boolean = false,
+  val total: String = "",
+  val comments: String = "",
+  val initialDate: Long = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()
+    .toEpochMilli()
 )
 
 // TODO refactor this code to use events to update the values
@@ -48,57 +50,24 @@ class AddIncomeViewModel @Inject constructor(
     _state.update { it.copy(date = LocalDateTime.now().formatDateWithYear()) }
   }
 
-  var initialDate by mutableLongStateOf(
-    LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
-  )
-
-  var total by mutableStateOf("0.0")
-    private set
-
-  var comments by mutableStateOf("")
-    private set
-
-  fun setComment(input: String) {
-    comments = input
-  }
-
-  fun setTotalIncome(input: String) {
-    total = input
-  }
-
-  fun resetInputs() {
-    total = ""
-    comments = ""
-  }
-
-  fun closeDialog() {
-    _state.update {
-      it.copy(isInserted = false)
-    }
-  }
-
   fun onEvent(addIncomeEvent: AddIncomeEvent, param: String? = null) {
     when (addIncomeEvent) {
       is AddIncomeEvent.InsertIncome -> {
         viewModelScope.launch {
           val insertedIncome = createIncomeUseCase(
-            total = total.toDouble(),
+            total = _state.value.total.toDouble(),
             paymentDate = _state.value.date.formatDateToISO() ?: LocalDateTime.now(),
-            comment = comments
+            comment = _state.value.comments
           )
 
-          when (insertedIncome) {
-            is MyResult.Success -> {
+          insertedIncome.successOrError(
+            onSuccess = {
               _state.update {
-                it.copy(isInserted = true, insertedIncome = insertedIncome.data)
+                it.copy(isInserted = true, insertedIncome = it.insertedIncome)
               }
-            }
-
-            //TODO create toast for when the mutation fails
-            is MyResult.Error -> {
-
-            }
-          }
+            },
+            onError = {}
+          )
         }
       }
 
@@ -112,6 +81,14 @@ class AddIncomeViewModel @Inject constructor(
 
       AddIncomeEvent.DateDialogOpen -> {
         _state.update { it.copy(openDateDialog = true) }
+      }
+
+      AddIncomeEvent.UpdateComment -> {
+        _state.update { it.copy(comments = param as String) }
+      }
+
+      AddIncomeEvent.UpdateTotal -> {
+        _state.update { it.copy(total = param as String) }
       }
     }
   }

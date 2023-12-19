@@ -41,7 +41,7 @@ private fun <T> navigate(navigateEvent: NavigateEvent, navController: NavControl
     }
 
     is NavigateEvent.NavigateIncomeOverview -> {
-      navController.navigate(RoutesConstants.INCOME_OVERVIEW)
+      navController.navigate("${RoutesConstants.INCOME_OVERVIEW}/${param}")
     }
 
     is NavigateEvent.NavigateIncomeExpensesList -> {
@@ -51,7 +51,12 @@ private fun <T> navigate(navigateEvent: NavigateEvent, navController: NavControl
     }
 
     is NavigateEvent.NavigationAddIncomeScreen -> {
-      navController.navigate(RoutesConstants.INCOME_ADD)
+      navController.navigate(RoutesConstants.INCOME_ADD) {
+        launchSingleTop = true
+        popUpTo("${RoutesConstants.INCOME_OVERVIEW}/${param}") {
+          inclusive = true
+        }
+      }
     }
 
     is NavigateEvent.NavigateCardsScreen -> {
@@ -80,17 +85,27 @@ fun ExpensesApplication() {
     // Login Screen
     composable(RoutesConstants.LOGIN_SCREEN) {
       LoginScreen(
-        onNavigate = { event, shouldNavigate ->
-          if (shouldNavigate) {
-            navigate(event, navController, null)
+        onNavigate = { event, shouldRefresh, isSuccessLogin ->
+          if (isSuccessLogin) {
+            navigate(event, navController, "$shouldRefresh/$isSuccessLogin")
           }
         }
       )
     }
 
     // Incomes Screen
-    composable(RoutesConstants.INCOME_OVERVIEW) {
+    composable(
+      "${RoutesConstants.INCOME_OVERVIEW}/{shouldRefresh}/{isSuccessLogin}",
+      arguments = listOf(
+        navArgument("shouldRefresh") { type = NavType.BoolType },
+        navArgument("isSuccessLogin") { type = NavType.BoolType }
+      )
+    ) {
+      val shouldRefresh = it.arguments?.getBoolean("shouldRefresh") ?: false
+      val isSuccessLogin = it.arguments?.getBoolean("isSuccessLogin") ?: false
       IncomesScreen(
+        shouldRefresh = shouldRefresh,
+        isSuccessLogin = isSuccessLogin,
         onNavigate = { navigateEventVal, incomeDetails ->
           navigate(navigateEventVal, navController, incomeDetails?.paymentDate.toString())
         }
@@ -117,9 +132,11 @@ fun ExpensesApplication() {
 
     // Add Income Screen
     composable(RoutesConstants.INCOME_ADD) {
-      AddIncomeScreen {
-        navController.popBackStack()
-      }
+      AddIncomeScreen(
+        onPopBackStack = { navController.popBackStack() },
+        onNavigate = { navigateEvent, shouldRefresh, isSuccessLogin ->
+          navigate(navigateEvent, navController, "$shouldRefresh/$isSuccessLogin")
+        })
     }
 
     // Add Expense Screen
