@@ -26,7 +26,7 @@ sealed class BackPress {
 }
 
 data class IncomeState(
-  val incomesMap: Map<String, MutableMap<String, MutableList<Income>?>>? = null,
+  val incomesMap: Map<String, MutableMap<String, MutableMap<String, MutableList<Income>?>>>? = null,
   val totalByMonth: List<Total?> = emptyList(),
   val showAddButtons: Boolean = false,
   val backPressState: BackPress = BackPress.Idle,
@@ -86,26 +86,43 @@ class IncomesViewModel @Inject constructor(
     }
   }
 
-  private fun getIncomesMap(incomesList: List<Income>): Map<String, MutableMap<String, MutableList<Income>?>>? {
-    val incomesMap = mutableMapOf<String, MutableMap<String, MutableList<Income>?>>()
+  private fun getIncomesMap(incomesList: List<Income>): Map<String, MutableMap<String, MutableMap<String, MutableList<Income>?>>>? {
+    val yearMap =
+      mutableMapOf<String, MutableMap<String, MutableMap<String, MutableList<Income>?>>>()
+    val monthMap = mutableMapOf<String, MutableMap<String, MutableList<Income>?>>()
+
     incomesList.map { income ->
-      val month = income.paymentDate.date?.month ?: return null
-      val incomeMonths = incomesMap[month.name]
-      if (incomeMonths !== null) {
-        val incomeFortnight = income.paymentDate.fortnight ?: return null
-        val incomeArr = incomeMonths[incomeFortnight.translate()]
-        incomeArr?.add(income) ?: incomeMonths.put(
-          incomeFortnight.translate(), mutableListOf(income)
-        )
+      val year = income.paymentDate.date?.year.toString()
+      val month = income.paymentDate.date?.month?.name ?: return null
+      val fortnight = income.paymentDate.fortnight ?: return null
+      val incomeYear = yearMap[year]
+      val incomeMonths = incomeYear?.get(month)
+
+      if (incomeYear != null) {
+        if (incomeMonths != null) {
+          val incomeFortnight = income.paymentDate.fortnight.translate()
+          val incomeArr = incomeMonths[incomeFortnight]
+          incomeArr?.add(income) ?: incomeMonths.put(
+            incomeFortnight, mutableListOf(income)
+          )
+          monthMap[month] = incomeMonths
+          yearMap[year] = monthMap
+        } else {
+          monthMap[month] = mutableMapOf(
+            fortnight.translate() to mutableListOf(income)
+          )
+          yearMap[year] = monthMap
+        }
       } else {
-        val fortnight = income.paymentDate.fortnight ?: return null
-        incomesMap[month.name] = mutableMapOf(
-          fortnight.translate() to mutableListOf(income)
+        yearMap[year] = mutableMapOf(
+          month to mutableMapOf(
+            fortnight.translate() to mutableListOf(income)
+          )
         )
       }
     }
 
-    return incomesMap.toMap()
+    return yearMap.toMap()
   }
 
   private suspend fun getAllIncomes() {
@@ -130,30 +147,26 @@ class IncomesViewModel @Inject constructor(
       } else {
         MyResult.Error(uiText = "error", data = null)
       }
+    }.catch {
+      // TODO find a way to detect the type of apollo error and create an error screen
+      _state.emit(IncomeState(isLoading = false))
+    }.collect { incomes ->
+      incomes.successOrError(onSuccess = { success ->
+        val incomesList = success.data.incomesList
+        _state.update {
+          it.copy(
+            incomesMap = getIncomesMap(incomesList),
+            totalByMonth = success.data.totalByMonth,
+            isLoading = false
+          )
+        }
+      }, onError = { error ->
+        _state.update {
+          it.copy(
+            errorMessage = error.uiText ?: ""
+          )
+        }
+      })
     }
-      .catch {
-        // TODO find a way to detect the type of apollo error and create an error screen
-        _state.emit(IncomeState(isLoading = false))
-      }
-      .collect { incomes ->
-        incomes.successOrError(
-          onSuccess = { success ->
-            val incomesList = success.data.incomesList
-            _state.update {
-              it.copy(
-                incomesMap = getIncomesMap(incomesList),
-                totalByMonth = success.data.totalByMonth,
-                isLoading = false
-              )
-            }
-          },
-          onError = { error ->
-            _state.update {
-              it.copy(
-                errorMessage = error.uiText ?: ""
-              )
-            }
-          })
-      }
   }
 }

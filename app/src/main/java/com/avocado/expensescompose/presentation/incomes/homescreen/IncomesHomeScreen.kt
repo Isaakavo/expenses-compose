@@ -100,7 +100,7 @@ fun IncomeScreenContent(
   backPressState: BackPress?,
   isLoading: Boolean,
   shouldRefresh: Boolean,
-  incomesMap: Map<String, MutableMap<String, MutableList<Income>?>>?,
+  incomesMap: Map<String, MutableMap<String, MutableMap<String, MutableList<Income>?>>>?,
   totalByMonth: List<Total?>,
   showToast: Boolean,
   onNavigate: (navigateEvent: NavigateEvent, income: NavigationIncomeDetails?) -> Unit,
@@ -184,6 +184,7 @@ fun IncomeScreenContent(
             //CircularProgressIndicator(strokeWidth = 6.dp)
           }
         } else {
+          // TODO make the year display better
           if (incomesMap?.isNotEmpty() == true) {
             LazyColumn(
               contentPadding = PaddingValues(16.dp),
@@ -194,16 +195,19 @@ fun IncomeScreenContent(
                   totalByMont?.date?.formatDateOnlyMonth()?.uppercase(Locale.ROOT) == income.first
                 }?.total ?: 0.0
                 IncomeMonth(monthTotal = currentTotal, incomeMonth = income.first)
-                income.second.map { fortnightIncome ->
-                  Column(
-                    modifier = Modifier.padding(start = 12.dp, top = 12.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                  ) {
-                    IncomeItem(
-                      items = fortnightIncome.value ?: emptyList(),
-                      fortnight = fortnightIncome.key,
-                      onNavigate = onNavigate
-                    )
+                income.second.map { month ->
+                  IncomeMonth(monthTotal = 0.0, incomeMonth = month.key)
+                  month.value.map { income ->
+                    Column(
+                      modifier = Modifier.padding(start = 12.dp, top = 12.dp),
+                      verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                      IncomeItem(
+                        items = income.value ?: emptyList(),
+                        fortnight = income.key,
+                        onNavigate = onNavigate
+                      )
+                    }
                   }
                 }
               }
