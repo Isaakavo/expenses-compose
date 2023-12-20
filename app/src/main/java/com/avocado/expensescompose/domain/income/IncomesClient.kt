@@ -9,7 +9,6 @@ import java.time.LocalDateTime
 interface IncomesClient {
   suspend fun getIncomesByMonth(date: String): List<Income>
   suspend fun getAllIncomes(): MyResult<Incomes>
-  suspend fun getIncomeByIdWithExpenses(payBefore: String): MyResult<IncomeWithExpenses>
   suspend fun insertIncome(
     total: Double,
     paymentDate: LocalDateTime,

@@ -12,7 +12,6 @@ import com.avocado.expensescompose.data.network.LoginJwtClient
 import com.avocado.expensescompose.data.repositories.AuthRepository
 import com.avocado.expensescompose.data.repositories.TokenManagerRepository
 import com.avocado.expensescompose.domain.income.usecase.CreateIncomeUseCase
-import com.avocado.expensescompose.domain.income.usecase.GetIncomeByIdWithExpensesUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -79,11 +78,6 @@ object AppModule {
   @Singleton
   fun provideCreateIncomeUseCase(incomesClient: IncomesClient): CreateIncomeUseCase =
     CreateIncomeUseCase(incomesClient)
-
-  @Provides
-  @Singleton
-  fun provideGetIncomeByIdWithExpensesUseCase(incomesClient: IncomesClient): GetIncomeByIdWithExpensesUseCase =
-    GetIncomeByIdWithExpensesUseCase(incomesClient)
 
   @Provides
   @Singleton

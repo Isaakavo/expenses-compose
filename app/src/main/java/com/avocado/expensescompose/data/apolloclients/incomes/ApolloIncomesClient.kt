@@ -49,37 +49,6 @@ class ApolloIncomesClient(private val apolloClient: ApolloClient) : IncomesClien
     }
 
   }
-
-  override suspend fun getIncomeByIdWithExpenses(
-    payBefore: String
-  ): MyResult<IncomeWithExpenses> {
-    return try {
-      val input = IncomeByIdWithExpensesListQuery(
-        input = PayBeforeInput(payBefore.formatDateForRequest()?.let { Date(it) } ?: Date(LocalDateTime.now()))
-      )
-      val incomeWithExpenses = apolloClient.query(input)
-        .execute().data?.incomesAndExpensesByFortnight
-      val incomes = incomeWithExpenses?.incomes?.map {income ->
-        income.incomeFragment.toIncome()
-      }
-      val expensesList = incomeWithExpenses?.expenses?.map { expense ->
-        expense.expenseFragment.toExpense()
-      }
-      return MyResult.Success(
-        IncomeWithExpenses(
-          incomes = incomes ?: listOf(Income(paymentDate = PaymentDate(null))),
-          expensesList = expensesList ?: emptyList(),
-          incomesTotal = incomeWithExpenses?.incomesTotal ?: 0.0,
-          expensesTotal = incomeWithExpenses?.expensesTotal ?: 0.0,
-          remaining = incomeWithExpenses?.remaining ?: 0.0
-        )
-      )
-    } catch (e: ApolloException) {
-      MyResult.Error(uiText = e.message)
-    }
-  }
-
-
   override suspend fun insertIncome(
     total: Double,
     paymentDate: LocalDateTime,

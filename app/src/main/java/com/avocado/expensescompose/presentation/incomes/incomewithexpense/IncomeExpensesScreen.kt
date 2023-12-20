@@ -52,8 +52,8 @@ fun IncomeExpensesScreen(
 
   IncomeWithExpensesContent(
     incomesTotal = state.incomesTotal,
-    fortnight = state.income?.get(0)?.paymentDate?.fortnight?.translate() ?: "",
-    month = state.income?.get(0)?.paymentDate?.date?.formatDateMonthWithYear() ?: "",
+    fortnight = state.incomes?.get(0)?.paymentDate?.fortnight?.translate() ?: "",
+    month = state.incomes?.get(0)?.paymentDate?.date?.formatDateMonthWithYear() ?: "",
     remaining = state.remaining,
     expended = state.expensesTotal,
     expenseList = state.expensesList,
@@ -95,7 +95,11 @@ fun IncomeWithExpensesContent(
         .fillMaxSize()
     ) {
       if (isLoading) {
-        CircularProgressIndicator(strokeWidth = 6.dp)
+        Column(modifier = Modifier
+          .fillMaxSize()
+          .padding(22.dp)) {
+          CircularProgressIndicator(strokeWidth = 6.dp)
+        }
       } else {
         Column(
           modifier = Modifier
