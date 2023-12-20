@@ -34,6 +34,7 @@ import com.avocado.expensescompose.data.model.total.TotalFortnight
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.expensescompose.presentation.topbar.IconsActions
+import com.avocado.expensescompose.presentation.util.formatDateMonthWithYear
 
 @Composable
 fun ExpensesTotalByCardScreen(
@@ -145,7 +146,7 @@ fun TotalByFortnight(
         }) {
         Column(modifier = Modifier.padding(12.dp)) {
           Row(modifier = Modifier.fillMaxWidth()) {
-            Text(text = item.month ?: "", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+            Text(text = item.date?.formatDateMonthWithYear() ?: "", fontSize = 22.sp, fontWeight = FontWeight.Bold)
 
           }
           Row(
@@ -182,7 +183,7 @@ fun TotalByMonth(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
           ) {
-            Text(text = item.month ?: "", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+            Text(text = item.date?.formatDateMonthWithYear() ?: "", fontSize = 22.sp, fontWeight = FontWeight.Bold)
             Text(text = item.total?.formatMoney().orEmpty())
           }
         }
