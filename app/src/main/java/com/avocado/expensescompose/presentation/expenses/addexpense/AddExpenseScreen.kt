@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DropdownMenuItem
@@ -30,8 +31,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -59,7 +63,9 @@ fun AddExpenseScreen(
   }
 
   if (state.isAdded) {
-    onPopBackStack()
+    LaunchedEffect(key1 = Unit) {
+      onPopBackStack()
+    }
   }
 
   AddExpenseScreenContent(
@@ -103,6 +109,7 @@ fun AddExpenseScreenContent(
   val datePickerState = rememberDatePickerState()
   val scope = rememberCoroutineScope()
   val snackBarHostState = remember { SnackbarHostState() }
+  val focusRequester = remember { FocusRequester() }
 
   LaunchedEffect(key1 = snackBarHostState) {
     if (expenseAdded || expenseAddedError) {
@@ -158,7 +165,11 @@ fun AddExpenseScreenContent(
           OutlinedTextField(
             value = concept,
             onValueChange = { onEvent(AddExpenseEvent.UpdateConcept, it) },
-            label = { Text(text = "Concepto") })
+            label = { Text(text = "Concepto") },
+            keyboardOptions = KeyboardOptions(
+              imeAction = ImeAction.Next
+            )
+          )
         }
 
         AddExpenseRow {
@@ -170,7 +181,13 @@ fun AddExpenseScreenContent(
             value = total,
             onValueChange = { onEvent(AddExpenseEvent.UpdateTotal, it) },
             label = { Text(text = "Total") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+            keyboardOptions = KeyboardOptions(
+              keyboardType = KeyboardType.Decimal,
+              imeAction = ImeAction.Next
+            ),
+            keyboardActions = KeyboardActions(
+              onNext = { focusRequester.requestFocus() }
+            )
           )
         }
 
@@ -182,7 +199,15 @@ fun AddExpenseScreenContent(
           OutlinedTextField(
             value = comment,
             onValueChange = { onEvent(AddExpenseEvent.UpdateComment, it) },
-            label = { Text(text = "Comentario") })
+            label = { Text(text = "Comentario") },
+            modifier = Modifier.focusRequester(focusRequester),
+            keyboardOptions = KeyboardOptions(
+              imeAction = ImeAction.Next
+            ),
+            keyboardActions = KeyboardActions(
+              onNext = { focusRequester.requestFocus() }
+            )
+          )
         }
 
         AddExpenseRow {
