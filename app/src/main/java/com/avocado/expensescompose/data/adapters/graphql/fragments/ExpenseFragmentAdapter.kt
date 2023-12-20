@@ -2,7 +2,6 @@ package com.avocado.expensescompose.data.adapters.graphql.fragments
 
 import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.data.model.card.Card
-import com.avocado.expensescompose.domain.income.models.ExpenseTag
 import com.avocado.fragment.ExpenseFragment
 
 fun ExpenseFragment.toExpense(): Expense = Expense(
@@ -13,5 +12,9 @@ fun ExpenseFragment.toExpense(): Expense = Expense(
   payBefore = payBefore.date,
   createdAt = createdAt?.date,
   updatedAt = updatedAt?.date,
-  card = Card(id = card?.id ?: "", bank = card?.bank ?: "", alias = card?.alias ?: "")
+  card = if (card != null) Card(
+    id = card.id,
+    bank = card.bank,
+    alias = card.alias
+  ) else null
 )

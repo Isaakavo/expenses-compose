@@ -166,7 +166,7 @@ fun CardsScreenContent(
         items(cardsList) { card ->
           CardItem(
             id = card.id,
-            alias = card.alias,
+            alias = card.alias ?: "",
             bank = card.bank,
             cardType = if (card.isDebit == true) "Tarjeta de débito" else "Tarjeta de crédito",
             onNavigate = onNavigate

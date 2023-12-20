@@ -53,6 +53,7 @@ fun ExpensesTotalByCardScreen(
     cardId = cardId,
     cardAlias = state.cardAlias,
     cardBank = state.cardBank,
+    uiError = state.uiError,
     openDropDownMenu = state.openDropDownMenu,
     dataSelector = state.dataSelector,
     onPopBackStack = onPopBackStack,
@@ -68,6 +69,7 @@ fun CardWithExpenseContent(
   cardId: String,
   cardAlias: String,
   cardBank: String,
+  uiError: String,
   openDropDownMenu: Boolean,
   dataSelector: DataSelector,
   onPopBackStack: () -> Unit = {},
@@ -90,24 +92,34 @@ fun CardWithExpenseContent(
         .padding(paddingValues)
         .fillMaxSize()
     ) {
-      Column(
-        modifier = Modifier
-          .fillMaxSize()
-          .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(22.dp)
-      ) {
-        CardDataDropDownMenu(openDropDownMenu = openDropDownMenu, onEvent = onEvent)
-        when (dataSelector) {
-          DataSelector.FORTNIGHT -> {
-            TotalByFortnight(
-              totalByFortnight = totalByFortnight,
-              cardId = cardId,
-              onNavigate = onNavigate
-            )
-          }
+      if (uiError.isNotEmpty()) {
+        Column(
+          modifier = Modifier.fillMaxSize(),
+          verticalArrangement = Arrangement.Center,
+          horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+          Text(text = uiError, fontSize = 26.sp)
+        }
+      } else {
+        Column(
+          modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 12.dp),
+          verticalArrangement = Arrangement.spacedBy(22.dp)
+        ) {
+          CardDataDropDownMenu(openDropDownMenu = openDropDownMenu, onEvent = onEvent)
+          when (dataSelector) {
+            DataSelector.FORTNIGHT -> {
+              TotalByFortnight(
+                totalByFortnight = totalByFortnight,
+                cardId = cardId,
+                onNavigate = onNavigate
+              )
+            }
 
-          DataSelector.MONTH -> {
-            TotalByMonth(totalByMonth = totalByMonth, cardId = cardId, onNavigate = onNavigate)
+            DataSelector.MONTH -> {
+              TotalByMonth(totalByMonth = totalByMonth, cardId = cardId, onNavigate = onNavigate)
+            }
           }
         }
       }
