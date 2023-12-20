@@ -23,16 +23,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.avocado.expensescompose.presentation.util.formatDateOnlyMonth
 import com.avocado.expensescompose.data.adapters.formatMoney
 import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.shared.ExpensesList
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.expensescompose.presentation.topbar.IconsActions
+import com.avocado.expensescompose.presentation.util.formatDateMonthWithYear
 
 @Composable
 fun IncomeExpensesScreen(
@@ -50,8 +53,9 @@ fun IncomeExpensesScreen(
   IncomeWithExpensesContent(
     incomesTotal = state.incomesTotal,
     fortnight = state.income?.get(0)?.paymentDate?.fortnight?.translate() ?: "",
-    month = state.income?.get(0)?.paymentDate?.date?.formatDateOnlyMonth() ?: "",
+    month = state.income?.get(0)?.paymentDate?.date?.formatDateMonthWithYear() ?: "",
     remaining = state.remaining,
+    expended = state.expensesTotal,
     expenseList = state.expensesList,
     isLoading = state.isLoading,
     onNavigate = onNavigate,
@@ -65,6 +69,7 @@ fun IncomeWithExpensesContent(
   fortnight: String,
   month: String,
   remaining: Double,
+  expended: Double,
   expenseList: List<Expense>,
   isLoading: Boolean = false,
   onNavigateBack: () -> Unit = {},
@@ -89,16 +94,21 @@ fun IncomeWithExpensesContent(
         .padding(paddingValues)
         .fillMaxSize()
     ) {
-      Column(
-        modifier = Modifier
-          .fillMaxSize()
-          .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(22.dp)
-      ) {
-        if (isLoading) {
-          CircularProgressIndicator(strokeWidth = 6.dp)
-        } else {
-          IncomeDetails(incomesTotal, month, remaining)
+      if (isLoading) {
+        CircularProgressIndicator(strokeWidth = 6.dp)
+      } else {
+        Column(
+          modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 12.dp),
+          verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+          DateRow(date = month)
+          IncomeDetails(
+            incomesTotal = incomesTotal,
+            remaining = remaining,
+            expended = expended
+          )
           ExpensesList(expenseList)
         }
       }
@@ -108,45 +118,79 @@ fun IncomeWithExpensesContent(
 }
 
 @Composable
-fun IncomeDetails(incomesTotal: Double, month: String, remaining: Double) {
+fun DateRow(date: String) {
+  Row(
+    modifier = Modifier
+      .padding(bottom = 8.dp)
+      .fillMaxWidth(),
+    horizontalArrangement = Arrangement.End
+  ) {
+    Text(
+      text = date,
+      fontSize = 20.sp
+    )
+  }
+}
+
+@Composable
+fun IncomeDetails(incomesTotal: Double, remaining: Double, expended: Double) {
   Card(
     modifier = Modifier.fillMaxWidth(),
-    elevation = CardDefaults.cardElevation(defaultElevation = 22.dp)
+    elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
   ) {
     Column(
-      modifier = Modifier.padding(16.dp)
+      modifier = Modifier.padding(16.dp),
+      verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-      Row(
-        modifier = Modifier
-          .padding(bottom = 8.dp)
-          .fillMaxWidth(),
-        horizontalArrangement = Arrangement.End
-      ) {
-        Text(
-          text = month,
-          style = MaterialTheme.typography.headlineSmall
-        )
-      }
-
       Row(
         modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
       ) {
         //TODO make text color of remaining
         // if remaining is more than income make it green if not red
         Text(
-          text = incomesTotal.formatMoney(), style = MaterialTheme.typography.headlineMedium
+          text = "Ingreso",
+          color = MaterialTheme.colorScheme.secondary,
+          style = MaterialTheme.typography.bodyLarge
         )
-        Text(text = remaining.formatMoney(), style = MaterialTheme.typography.headlineMedium)
+        Text(
+          text = incomesTotal.formatMoney(),
+          style = MaterialTheme.typography.bodyLarge,
+          fontWeight = FontWeight.SemiBold
+        )
       }
 
       Row(
         modifier = Modifier
-          .fillMaxWidth()
-          .padding(top = 4.dp, start = 8.dp),
+          .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
       ) {
-        Text(text = "Ingreso", color = MaterialTheme.colorScheme.secondary)
-        Text(text = "Restante", color = MaterialTheme.colorScheme.secondary)
+        Text(
+          text = "Gastos",
+          color = MaterialTheme.colorScheme.secondary,
+          style = MaterialTheme.typography.bodyLarge
+        )
+        Text(
+          text = expended.formatMoney(),
+          style = MaterialTheme.typography.bodyLarge,
+          fontWeight = FontWeight.SemiBold
+        )
+      }
+
+      Row(
+        modifier = Modifier
+          .fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+      ) {
+        Text(
+          text = "Restante",
+          color = MaterialTheme.colorScheme.secondary,
+          style = MaterialTheme.typography.bodyLarge
+        )
+        Text(
+          text = remaining.formatMoney(),
+          style = MaterialTheme.typography.bodyLarge,
+          fontWeight = FontWeight.SemiBold
+        )
       }
     }
   }
@@ -156,5 +200,17 @@ fun IncomeDetails(incomesTotal: Double, month: String, remaining: Double) {
 fun FABAddExpense(onNavigate: (navigateEvent: NavigateEvent) -> Unit) {
   FloatingActionButton(onClick = { onNavigate(NavigateEvent.NavigateAddExpenseScreen) }) {
     Icon(Icons.Rounded.Add, contentDescription = "")
+  }
+}
+
+@Preview
+@Composable
+fun IncomeDetailsPreview() {
+  Column(modifier = Modifier.padding(22.dp)) {
+    IncomeDetails(
+      incomesTotal = 18750.23,
+      remaining = 5000.0,
+      expended = 8000.0
+    )
   }
 }

@@ -24,6 +24,11 @@ fun LocalDateTime.formatDateOnlyMonth(): String {
   return this.format(format)
 }
 
+fun LocalDateTime.formatDateMonthWithYear(): String {
+  val format = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault())
+  return this.format(format)
+}
+
 fun String.formatDateOnlyMonth(): String {
   val format = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.getDefault())
   // TODO find a way to translate this
