@@ -6,17 +6,13 @@ import com.apollographql.apollo3.api.Optional
 import com.apollographql.apollo3.exception.ApolloException
 import com.avocado.HomeScreenAllIncomesQuery
 import com.avocado.CreateIncomeMutation
-import com.avocado.IncomeByIdWithExpensesListQuery
-import com.avocado.expensescompose.data.adapters.graphql.fragments.toExpense
 import com.avocado.expensescompose.data.adapters.graphql.fragments.toIncome
 import com.avocado.expensescompose.data.adapters.graphql.fragments.toTotal
-import com.avocado.expensescompose.presentation.util.formatDateForRequest
 import com.avocado.expensescompose.data.adapters.graphql.scalar.Date
 import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.domain.income.IncomesClient
 import com.avocado.expensescompose.domain.income.models.Fortnight
 import com.avocado.expensescompose.domain.income.models.Income
-import com.avocado.expensescompose.domain.income.models.IncomeWithExpenses
 import com.avocado.expensescompose.domain.income.models.Incomes
 import com.avocado.expensescompose.domain.income.models.PaymentDate
 import com.avocado.type.PayBeforeInput
