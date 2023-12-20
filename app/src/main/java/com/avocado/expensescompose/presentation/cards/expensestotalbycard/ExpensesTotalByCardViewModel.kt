@@ -1,15 +1,17 @@
 package com.avocado.expensescompose.presentation.cards.expensestotalbycard
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.apollographql.apollo3.exception.ApolloException
 import com.avocado.CardByIdQuery
 import com.avocado.ExpensesTotalByCardIdQuery
 import com.avocado.expensescompose.data.adapters.adapt
 import com.avocado.expensescompose.data.adapters.graphql.fragments.toTotal
 import com.avocado.expensescompose.data.adapters.graphql.fragments.toTotalFortnight
+import com.avocado.expensescompose.data.adapters.graphql.utils.validateDataWithoutErrors
 import com.avocado.expensescompose.data.apolloclients.GraphQlClientImpl
 import com.avocado.expensescompose.data.model.MyResult
+import com.avocado.expensescompose.data.model.successOrError
 import com.avocado.expensescompose.data.model.total.Total
 import com.avocado.expensescompose.data.model.total.TotalFortnight
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -43,6 +45,7 @@ data class CardsWithExpensesState(
   val cardAlias: String = "",
   val dataSelector: DataSelector = DataSelector.FORTNIGHT,
   val openDropDownMenu: Boolean = false,
+  val uiError: String = ""
 )
 
 @HiltViewModel
@@ -75,73 +78,64 @@ class ExpensesTotalByCardViewModel @Inject constructor(private val graphQlClient
   fun fetchData(cardId: String) {
     viewModelScope.launch {
       getCardById(cardId).zip(getExpensesByCardId(cardId)) { card, expensesCard ->
-        when (expensesCard) {
-          is MyResult.Success -> {
-            val data = expensesCard.data
+        expensesCard.successOrError(
+          onSuccess = { expensesCardResult ->
+            val data = expensesCardResult.data.expensesTotalByCardId
             val totalByMonth =
-              data.totalByMonth?.mapNotNull { it?.totalFragment?.toTotal() }.orEmpty()
+              data?.totalByMonth?.mapNotNull { it?.totalFragment?.toTotal() }.orEmpty()
             val totalByyFortnight =
-              data.totalByFortnight?.mapNotNull { it?.totalFragment?.toTotalFortnight(it.fortnight.adapt()) }
+              data?.totalByFortnight?.mapNotNull { it?.totalFragment?.toTotalFortnight(it.fortnight.adapt()) }
                 .orEmpty()
-            when (card) {
-              is MyResult.Success -> {
+            card.successOrError(
+              onSuccess = { cardById ->
                 CardsWithExpensesState(
                   totalByMonthList = totalByMonth,
                   totalByFortnight = totalByyFortnight,
-                  cardBank = card.data.bank,
-                  cardAlias = card.data.alias.orEmpty(),
+                  cardBank = cardById.data.cardById?.bank.orEmpty(),
+                  cardAlias = cardById.data.cardById?.alias.orEmpty(),
                   openDropDownMenu = _state.value.openDropDownMenu,
                   dataSelector = _state.value.dataSelector
                 )
+              },
+              onError = { cardByIdError ->
+                Log.e(
+                  "ExpensesTotalByCardViewModel",
+                  cardByIdError.exception?.localizedMessage.orEmpty()
+                )
+                CardsWithExpensesState(uiError = cardByIdError.uiText.orEmpty())
               }
-
-              is MyResult.Error -> {
-                CardsWithExpensesState()
-              }
-            }
+            )
+          },
+          onError = {
+            CardsWithExpensesState(uiError = it.uiText.orEmpty())
           }
-
-          else -> {
-            CardsWithExpensesState()
-          }
+        )
+      }
+        .catch { e ->
+          Log.e("ExpensesTotalByCardViewModel", "Error retrieving data ${e.localizedMessage}")
+          MyResult.Error(
+            uiText = "Error from network ${e.localizedMessage}",
+            exception = e,
+            data = CardsWithExpensesState()
+          )
         }
-      }
-        .catch { e -> MyResult.Error(uiText = "Error from network ${e.localizedMessage}", data = null) }
         .collect {
-        _state.emit(it)
-      }
+          _state.emit(it)
+        }
     }
 
   }
 
-  private suspend fun getCardById(cardId: String): Flow<MyResult<CardByIdQuery.CardById>> {
+  private suspend fun getCardById(cardId: String): Flow<MyResult<CardByIdQuery.Data>> {
     return graphQlClientImpl.query(CardByIdQuery(cardId)).map { apolloResponse ->
-      try {
-        val data = apolloResponse.data?.cardById
-        if (data != null) {
-          MyResult.Success(data)
-        } else {
-          MyResult.Error(data = null, uiText = "")
-        }
-      } catch (e: ApolloException) {
-        MyResult.Error(data = null, uiText = "Something went wrong from the server")
-      }
+      validateDataWithoutErrors(apolloResponse)
     }
   }
 
   private suspend fun getExpensesByCardId(cardId: String):
-      Flow<MyResult<ExpensesTotalByCardIdQuery.ExpensesTotalByCardId>> {
+      Flow<MyResult<ExpensesTotalByCardIdQuery.Data>> {
     return graphQlClientImpl.query(ExpensesTotalByCardIdQuery(cardId)).map { apolloResponse ->
-      try {
-        val data = apolloResponse.data?.expensesTotalByCardId
-        if (data != null) {
-          MyResult.Success(data)
-        } else {
-          MyResult.Error(data = null, uiText = "")
-        }
-      } catch (e: ApolloException) {
-        MyResult.Error(data = null, uiText = "Something went wrong from the server")
-      }
+      validateDataWithoutErrors(apolloResponse)
     }
   }
 }
