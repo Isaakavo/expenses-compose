@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.avocado.expensescompose.data.adapters.adapt
 import com.avocado.expensescompose.data.adapters.formatMoney
 import com.avocado.expensescompose.data.model.total.Total
 import com.avocado.expensescompose.data.model.total.TotalFortnight
@@ -35,8 +36,8 @@ import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.expensescompose.presentation.topbar.IconsActions
 import com.avocado.expensescompose.presentation.util.formatDateMonthWithYear
-import com.avocado.expensescompose.presentation.util.getFifteenDayOfMonth
 import com.avocado.expensescompose.presentation.util.getLastDayOfMonth
+import com.avocado.expensescompose.presentation.util.prepareDateForRequest
 
 @Composable
 fun ExpensesTotalByCardScreen(
@@ -150,7 +151,7 @@ fun TotalByFortnight(
         .clickable {
           onNavigate(
             NavigateEvent.NavigateExpensesByCardScreen,
-            "${item.date?.getFifteenDayOfMonth()}/$cardId/$dataSelector"
+            "${item.prepareDateForRequest()}/$cardId/$dataSelector"
           )
         }) {
         Column(modifier = Modifier.padding(12.dp)) {
@@ -166,7 +167,7 @@ fun TotalByFortnight(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
           ) {
-            Text(text = item.fortnight.orEmpty())
+            Text(text = item.fortnight?.adapt().orEmpty())
             Text(text = item.total?.formatMoney().orEmpty())
           }
         }

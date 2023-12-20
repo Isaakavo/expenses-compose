@@ -1,6 +1,8 @@
 package com.avocado.expensescompose.presentation.util
 
 import android.util.Log
+import com.avocado.expensescompose.data.model.total.TotalFortnight
+import com.avocado.type.Fortnight
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -28,6 +30,14 @@ fun LocalDateTime.formatDateOnlyMonth(): String {
 fun LocalDateTime.formatDateMonthWithYear(): String {
   val format = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault())
   return this.format(format)
+}
+
+fun TotalFortnight.prepareDateForRequest(): String? {
+  return when(Fortnight.valueOf(this.fortnight?.name.orEmpty())) {
+    Fortnight.FIRST -> this.date?.getFifteenDayOfMonth()
+    Fortnight.SECOND -> this.date?.getLastDayOfMonth()
+    else -> ""
+  }
 }
 
 fun String.getFifteenDayOfMonth(): String {

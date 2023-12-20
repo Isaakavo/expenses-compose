@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.avocado.CardByIdQuery
 import com.avocado.ExpensesTotalByCardIdQuery
-import com.avocado.expensescompose.data.adapters.adapt
 import com.avocado.expensescompose.data.adapters.graphql.fragments.toTotal
 import com.avocado.expensescompose.data.adapters.graphql.fragments.toTotalFortnight
 import com.avocado.expensescompose.data.adapters.graphql.utils.validateDataWithoutErrors
@@ -84,7 +83,7 @@ class ExpensesTotalByCardViewModel @Inject constructor(private val graphQlClient
             val totalByMonth =
               data?.totalByMonth?.mapNotNull { it?.totalFragment?.toTotal() }.orEmpty()
             val totalByyFortnight =
-              data?.totalByFortnight?.mapNotNull { it?.totalFragment?.toTotalFortnight(it.fortnight.adapt()) }
+              data?.totalByFortnight?.mapNotNull { it?.totalFragment?.toTotalFortnight(it.fortnight) }
                 .orEmpty()
             card.successOrError(
               onSuccess = { cardById ->
