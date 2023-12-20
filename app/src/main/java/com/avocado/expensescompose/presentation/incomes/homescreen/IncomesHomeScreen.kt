@@ -184,29 +184,40 @@ fun IncomeScreenContent(
             //CircularProgressIndicator(strokeWidth = 6.dp)
           }
         } else {
-          // TODO make the year display better
           if (incomesMap?.isNotEmpty() == true) {
             LazyColumn(
-              contentPadding = PaddingValues(16.dp),
-              verticalArrangement = Arrangement.spacedBy(16.dp)
+              contentPadding = PaddingValues(start = 24.dp, end = 24.dp),
             ) {
-              items(incomesMap.toList()) { income ->
-                val currentTotal = totalByMonth.find { totalByMont ->
-                  totalByMont?.date?.formatDateOnlyMonth()?.uppercase(Locale.ROOT) == income.first
-                }?.total ?: 0.0
-                IncomeMonth(monthTotal = currentTotal, incomeMonth = income.first)
-                income.second.map { month ->
-                  IncomeMonth(monthTotal = 0.0, incomeMonth = month.key)
-                  month.value.map { income ->
+              items(incomesMap.toList()) { year ->
+                YearRow(year = year.first)
+                year.second.map { month ->
+                  Card(
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier
+                      .fillMaxWidth()
+                      .wrapContentHeight()
+                      .padding(bottom = 22.dp, start = 12.dp, end = 12.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
+                  ) {
                     Column(
-                      modifier = Modifier.padding(start = 12.dp, top = 12.dp),
-                      verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                      IncomeItem(
-                        items = income.value ?: emptyList(),
-                        fortnight = income.key,
-                        onNavigate = onNavigate
+                      modifier = Modifier.padding(
+                        start = 12.dp,
+                        end = 12.dp,
+                        top = 12.dp,
+                        bottom = 6.dp
                       )
+                    ) {
+                      MonthRow(
+                        monthTotal = getMonthTotal(totalByMonth, month.key, year.first),
+                        incomeMonth = month.key
+                      )
+                      month.value.map { income ->
+                        IncomeItem(
+                          items = income.value ?: emptyList(),
+                          fortnight = income.key,
+                          onNavigate = onNavigate
+                        )
+                      }
                     }
                   }
                 }
@@ -256,31 +267,23 @@ fun IncomeItem(
   fortnight: String,
   onNavigate: (navigateEvent: NavigateEvent, income: NavigationIncomeDetails) -> Unit
 ) {
-  Card(
-    shape = RoundedCornerShape(16.dp),
+  Column(
     modifier = Modifier
-      .fillMaxWidth()
-      .wrapContentHeight()
       .clickable {
         onNavigate(
           NavigateEvent.NavigateIncomeExpensesList, NavigationIncomeDetails(
             paymentDate = items[0].paymentDate.date
           )
         )
-      },
-    elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
+      }
   ) {
-    Column(
-      modifier = Modifier.padding(top = 12.dp, bottom = 12.dp, start = 22.dp, end = 24.dp)
-    ) {
-      Text(text = "$fortnight quincena")
-      if (items.size == 1) {
-        IncomeItemRow(item = items[0])
-      } else {
-        Column {
-          items.map { item ->
-            IncomeItemRow(item = item, renderIcon = false)
-          }
+    Text(text = "$fortnight quincena")
+    if (items.size == 1) {
+      IncomeItemRow(item = items[0], false)
+    } else {
+      Column {
+        items.map { item ->
+          IncomeItemRow(item = item, renderIcon = false)
         }
       }
     }
@@ -291,7 +294,7 @@ fun IncomeItem(
 fun IncomeItemRow(item: Income, renderIcon: Boolean = true) {
   Row(
     modifier = Modifier
-      .padding(top = 12.dp, bottom = 12.dp, start = 8.dp, end = 1.dp)
+      .padding(top = 6.dp, bottom = 6.dp)
       .fillMaxWidth(),
     verticalAlignment = Alignment.CenterVertically,
     horizontalArrangement = Arrangement.SpaceBetween
@@ -309,16 +312,29 @@ fun IncomeItemRow(item: Income, renderIcon: Boolean = true) {
 }
 
 @Composable
-fun IncomeMonth(monthTotal: Double, incomeMonth: String) {
+fun YearRow(year: String) {
   Row(
     modifier = Modifier
-      .padding(top = 12.dp, bottom = 12.dp, start = 12.dp, end = 12.dp)
+      .padding(top = 12.dp, bottom = 4.dp, start = 24.dp)
+      .fillMaxWidth(),
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.Start
+  ) {
+    Text(text = year, style = MaterialTheme.typography.titleLarge)
+  }
+}
+
+@Composable
+fun MonthRow(monthTotal: Double, incomeMonth: String) {
+  Row(
+    modifier = Modifier
+      .padding(top = 6.dp, bottom = 6.dp)
       .fillMaxWidth(),
     verticalAlignment = Alignment.CenterVertically,
     horizontalArrangement = Arrangement.SpaceBetween
   ) {
-    Text(text = incomeMonth, style = MaterialTheme.typography.headlineSmall)
-    Text(text = monthTotal.formatMoney(), style = MaterialTheme.typography.headlineSmall)
+    Text(text = incomeMonth, style = MaterialTheme.typography.titleMedium)
+    Text(text = monthTotal.formatMoney(), style = MaterialTheme.typography.titleMedium)
   }
 }
 
@@ -333,3 +349,10 @@ fun FabAddIncome(
   }
 
 }
+
+fun getMonthTotal(totalByMonth: List<Total?>, month: String, year: String) =
+  totalByMonth.find { totalByMont ->
+    totalByMont?.date?.formatDateOnlyMonth()
+      ?.uppercase(Locale.ROOT) == month && totalByMont.year == year
+  }?.total ?: 0.0
+
