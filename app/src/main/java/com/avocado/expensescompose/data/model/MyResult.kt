@@ -3,15 +3,19 @@ package com.avocado.expensescompose.data.model
 typealias SimpleResource = MyResult<Unit>
 
 sealed class MyResult<out R> {
-    data class Success<out T>(val data: T) : MyResult<T>()
-    data class Error<out T>(val data: T? = null, val uiText: String?) : MyResult<T>()
+  data class Success<out T>(val data: T) : MyResult<T>()
+  data class Error<out T>(
+    val data: T? = null,
+    val uiText: String? = null,
+    val exception: Throwable? = null
+  ) : MyResult<T>()
 }
 
-fun <D> MyResult<D>.successOrError(
-    onSuccess: (success: MyResult.Success<D>) -> Unit,
-    onError: (error: MyResult.Error<D>) -> Unit
-) {
-  when (this) {
+fun <D, R> MyResult<D>.successOrError(
+  onSuccess: (success: MyResult.Success<D>) -> R,
+  onError: (error: MyResult.Error<D>) -> R
+): R {
+  return when (this) {
     is MyResult.Success -> {
       onSuccess(this)
     }
