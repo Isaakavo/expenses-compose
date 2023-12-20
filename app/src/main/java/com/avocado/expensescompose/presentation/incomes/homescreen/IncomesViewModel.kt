@@ -89,7 +89,8 @@ class IncomesViewModel @Inject constructor(
   private fun getIncomesMap(incomesList: List<Income>): Map<String, MutableMap<String, MutableMap<String, MutableList<Income>?>>>? {
     val yearMap =
       mutableMapOf<String, MutableMap<String, MutableMap<String, MutableList<Income>?>>>()
-    val monthMap = mutableMapOf<String, MutableMap<String, MutableList<Income>?>>()
+    var monthMap = mutableMapOf<String, MutableMap<String, MutableList<Income>?>>()
+    var prevYear = ""
 
     incomesList.map { income ->
       val year = income.paymentDate.date?.year.toString()
@@ -114,11 +115,13 @@ class IncomesViewModel @Inject constructor(
           yearMap[year] = monthMap
         }
       } else {
+        if (prevYear != year) monthMap = mutableMapOf()
         yearMap[year] = mutableMapOf(
           month to mutableMapOf(
             fortnight.translate() to mutableListOf(income)
           )
         )
+        prevYear = year
       }
     }
 
