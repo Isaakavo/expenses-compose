@@ -5,6 +5,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.YearMonth
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -27,6 +28,27 @@ fun LocalDateTime.formatDateOnlyMonth(): String {
 fun LocalDateTime.formatDateMonthWithYear(): String {
   val format = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault())
   return this.format(format)
+}
+
+fun String.getFifteenDayOfMonth(): String {
+  val dateArr = this.split("-")
+
+  val year = dateArr[0]
+  val month = dateArr[1]
+
+  return "$year-$month-15"
+}
+
+fun String.getLastDayOfMonth(): String {
+  val localDateTime = LocalDateTime.parse("${this}T00:00:00", DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+  val yearMonth = YearMonth.from(localDateTime)
+  val lastDay = yearMonth.atEndOfMonth().atTime(23, 59, 59).dayOfMonth
+  val dateArr = this.split("-")
+
+  val year = dateArr[0]
+  val month = dateArr[1]
+
+  return "$year-$month-$lastDay"
 }
 
 fun String.formatDateMonthWithYear(): String {

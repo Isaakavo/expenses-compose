@@ -35,6 +35,8 @@ import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.expensescompose.presentation.topbar.IconsActions
 import com.avocado.expensescompose.presentation.util.formatDateMonthWithYear
+import com.avocado.expensescompose.presentation.util.getFifteenDayOfMonth
+import com.avocado.expensescompose.presentation.util.getLastDayOfMonth
 
 @Composable
 fun ExpensesTotalByCardScreen(
@@ -114,12 +116,18 @@ fun CardWithExpenseContent(
               TotalByFortnight(
                 totalByFortnight = totalByFortnight,
                 cardId = cardId,
+                dataSelector = dataSelector,
                 onNavigate = onNavigate
               )
             }
 
             DataSelector.MONTH -> {
-              TotalByMonth(totalByMonth = totalByMonth, cardId = cardId, onNavigate = onNavigate)
+              TotalByMonth(
+                totalByMonth = totalByMonth,
+                cardId = cardId,
+                dataSelector = dataSelector,
+                onNavigate = onNavigate
+              )
             }
           }
         }
@@ -132,6 +140,7 @@ fun CardWithExpenseContent(
 fun TotalByFortnight(
   totalByFortnight: List<TotalFortnight>,
   cardId: String,
+  dataSelector: DataSelector,
   onNavigate: (navigateEvent: NavigateEvent, param: String) -> Unit
 ) {
   LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -141,12 +150,16 @@ fun TotalByFortnight(
         .clickable {
           onNavigate(
             NavigateEvent.NavigateExpensesByCardScreen,
-            "${item.date}/$cardId"
+            "${item.date?.getFifteenDayOfMonth()}/$cardId/$dataSelector"
           )
         }) {
         Column(modifier = Modifier.padding(12.dp)) {
           Row(modifier = Modifier.fillMaxWidth()) {
-            Text(text = item.date?.formatDateMonthWithYear() ?: "", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+            Text(
+              text = item.date?.formatDateMonthWithYear() ?: "",
+              fontSize = 22.sp,
+              fontWeight = FontWeight.Bold
+            )
 
           }
           Row(
@@ -166,6 +179,7 @@ fun TotalByFortnight(
 fun TotalByMonth(
   totalByMonth: List<Total>,
   cardId: String,
+  dataSelector: DataSelector,
   onNavigate: (navigateEvent: NavigateEvent, param: String) -> Unit
 ) {
   LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -175,7 +189,7 @@ fun TotalByMonth(
         .clickable {
           onNavigate(
             NavigateEvent.NavigateExpensesByCardScreen,
-            "${item.date}/$cardId"
+            "${item.date?.getLastDayOfMonth()}/$cardId/$dataSelector"
           )
         }) {
         Column(modifier = Modifier.padding(12.dp)) {
@@ -183,7 +197,11 @@ fun TotalByMonth(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
           ) {
-            Text(text = item.date?.formatDateMonthWithYear() ?: "", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+            Text(
+              text = item.date?.formatDateMonthWithYear() ?: "",
+              fontSize = 22.sp,
+              fontWeight = FontWeight.Bold
+            )
             Text(text = item.total?.formatMoney().orEmpty())
           }
         }

@@ -10,6 +10,7 @@ import androidx.navigation.navArgument
 import com.avocado.expensescompose.presentation.RoutesConstants
 import com.avocado.expensescompose.presentation.cards.cardsscreen.CardsScreen
 import com.avocado.expensescompose.presentation.cards.expensesbycard.ExpensesByCardScreen
+import com.avocado.expensescompose.presentation.cards.expensestotalbycard.DataSelector
 import com.avocado.expensescompose.presentation.cards.expensestotalbycard.ExpensesTotalByCardScreen
 import com.avocado.expensescompose.presentation.expenses.addexpense.AddExpenseScreen
 import com.avocado.expensescompose.presentation.incomes.addscreen.AddIncomeScreen
@@ -175,19 +176,24 @@ fun ExpensesApplication() {
 
     // Expenses by card Screen
     composable(
-      "${RoutesConstants.EXPENSES_CARD_SCREEN}/{payBefore}/{cardId}",
+      "${RoutesConstants.EXPENSES_CARD_SCREEN}/{payBefore}/{cardId}/{dataSelector}",
       arguments = listOf(
         navArgument("cardId") { type = NavType.StringType },
         navArgument("payBefore") {
+          type = NavType.StringType
+        },
+        navArgument("dataSelector") {
           type = NavType.StringType
         }
       )
     ) { navBackStackEntry ->
       val cardId = navBackStackEntry.arguments?.getString("cardId").orEmpty()
       val payBefore = navBackStackEntry.arguments?.getString("payBefore").orEmpty()
+      val dataSelector = navBackStackEntry.arguments?.getString("dataSelector").orEmpty()
       ExpensesByCardScreen(
         cardId = cardId,
         payBefore = payBefore,
+        dataSelector = DataSelector.valueOf(dataSelector),
         onPopBackStack = { navController.popBackStack() }
       )
     }

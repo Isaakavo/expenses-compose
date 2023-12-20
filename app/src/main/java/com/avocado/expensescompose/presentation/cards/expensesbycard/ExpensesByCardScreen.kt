@@ -32,6 +32,7 @@ import com.avocado.expensescompose.presentation.util.formatDateOnlyMonth
 fun ExpensesByCardScreen(
   viewModel: ExpensesByCardViewModel = hiltViewModel(),
   cardId: String,
+  dataSelector: DataSelector,
   payBefore: String,
   onPopBackStack: () -> Unit = {},
 ) {
@@ -39,7 +40,7 @@ fun ExpensesByCardScreen(
   val state by viewModel.state.collectAsStateWithLifecycle()
 
   LaunchedEffect(key1 = Unit) {
-    when (state.querySelector) {
+    when (dataSelector) {
       DataSelector.FORTNIGHT -> {
         Log.d("ExpensesByCardScreen", "Querying fortnight")
         viewModel.getExpensesByFortnight(payBefore = payBefore, cardId = cardId)
