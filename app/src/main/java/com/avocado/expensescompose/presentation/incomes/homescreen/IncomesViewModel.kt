@@ -115,12 +115,13 @@ class IncomesViewModel @Inject constructor(
           yearMap[year] = monthMap
         }
       } else {
-        if (prevYear != year) monthMap = mutableMapOf()
-        yearMap[year] = mutableMapOf(
-          month to mutableMapOf(
-            fortnight.translate() to mutableListOf(income)
-          )
+        if (prevYear != year) {
+          monthMap = mutableMapOf()
+        }
+        monthMap[month] = mutableMapOf(
+          fortnight.translate() to mutableListOf(income)
         )
+        yearMap[year] = monthMap
         prevYear = year
       }
     }
