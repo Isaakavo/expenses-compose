@@ -15,7 +15,7 @@ import com.avocado.expensescompose.domain.income.models.Fortnight
 import com.avocado.expensescompose.domain.income.models.Income
 import com.avocado.expensescompose.domain.income.models.Incomes
 import com.avocado.expensescompose.domain.income.models.PaymentDate
-import com.avocado.type.PayBeforeInput
+import com.avocado.type.CreateIncomeInput
 import java.time.LocalDateTime
 
 class ApolloIncomesClient(private val apolloClient: ApolloClient) : IncomesClient {
@@ -51,11 +51,14 @@ class ApolloIncomesClient(private val apolloClient: ApolloClient) : IncomesClien
     comment: String,
   ): MyResult<Income?> {
     try {
+      val input = CreateIncomeInput(
+        total = total,
+        paymentDate = Date(paymentDate),
+        comment = Optional.present(comment)
+      )
       val insertedIncome = apolloClient.mutation(
         CreateIncomeMutation(
-          total = total,
-          paymentDate = Date(paymentDate),
-          comment = Optional.present(comment)
+          input = input
         )
       ).execute().data?.createIncome?.incomeFragment
         ?: return MyResult.Error(uiText = "Error extracting the response")
