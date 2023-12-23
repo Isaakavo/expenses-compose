@@ -11,6 +11,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -43,7 +45,7 @@ fun IncomeExpensesScreen(
   viewModel: IncomeWithExpenseViewModel = hiltViewModel(),
   paymentDate: String,
   onNavigateBack: () -> Unit = {},
-  onNavigate: (navigateEvent: NavigateEvent) -> Unit = {},
+  onNavigate: (navigateEvent: NavigateEvent, shouldRefresh: String, isSuccessLogin: Boolean) -> Unit = { one, two, three -> },
   onEditIncome: (navigateEvent: NavigateEvent, incomeId: String) -> Unit = { one, two -> }
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
@@ -52,18 +54,27 @@ fun IncomeExpensesScreen(
     viewModel.getIncomesWithExpenses(paymentDate)
   }
 
+
+  if (state.isDeleted) {
+    LaunchedEffect(key1 = Unit) {
+      onNavigate(NavigateEvent.NavigateIncomeOverview, "DELETED", false)
+    }
+  }
+
   IncomeWithExpensesContent(
     incomeId = state.incomes?.get(0)?.id ?: "",
     incomesTotal = state.incomesTotal,
     fortnight = state.incomes?.get(0)?.paymentDate?.fortnight?.translate() ?: "",
     month = state.incomes?.get(0)?.paymentDate?.date?.formatDateMonthWithYear() ?: "",
+    shouldDisplayAlertDialog = state.shouldDisplayAlertDialog,
     remaining = state.remaining,
     expended = state.expensesTotal,
     expenseList = state.expensesList,
     isLoading = state.isLoading,
     onNavigate = onNavigate,
     onNavigateBack = onNavigateBack,
-    onEditIncome = onEditIncome
+    onEditIncome = onEditIncome,
+    onEvent = viewModel::onEvent
   )
 }
 
@@ -77,9 +88,11 @@ fun IncomeWithExpensesContent(
   expended: Double,
   expenseList: List<Expense>,
   isLoading: Boolean = false,
+  shouldDisplayAlertDialog: Boolean = false,
   onNavigateBack: () -> Unit = {},
-  onNavigate: (navigateEvent: NavigateEvent) -> Unit,
-  onEditIncome: (navigateEvent: NavigateEvent, incomeId: String) -> Unit = { one, two -> }
+  onNavigate: (navigateEvent: NavigateEvent, shouldRefresh: String, isSuccessLogin: Boolean) -> Unit = { one, two, three -> },
+  onEditIncome: (navigateEvent: NavigateEvent, incomeId: String) -> Unit = { one, two -> },
+  onEvent: (event: IncomeWithExpenseEvent, param: String) -> Unit = { one, two -> }
 ) {
   Scaffold(
     topBar = {
@@ -99,7 +112,7 @@ fun IncomeWithExpensesContent(
           MenuItems(
             text = "Borrar",
             icon = Icons.Rounded.Delete,
-            action = {}
+            action = { onEvent(IncomeWithExpenseEvent.DeleteIncome, "") }
           )
         )
       )
@@ -122,6 +135,11 @@ fun IncomeWithExpensesContent(
           CircularProgressIndicator(strokeWidth = 6.dp)
         }
       } else {
+        DeleteAlertDialog(
+          shouldDisplay = shouldDisplayAlertDialog,
+          onConfirmRequest = { onEvent(IncomeWithExpenseEvent.ConfirmDeleteIncome, incomeId) },
+          onDismissRequest = { onEvent(IncomeWithExpenseEvent.CancelDeleteIncome, "") }
+        )
         Column(
           modifier = Modifier
             .fillMaxSize()
@@ -221,9 +239,49 @@ fun IncomeDetails(incomesTotal: Double, remaining: Double, expended: Double) {
 }
 
 @Composable
-fun FABAddExpense(onNavigate: (navigateEvent: NavigateEvent) -> Unit) {
-  FloatingActionButton(onClick = { onNavigate(NavigateEvent.NavigateAddExpenseScreen) }) {
+fun FABAddExpense(
+  onNavigate: (navigateEvent: NavigateEvent, shouldRefresh: String, isSuccessLogin: Boolean) -> Unit = { one, two, three -> }
+) {
+  FloatingActionButton(onClick = {
+    onNavigate(
+      NavigateEvent.NavigateAddExpenseScreen,
+      "",
+      false
+    )
+  }) {
     Icon(Icons.Rounded.Add, contentDescription = "")
+  }
+}
+
+@Composable
+fun DeleteAlertDialog(
+  shouldDisplay: Boolean,
+  onConfirmRequest: () -> Unit,
+  onDismissRequest: () -> Unit
+) {
+  if (shouldDisplay) {
+    AlertDialog(
+      onDismissRequest = { onDismissRequest() },
+      confirmButton =
+      {
+        Button(onClick = { onConfirmRequest() }) {
+          Text(text = "Aceptar")
+        }
+      },
+      dismissButton =
+      {
+        Button(onClick = { onDismissRequest() }) {
+          Text(text = "Cancelar")
+        }
+      },
+      icon = { Icon(imageVector = Icons.Rounded.Delete, contentDescription = "") },
+      title = { Text(text = "Eliminar Ingreso") },
+      text = {
+        Text(
+          text = "Esta accion no se puede deshacer. Los gastos asociados a este ingreso no seran eliminados"
+        )
+      }
+    )
   }
 }
 

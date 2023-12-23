@@ -135,8 +135,8 @@ fun ExpensesApplication() {
         onNavigateBack = {
           navController.popBackStack()
         },
-        onNavigate = {
-          navigate(it, navController, null)
+        onNavigate = { event, shouldRefresh, isSuccessLogin ->
+          navigate(event, navController, "$shouldRefresh/$isSuccessLogin")
         },
         onEditIncome = { event, incomeId ->
           navigate(event, navController, incomeId)

@@ -1,0 +1,3 @@
+mutation DeleteIncomeById($deleteIncomeByIdId: ID!) {
+    deleteIncomeById(id: $deleteIncomeByIdId)
+}
