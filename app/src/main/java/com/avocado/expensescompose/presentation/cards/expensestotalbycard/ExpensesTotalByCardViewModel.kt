@@ -26,8 +26,6 @@ import javax.inject.Inject
 
 
 sealed class ExpensesTotalByCardEvent {
-  object OpenDropDownMenu : ExpensesTotalByCardEvent()
-  object CloseDropDownMenu : ExpensesTotalByCardEvent()
   object MonthData : ExpensesTotalByCardEvent()
   object FortnightData : ExpensesTotalByCardEvent()
 }
@@ -43,7 +41,6 @@ data class CardsWithExpensesState(
   val cardBank: String = "",
   val cardAlias: String = "",
   val dataSelector: DataSelector = DataSelector.FORTNIGHT,
-  val openDropDownMenu: Boolean = false,
   val uiError: String = ""
 )
 
@@ -56,13 +53,6 @@ class ExpensesTotalByCardViewModel @Inject constructor(private val graphQlClient
 
   fun onEvent(event: ExpensesTotalByCardEvent) {
     when (event) {
-      ExpensesTotalByCardEvent.OpenDropDownMenu -> {
-        _state.update { it.copy(openDropDownMenu = true) }
-      }
-
-      ExpensesTotalByCardEvent.CloseDropDownMenu -> {
-        _state.update { it.copy(openDropDownMenu = false) }
-      }
 
       ExpensesTotalByCardEvent.FortnightData -> {
         _state.update { it.copy(dataSelector = DataSelector.FORTNIGHT) }
@@ -92,7 +82,6 @@ class ExpensesTotalByCardViewModel @Inject constructor(private val graphQlClient
                   totalByFortnight = totalByyFortnight,
                   cardBank = cardById.data.cardById?.bank.orEmpty(),
                   cardAlias = cardById.data.cardById?.alias.orEmpty(),
-                  openDropDownMenu = _state.value.openDropDownMenu,
                   dataSelector = _state.value.dataSelector
                 )
               },
