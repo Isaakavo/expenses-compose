@@ -8,8 +8,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -75,29 +75,40 @@ fun IncomeWithExpensesContent(
   onNavigateBack: () -> Unit = {},
   onNavigate: (navigateEvent: NavigateEvent) -> Unit
 ) {
-  //TODO add logic to edit income
-  // and more menu
-  Scaffold(topBar = {
-    AppBar(
-      title = "$fortnight Quincena",
-      onNavigationIconClick = { onNavigateBack() },
-      actionsList = listOf(
-        IconsActions(icon = Icons.Rounded.Edit, action = {}),
-        IconsActions(icon = Icons.Rounded.MoreVert, action = {})
+  Scaffold(
+    topBar = {
+      AppBar(
+        title = "$fortnight Quincena",
+        onNavigationIconClick = { onNavigateBack() },
+        actionsList = listOf(
+          IconsActions(
+            text = "Editar",
+            icon = Icons.Rounded.Edit,
+            action = {}
+          ),
+          IconsActions(
+            text = "Borrar",
+            icon = Icons.Rounded.Delete,
+            action = {}
+          )
+        )
       )
-    )
-  }, floatingActionButton = {
-    FABAddExpense(onNavigate)
-  }) { paddingValues ->
+    },
+    floatingActionButton = {
+      FABAddExpense(onNavigate)
+    }
+  ) { paddingValues ->
     Surface(
       modifier = Modifier
         .padding(paddingValues)
         .fillMaxSize()
     ) {
       if (isLoading) {
-        Column(modifier = Modifier
-          .fillMaxSize()
-          .padding(22.dp)) {
+        Column(
+          modifier = Modifier
+            .fillMaxSize()
+            .padding(22.dp)
+        ) {
           CircularProgressIndicator(strokeWidth = 6.dp)
         }
       } else {
@@ -117,7 +128,6 @@ fun IncomeWithExpensesContent(
         }
       }
     }
-
   }
 }
 

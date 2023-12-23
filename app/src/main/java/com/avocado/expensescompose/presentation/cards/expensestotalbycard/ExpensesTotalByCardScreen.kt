@@ -83,11 +83,18 @@ fun CardWithExpenseContent(
 
   Scaffold(
     topBar = {
-      AppBar(title = cardAlias.ifEmpty { cardBank }, actionsList = listOf(
-        IconsActions(
-          icon = Icons.Rounded.MoreVert,
-          action = { onEvent(ExpensesTotalByCardEvent.OpenDropDownMenu) })
-      ),
+      AppBar(
+        title = cardAlias.ifEmpty { cardBank },
+        actionsList = listOf(
+          IconsActions(
+            text = "Quincenal",
+            action = { onEvent(ExpensesTotalByCardEvent.FortnightData) }
+          ),
+          IconsActions(
+            text = "Mensual",
+            action = { onEvent(ExpensesTotalByCardEvent.MonthData) }
+          ),
+        ),
         onNavigationIconClick = { onPopBackStack() })
     }
   ) { paddingValues ->
@@ -111,7 +118,6 @@ fun CardWithExpenseContent(
             .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 12.dp),
           verticalArrangement = Arrangement.spacedBy(22.dp)
         ) {
-          CardDataDropDownMenu(openDropDownMenu = openDropDownMenu, onEvent = onEvent)
           when (dataSelector) {
             DataSelector.FORTNIGHT -> {
               TotalByFortnight(
@@ -206,37 +212,6 @@ fun TotalByMonth(
             Text(text = item.total?.formatMoney().orEmpty())
           }
         }
-      }
-    }
-  }
-}
-
-@Composable
-fun CardDataDropDownMenu(
-  openDropDownMenu: Boolean,
-  onEvent: (event: ExpensesTotalByCardEvent) -> Unit
-) {
-  Column(
-    modifier = Modifier.fillMaxWidth(),
-    horizontalAlignment = Alignment.End,
-    verticalArrangement = Arrangement.Top
-  ) {
-    Box {
-      DropdownMenu(
-        expanded = openDropDownMenu,
-        onDismissRequest = { onEvent(ExpensesTotalByCardEvent.CloseDropDownMenu) }) {
-        DropdownMenuItem(
-          text = { Text(text = "Quincenal") },
-          onClick = {
-            onEvent(ExpensesTotalByCardEvent.FortnightData)
-            onEvent(ExpensesTotalByCardEvent.CloseDropDownMenu)
-          })
-        DropdownMenuItem(
-          text = { Text(text = "Mensual") },
-          onClick = {
-            onEvent(ExpensesTotalByCardEvent.MonthData)
-            onEvent(ExpensesTotalByCardEvent.CloseDropDownMenu)
-          })
       }
     }
   }
