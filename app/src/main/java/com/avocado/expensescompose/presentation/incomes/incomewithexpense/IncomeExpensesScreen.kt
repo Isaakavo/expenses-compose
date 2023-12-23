@@ -1,5 +1,6 @@
 package com.avocado.expensescompose.presentation.incomes.incomewithexpense
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,7 +35,7 @@ import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.shared.ExpensesList
 import com.avocado.expensescompose.presentation.topbar.AppBar
-import com.avocado.expensescompose.presentation.topbar.IconsActions
+import com.avocado.expensescompose.presentation.topbar.MenuItems
 import com.avocado.expensescompose.presentation.util.formatDateMonthWithYear
 
 @Composable
@@ -42,7 +43,8 @@ fun IncomeExpensesScreen(
   viewModel: IncomeWithExpenseViewModel = hiltViewModel(),
   paymentDate: String,
   onNavigateBack: () -> Unit = {},
-  onNavigate: (navigateEvent: NavigateEvent) -> Unit = {}
+  onNavigate: (navigateEvent: NavigateEvent) -> Unit = {},
+  onEditIncome: (navigateEvent: NavigateEvent, incomeId: String) -> Unit = { one, two -> }
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -51,6 +53,7 @@ fun IncomeExpensesScreen(
   }
 
   IncomeWithExpensesContent(
+    incomeId = state.incomes?.get(0)?.id ?: "",
     incomesTotal = state.incomesTotal,
     fortnight = state.incomes?.get(0)?.paymentDate?.fortnight?.translate() ?: "",
     month = state.incomes?.get(0)?.paymentDate?.date?.formatDateMonthWithYear() ?: "",
@@ -59,12 +62,14 @@ fun IncomeExpensesScreen(
     expenseList = state.expensesList,
     isLoading = state.isLoading,
     onNavigate = onNavigate,
-    onNavigateBack = onNavigateBack
+    onNavigateBack = onNavigateBack,
+    onEditIncome = onEditIncome
   )
 }
 
 @Composable
 fun IncomeWithExpensesContent(
+  incomeId: String,
   incomesTotal: Double,
   fortnight: String,
   month: String,
@@ -73,20 +78,25 @@ fun IncomeWithExpensesContent(
   expenseList: List<Expense>,
   isLoading: Boolean = false,
   onNavigateBack: () -> Unit = {},
-  onNavigate: (navigateEvent: NavigateEvent) -> Unit
+  onNavigate: (navigateEvent: NavigateEvent) -> Unit,
+  onEditIncome: (navigateEvent: NavigateEvent, incomeId: String) -> Unit = { one, two -> }
 ) {
   Scaffold(
     topBar = {
       AppBar(
         title = "$fortnight Quincena",
         onNavigationIconClick = { onNavigateBack() },
-        actionsList = listOf(
-          IconsActions(
+        dropDownMenuItems = listOf(
+          MenuItems(
             text = "Editar",
             icon = Icons.Rounded.Edit,
-            action = {}
+            action = {
+              // Hardcoding the first id for the income
+              Log.d("IncomeExpensesScreen", "Clicking on edit")
+              onEditIncome(NavigateEvent.NavigationEditIncomeScreen, incomeId)
+            }
           ),
-          IconsActions(
+          MenuItems(
             text = "Borrar",
             icon = Icons.Rounded.Delete,
             action = {}

@@ -23,6 +23,7 @@ sealed class NavigateEvent {
   object NavigateIncomeOverview : NavigateEvent()
   object NavigateIncomeExpensesList : NavigateEvent()
   object NavigationAddIncomeScreen : NavigateEvent()
+  object NavigationEditIncomeScreen : NavigateEvent()
   object NavigateCardsScreen : NavigateEvent()
   object NavigateAddExpenseScreen : NavigateEvent()
   object NavigateCardsWithExpenseScreen : NavigateEvent()
@@ -53,6 +54,15 @@ private fun <T> navigate(navigateEvent: NavigateEvent, navController: NavControl
 
     is NavigateEvent.NavigationAddIncomeScreen -> {
       navController.navigate(RoutesConstants.INCOME_ADD) {
+        launchSingleTop = true
+        popUpTo("${RoutesConstants.INCOME_OVERVIEW}/${param}") {
+          inclusive = true
+        }
+      }
+    }
+
+    is NavigateEvent.NavigationEditIncomeScreen -> {
+      navController.navigate("${RoutesConstants.INCOME_ADD}/$param") {
         launchSingleTop = true
         popUpTo("${RoutesConstants.INCOME_OVERVIEW}/${param}") {
           inclusive = true
@@ -98,11 +108,11 @@ fun ExpensesApplication() {
     composable(
       "${RoutesConstants.INCOME_OVERVIEW}/{shouldRefresh}/{isSuccessLogin}",
       arguments = listOf(
-        navArgument("shouldRefresh") { type = NavType.BoolType },
+        navArgument("shouldRefresh") { type = NavType.StringType },
         navArgument("isSuccessLogin") { type = NavType.BoolType }
       )
     ) {
-      val shouldRefresh = it.arguments?.getBoolean("shouldRefresh") ?: false
+      val shouldRefresh = it.arguments?.getString("shouldRefresh") ?: ""
       val isSuccessLogin = it.arguments?.getBoolean("isSuccessLogin") ?: false
       IncomesScreen(
         shouldRefresh = shouldRefresh,
@@ -127,6 +137,9 @@ fun ExpensesApplication() {
         },
         onNavigate = {
           navigate(it, navController, null)
+        },
+        onEditIncome = { event, incomeId ->
+          navigate(event, navController, incomeId)
         }
       )
     }
@@ -138,6 +151,21 @@ fun ExpensesApplication() {
         onNavigate = { navigateEvent, shouldRefresh, isSuccessLogin ->
           navigate(navigateEvent, navController, "$shouldRefresh/$isSuccessLogin")
         })
+    }
+
+    // Edit Income Screen
+    composable(
+      "${RoutesConstants.INCOME_ADD}/{incomeId}",
+      arguments = listOf(navArgument("incomeId") { type = NavType.StringType })
+    ) { navBackStackEntry ->
+      val incomeId = navBackStackEntry.arguments?.getString("incomeId") ?: ""
+      AddIncomeScreen(
+        incomeId = incomeId,
+        onPopBackStack = { navController.popBackStack() },
+        onNavigate = { navigateEvent, shouldRefresh, isSuccessLogin ->
+          navigate(navigateEvent, navController, "$shouldRefresh/$isSuccessLogin")
+        }
+      )
     }
 
     // Add Expense Screen

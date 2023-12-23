@@ -32,8 +32,11 @@ fun LocalDateTime.formatDateMonthWithYear(): String {
   return this.format(format)
 }
 
+fun LocalDateTime.convertDateToMillis(): Long =
+  this.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+
 fun TotalFortnight.prepareDateForRequest(): String? {
-  return when(Fortnight.valueOf(this.fortnight?.name.orEmpty())) {
+  return when (Fortnight.valueOf(this.fortnight?.name.orEmpty())) {
     Fortnight.FIRST -> this.date?.getFifteenDayOfMonth()
     Fortnight.SECOND -> this.date?.getLastDayOfMonth()
     else -> ""

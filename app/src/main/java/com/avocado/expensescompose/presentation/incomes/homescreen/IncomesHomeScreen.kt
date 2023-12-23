@@ -70,7 +70,7 @@ data class NavigationIncomeDetails(
 
 @Composable
 fun IncomesScreen(
-  shouldRefresh: Boolean = false,
+  shouldRefresh: String = "",
   isSuccessLogin: Boolean = false,
   viewModel: IncomesViewModel = hiltViewModel(),
   onNavigate: (navigateEvent: NavigateEvent, income: NavigationIncomeDetails?) -> Unit
@@ -78,7 +78,7 @@ fun IncomesScreen(
   val state by viewModel.state.collectAsStateWithLifecycle()
 
   LaunchedEffect(key1 = Unit) {
-    if (shouldRefresh || isSuccessLogin) {
+    if (shouldRefresh.isNotEmpty() || isSuccessLogin) {
       viewModel.onEvent(IncomeEvent.FetchIncomes)
     }
   }
@@ -99,7 +99,7 @@ fun IncomesScreen(
 fun IncomeScreenContent(
   backPressState: BackPress?,
   isLoading: Boolean,
-  shouldRefresh: Boolean,
+  shouldRefresh: String,
   incomesMap: Map<String, MutableMap<String, MutableMap<String, MutableList<Income>?>>>?,
   totalByMonth: List<Total?>,
   showToast: Boolean,
@@ -110,10 +110,14 @@ fun IncomeScreenContent(
   val drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
   val snackBarHostState = remember { SnackbarHostState() }
 
-  if (shouldRefresh) {
+  if (shouldRefresh.isNotEmpty()) {
     LaunchedEffect(key1 = Unit) {
       scope.launch {
-        snackBarHostState.showSnackbar("Income added successfully")
+        if (shouldRefresh == "ADDED") {
+          snackBarHostState.showSnackbar("Income added successfully")
+        } else if (shouldRefresh == "UPDATED"){
+          snackBarHostState.showSnackbar("Income updated successfully")
+        }
       }
     }
   }

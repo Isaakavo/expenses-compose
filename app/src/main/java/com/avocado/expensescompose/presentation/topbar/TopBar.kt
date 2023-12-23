@@ -1,10 +1,9 @@
 package com.avocado.expensescompose.presentation.topbar
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -12,6 +11,7 @@ import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,9 +33,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 
-data class IconsActions(
+data class MenuItems(
   val text: String = "",
   val icon: ImageVector? = null,
   val action: () -> Unit
@@ -47,28 +46,28 @@ fun AppBar(
   title: String,
   navigationIcon: ImageVector = Icons.Rounded.ArrowBack,
   buttonText: String = "",
-  actionsList: List<IconsActions> = emptyList(),
+  dropDownMenuItems: List<MenuItems> = emptyList(),
   onNavigationIconClick: () -> Unit = {},
-  actionItemOnClick: () -> Unit = {}
+  onActionButtonClick: () -> Unit = {}
 ) {
   TopAppBar(
     title = { Text(title, color = Color.White) },
     colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
     navigationIcon = {
-      Icon(
-        imageVector = navigationIcon,
-        contentDescription = "",
-        modifier = Modifier
-          .padding(horizontal = 12.dp)
-          .clickable {
-            onNavigationIconClick.invoke()
-          },
-        tint = Color.White
-      )
+      IconButton(
+        onClick = { onNavigationIconClick() }
+      ) {
+        Icon(imageVector = navigationIcon, contentDescription = "")
+      }
     },
     actions = {
-      if (actionsList.isNotEmpty()) {
-        ToolBarDropDownMenu(actionsList = actionsList)
+      if (buttonText.isNotEmpty()) {
+        Button(onClick = { onActionButtonClick() }) {
+          Text(text = buttonText)
+        }
+      }
+      if (dropDownMenuItems.isNotEmpty()) {
+        ToolBarDropDownMenu(actionsList = dropDownMenuItems)
       }
     }
   )
@@ -76,22 +75,16 @@ fun AppBar(
 
 @Composable
 fun ToolBarDropDownMenu(
-  actionsList: List<IconsActions> = emptyList()
+  actionsList: List<MenuItems> = emptyList()
 ) {
   var expanded by remember {
     mutableStateOf(false)
   }
-  Row(
-    modifier = Modifier.fillMaxWidth(),
-    horizontalArrangement = Arrangement.End
-  ) {
-    IconButton(onClick = { expanded = !expanded }) {
-      Icon(imageVector = Icons.Rounded.MoreVert, contentDescription = "")
-    }
+  IconButton(onClick = { expanded = !expanded }) {
+    Icon(imageVector = Icons.Rounded.MoreVert, contentDescription = "")
   }
 
   Column(
-    modifier = Modifier.fillMaxWidth(),
     horizontalAlignment = Alignment.End,
     verticalArrangement = Arrangement.Top
   ) {
@@ -129,13 +122,14 @@ fun ToolBarPreview() {
     topBar = {
       AppBar(
         title = "Prueba",
-        actionsList = listOf(
-          IconsActions(
+        buttonText = "Guardar",
+        dropDownMenuItems = listOf(
+          MenuItems(
             text = "Editar",
             icon = Icons.Rounded.Edit,
             action = {}
           ),
-          IconsActions(
+          MenuItems(
             text = "Borrar",
             icon = Icons.Rounded.Delete,
             action = {}
@@ -144,7 +138,7 @@ fun ToolBarPreview() {
       )
     }
   ) {
-    Surface(modifier = Modifier.padding(it)) {
+    Surface(modifier = Modifier.padding(it).fillMaxSize()) {
 
     }
   }

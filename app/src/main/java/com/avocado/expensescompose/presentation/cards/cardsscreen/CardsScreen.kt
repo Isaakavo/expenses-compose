@@ -44,7 +44,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.avocado.expensescompose.data.model.card.Card
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.topbar.AppBar
-import com.avocado.expensescompose.presentation.topbar.IconsActions
+import com.avocado.expensescompose.presentation.topbar.MenuItems
 import kotlinx.coroutines.launch
 
 @Composable
@@ -124,8 +124,8 @@ fun CardsScreenContent(
     topBar = {
       AppBar(
         title = "Tarjetas",
-        actionsList = listOf(
-          IconsActions(
+        dropDownMenuItems = listOf(
+          MenuItems(
             icon = Icons.Rounded.MoreVert,
             action = { onEvent(CardsScreenEvents.OpenDropDownMenu, "") })
         ),

@@ -1,6 +1,5 @@
 package com.avocado.expensescompose.presentation.incomes.addscreen
 
-import android.icu.util.Calendar
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,12 +9,10 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -34,18 +31,27 @@ import com.avocado.expensescompose.presentation.topbar.AppBar
 
 @Composable
 fun AddIncomeScreen(
+  incomeId: String = "",
   viewModel: AddIncomeViewModel = hiltViewModel(),
   onPopBackStack: () -> Unit = {},
-  onNavigate: (navigateEvent: NavigateEvent, shouldRefresh: Boolean, isSuccessLogin: Boolean) -> Unit,
+  onNavigate: (navigateEvent: NavigateEvent, shouldRefresh: String, isSuccessLogin: Boolean) -> Unit,
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
 
+  LaunchedEffect(key1 = Unit) {
+    if (incomeId.isNotEmpty()) {
+      viewModel.getIncomeById(incomeId)
+    }
+  }
+
   AddIncomeContent(
+    incomeId = state.incomeId,
     total = state.total,
     comment = state.comments,
     date = state.date,
     initialDate = state.initialDate,
     isInserted = state.isInserted,
+    isUpdated = state.isUpdated,
     openDateDialog = state.openDateDialog,
     onPopBackStack = onPopBackStack,
     onNavigate = onNavigate,
@@ -54,22 +60,20 @@ fun AddIncomeScreen(
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddIncomeContent(
+  incomeId: String,
   total: String,
   comment: String,
   date: String,
-  initialDate: Long,
+  initialDate: Long?,
   isInserted: Boolean,
+  isUpdated: Boolean,
   openDateDialog: Boolean,
   onPopBackStack: () -> Unit = {},
-  onNavigate: (navigateEvent: NavigateEvent, shouldRefresh: Boolean, isSuccessLogin: Boolean) -> Unit,
+  onNavigate: (navigateEvent: NavigateEvent, shouldRefresh: String, isSuccessLogin: Boolean) -> Unit,
   onEvent: (addIncomeEvent: AddIncomeEvent, param: String?) -> Unit
 ) {
-  val calendar = Calendar.getInstance()
-  calendar.set(2023, 8, 30) // add year, month (Jan), date
-  val datePickerState = rememberDatePickerState(initialSelectedDateMillis = initialDate)
   val focusRequester = remember { FocusRequester() }
 
   Scaffold(
@@ -78,9 +82,15 @@ fun AddIncomeContent(
         title = "Agregar ingreso",
         navigationIcon = Icons.Rounded.ArrowBack,
         buttonText = "Guardar",
-        onNavigationIconClick = { onPopBackStack() }) {
-        onEvent(AddIncomeEvent.InsertIncome, null)
-      }
+        onNavigationIconClick = { onPopBackStack() },
+        onActionButtonClick = {
+          if (incomeId.isEmpty()) {
+            onEvent(AddIncomeEvent.InsertIncome, null)
+          } else if (incomeId.isNotEmpty()) {
+            onEvent(AddIncomeEvent.UpdateIncome, null)
+          }
+        }
+      )
     }
   ) { paddingValues ->
     Surface(
@@ -96,8 +106,8 @@ fun AddIncomeContent(
         DateDialog(
           date = date,
           openDateDialog = openDateDialog,
-          datePickerState = datePickerState,
           modifier = Modifier.fillMaxWidth(),
+          initialSelectedDate = initialDate,
           onConfirm = { formattedDate ->
             onEvent(
               AddIncomeEvent.UpdateDate,
@@ -134,7 +144,11 @@ fun AddIncomeContent(
 
       if (isInserted) {
         LaunchedEffect(key1 = Unit) {
-          onNavigate(NavigateEvent.NavigateIncomeOverview, true, false)
+          onNavigate(NavigateEvent.NavigateIncomeOverview, "ADDED", false)
+        }
+      } else if (isUpdated) {
+        LaunchedEffect(key1 = Unit) {
+          onNavigate(NavigateEvent.NavigateIncomeOverview, "UPDATED", false)
         }
       }
     }

@@ -106,7 +106,6 @@ fun AddExpenseScreenContent(
   onEvent: (event: AddExpenseEvent, elementId: String?) -> Unit,
   onPopBackStack: () -> Unit = {}
 ) {
-  val datePickerState = rememberDatePickerState()
   val scope = rememberCoroutineScope()
   val snackBarHostState = remember { SnackbarHostState() }
   val focusRequester = remember { FocusRequester() }
@@ -123,7 +122,7 @@ fun AddExpenseScreenContent(
     topBar = {
       AppBar(
         title = "Agregar gasto", buttonText = "Agregar",
-        actionItemOnClick = {
+        onActionButtonClick = {
           onEvent(AddExpenseEvent.AddExpense, null)
         },
         onNavigationIconClick = { onPopBackStack() }
@@ -150,7 +149,6 @@ fun AddExpenseScreenContent(
           date = date,
           iconResource = R.drawable.baseline_calendar_month_24,
           openDateDialog = openDateDialog,
-          datePickerState = datePickerState,
           onConfirm = { formattedDate -> onEvent(AddExpenseEvent.UpdateDate, formattedDate) },
           onDismiss = { onEvent(AddExpenseEvent.DateDialogClose, null) },
           onSelectTextField = { onEvent(AddExpenseEvent.DateDialogOpen, null) }

@@ -6,11 +6,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.DatePickerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -24,14 +24,18 @@ fun DateDialog(
   date: String,
   iconResource: Int? = null,
   openDateDialog: Boolean,
-  datePickerState: DatePickerState,
+  initialSelectedDate: Long? = null,
   onConfirm: (String) -> Unit,
   onDismiss: () -> Unit,
   onSelectTextField: () -> Unit,
 ) {
+  // TODO find why the initial state is not taking the new value when data from server is back (update income)
+  val datePickerState = rememberDatePickerState(initialSelectedDateMillis = initialSelectedDate)
   Row(
     horizontalArrangement = Arrangement.Center,
-    modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+    modifier = Modifier
+      .fillMaxWidth()
+      .padding(top = 8.dp)
   ) {
     if (iconResource != null) {
       Icon(
@@ -41,7 +45,6 @@ fun DateDialog(
     }
     ClickableText(text = date, modifier = modifier) {
       onSelectTextField()
-      // onEvent(AddExpenseEvent.DateDialogOpen, null)
     }
   }
 
@@ -54,10 +57,8 @@ fun DateDialog(
             datePickerState.selectedDateMillis?.let { millis ->
               val formattedDate = millis.formatDateFromMillis()
               onConfirm(formattedDate)
-              // onEvent(AddExpenseEvent.UpdateDate, formattedDate)
             }
             onDismiss()
-            // onEvent(AddExpenseEvent.DateDialogClose, null)
           }) {
           Text(text = "Aceptar")
         }

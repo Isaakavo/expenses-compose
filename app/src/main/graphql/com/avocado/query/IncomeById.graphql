@@ -1,0 +1,10 @@
+query IncomeById($incomeId: ID!) {
+    incomeById(incomeId: $incomeId) {
+        id
+        total
+        comment
+        paymentDate {
+            date
+        }
+    }
+}

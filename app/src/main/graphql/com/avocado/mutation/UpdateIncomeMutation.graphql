@@ -1,0 +1,14 @@
+mutation UpdateIncome($input: UpdateIncomeInput) {
+    updateIncome(input: $input) {
+        id
+        userId
+        total
+        createdAt
+        updatedAt
+        comment
+        paymentDate {
+            date
+            fortnight
+        }
+    }
+}
