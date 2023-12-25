@@ -47,19 +47,21 @@ android {
         getDefaultProguardFile("proguard-android-optimize.txt"),
         "proguard-rules.pro"
       )
+      buildConfigField("String", "GRAPHQL_ENDPOINT", "\"https://expenses-graphql.fly.dev/graphql\"")
+      signingConfig = signingConfigs.getByName("debug")
     }
 
     debug {
       applicationIdSuffix = ".debug"
       isDebuggable = true
-      buildConfigField("String", "GRAPHQL_ENDPOINT", "\"http://10.0.2.2:4000/graphql\"")
+      buildConfigField("String", "GRAPHQL_ENDPOINT", "\"http://10.0.2.2:3000/graphql\"")
     }
 
     create("staging") {
       initWith(getByName("debug"))
       manifestPlaceholders["hostNam"] = "internal.avocado.com"
       applicationIdSuffix = ".staging"
-      buildConfigField("String", "GRAPHQL_ENDPOINT", "\"http://192.168.100.56:4000/graphql\"")
+      buildConfigField("String", "GRAPHQL_ENDPOINT", "\"http://192.168.100.5:3000/graphql\"")
     }
   }
   compileOptions {
