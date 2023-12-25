@@ -20,8 +20,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 sealed class CardsScreenEvents {
-  object OpenDropDownMenu : CardsScreenEvents()
-  object CloseDropDownMenu : CardsScreenEvents()
   object OpenAddCardDialog : CardsScreenEvents()
   object CloseAddCardDialog : CardsScreenEvents()
   object UpdateBank : CardsScreenEvents()
@@ -34,7 +32,6 @@ data class CardsScreenState(
   val cardsList: List<Card> = emptyList(),
   val bank: String = "",
   val alias: String = "",
-  val openDropDownMenu: Boolean = false,
   val openAddCardDialog: Boolean = false,
   val isDebit: Boolean = true,
   val isCredit: Boolean = false,
@@ -58,13 +55,6 @@ class CardsScreenViewModel @Inject constructor(private val graphQlClient: GraphQ
 
   fun onEvent(events: CardsScreenEvents, inputValue: String = "") {
     when (events) {
-      CardsScreenEvents.OpenDropDownMenu -> {
-        _state.update { it.copy(openDropDownMenu = true) }
-      }
-
-      CardsScreenEvents.CloseDropDownMenu -> {
-        _state.update { it.copy(openDropDownMenu = false) }
-      }
 
       CardsScreenEvents.CloseAddCardDialog -> {
         _state.update { it.copy(openAddCardDialog = false) }
@@ -140,8 +130,7 @@ class CardsScreenViewModel @Inject constructor(private val graphQlClient: GraphQ
                   it.copy(
                     cardsList = cardList.toList(),
                     isAdded = true,
-                    openAddCardDialog = false,
-                    openDropDownMenu = false
+                    openAddCardDialog = false
                   )
                 }
               }

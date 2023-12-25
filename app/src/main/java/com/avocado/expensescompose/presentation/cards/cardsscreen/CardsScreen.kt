@@ -2,7 +2,6 @@ package com.avocado.expensescompose.presentation.cards.cardsscreen
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -14,12 +13,8 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -60,7 +55,6 @@ fun CardsScreen(
     cardsList = state.cardsList,
     bank = state.bank,
     alias = state.alias,
-    openDropDownMenu = state.openDropDownMenu,
     openAddCardDialog = state.openAddCardDialog,
     isDebitCard = state.isDebit,
     isCreditCard = state.isCredit,
@@ -78,7 +72,6 @@ fun CardsScreenContent(
   cardsList: List<Card>,
   bank: String,
   alias: String,
-  openDropDownMenu: Boolean,
   openAddCardDialog: Boolean,
   isDebitCard: Boolean,
   isCreditCard: Boolean,
@@ -111,7 +104,7 @@ fun CardsScreenContent(
       alias = alias,
       onBankChange = { onEvent(CardsScreenEvents.UpdateBank, it) },
       onAliasChange = { onEvent(CardsScreenEvents.UpdateAlias, it) },
-      onDismiss = { /*TODO*/ },
+      onDismiss = { onEvent(CardsScreenEvents.CloseAddCardDialog, "") },
       onConfirm = { onEvent(CardsScreenEvents.CreateCard, "") },
       onCheckedChange = { onEvent(CardsScreenEvents.HandleCardType, it) }
     )
@@ -126,8 +119,8 @@ fun CardsScreenContent(
         title = "Tarjetas",
         dropDownMenuItems = listOf(
           MenuItems(
-            icon = Icons.Rounded.MoreVert,
-            action = { onEvent(CardsScreenEvents.OpenDropDownMenu, "") })
+            text = "Agregar tarjeta",
+            action = { onEvent(CardsScreenEvents.OpenAddCardDialog, "") })
         ),
         onNavigationIconClick = { onPopBackStack() }
       ) {
@@ -140,24 +133,6 @@ fun CardsScreenContent(
         .fillMaxSize()
         .padding(paddingValues)
     ) {
-      Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.End,
-        verticalArrangement = Arrangement.Top
-      ) {
-        Box {
-          DropdownMenu(
-            expanded = openDropDownMenu,
-            onDismissRequest = { onEvent(CardsScreenEvents.CloseDropDownMenu, "") },
-          ) {
-            DropdownMenuItem(
-              text = { Text(text = "Agregar tarjeta") },
-              onClick = { onEvent(CardsScreenEvents.OpenAddCardDialog, "") })
-          }
-        }
-
-      }
-
       LazyColumn(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),

@@ -21,9 +21,10 @@ sealed class LoginEvent {
   object SetIsSuccess : LoginEvent()
 }
 
+// TODO add remember password logic
 data class LoginUiState(
-  val username: String = "isaakhaas96@gmail.com",
-  val password: String = "Weisses9622!",
+  val username: String = "",
+  val password: String = "",
   val isLoading: Boolean = false,
   val shouldShowPassword: Boolean = false,
   var userMessage: String? = null,
