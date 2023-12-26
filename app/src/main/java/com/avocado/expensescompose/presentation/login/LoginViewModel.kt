@@ -22,6 +22,8 @@ sealed class LoginEvent {
 }
 
 // TODO add remember password logic
+// Add a internal database so I can store the password there, and every time the user clicks in
+// login, the code retrieve the hashed password and use it to send the request to aws
 data class LoginUiState(
   val username: String = "",
   val password: String = "",
@@ -39,6 +41,10 @@ class LoginViewModel @Inject constructor(
   private val _uiState = MutableStateFlow(LoginUiState())
   val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
+  init {
+    getUsername()
+  }
+
   fun onEvent(event: LoginEvent, value: String) {
     when (event) {
       LoginEvent.ToggleViewPassword -> _uiState.update {
@@ -53,7 +59,7 @@ class LoginViewModel @Inject constructor(
         it.copy(username = value)
       }
 
-      LoginEvent.Login -> login()
+      LoginEvent.Login -> saveUsername()
 
       LoginEvent.SetIsSuccess -> _uiState.update {
         it.copy(isSuccess = false)
@@ -68,8 +74,8 @@ class LoginViewModel @Inject constructor(
         it.copy(isLoading = true)
       }
       val loginResult = loginUseCase(
-        email = uiState.value.username,
-        password = uiState.value.password
+        email = uiState.value.username.trim(),
+        password = uiState.value.password.trim()
       )
 
       if (loginResult.emailError != null) {
@@ -93,13 +99,44 @@ class LoginViewModel @Inject constructor(
 
         is MyResult.Error -> {
           _uiState.update {
-            it.copy(userMessage = loginResult.result.uiText)
+            it.copy(userMessage = loginResult.result.uiText, isLoading = false)
           }
         }
 
         else -> {}
       }
 
+    }
+  }
+
+  private fun saveUsername() {
+    viewModelScope.launch {
+      when (val isSaved = loginUseCase.saveUsername(_uiState.value.username)) {
+        is MyResult.Error -> {
+          Log.e(
+            "LoginViewModel",
+            "Error trying to save the username in data storage ${isSaved.exception?.stackTraceToString()}"
+          )
+        }
+
+        is MyResult.Success -> {
+          login()
+        }
+      }
+    }
+  }
+
+  private fun getUsername() {
+    viewModelScope.launch {
+      when (val username = loginUseCase.getUsernameFromStorage()) {
+        is MyResult.Error -> {
+          _uiState.update { it.copy(userMessage = "${username.uiText}") }
+        }
+
+        is MyResult.Success -> {
+          _uiState.update { it.copy(username = username.data.orEmpty()) }
+        }
+      }
     }
   }
 }

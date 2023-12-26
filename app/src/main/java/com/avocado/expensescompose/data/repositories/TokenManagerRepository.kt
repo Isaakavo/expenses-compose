@@ -20,6 +20,34 @@ class TokenManagerRepository @Inject constructor(private val context: Context) :
   companion object {
     private val JWT_ACCESS_KEY = stringPreferencesKey("ACCESS_JWT")
     private val JWT_REFRESH_KEY = stringPreferencesKey("REFRESH_JWT")
+    private val USER_NAME_KEY = stringPreferencesKey("USERNAME_KEY")
+  }
+
+  suspend fun saveUsername(username: String): MyResult<Boolean> {
+    return try {
+      context.dataStore.edit { preferences ->
+        preferences[USER_NAME_KEY] = username
+      }
+      Log.d("TokenManagerRepository", "Username saved correctly")
+      MyResult.Success(true)
+    } catch (exception: IOException) {
+      MyResult.Error(false, exception.message, exception = exception)
+    }
+  }
+
+  suspend fun getUsername(): MyResult<String?> {
+    return try {
+      val preferences = context.dataStore.data.first()
+      val accessToken = preferences[USER_NAME_KEY]
+      if (accessToken != null) {
+        MyResult.Success(preferences[USER_NAME_KEY])
+      } else {
+        MyResult.Error(null, "user name not found")
+      }
+    } catch (e: Exception) {
+      e.printStackTrace()
+      MyResult.Error(null, e.message)
+    }
   }
 
   override suspend fun saveAccessToken(value: String): MyResult<Boolean> =

@@ -69,12 +69,12 @@ fun LoginScreenContent(
       OutlinedTextField(
         value = username,
         onValueChange = { onEvent(LoginEvent.UpdateUsername, it) },
-        placeholder = { Text(text = "User name") },
+        placeholder = { Text(text = "Usuario") },
       )
       OutlinedTextField(
         value = password,
         onValueChange = { onEvent(LoginEvent.UpdatePassword, it) },
-        placeholder = { Text(text = "Password") },
+        placeholder = { Text(text = "Contraseña") },
         trailingIcon = {
           IconButton(onClick = { onEvent(LoginEvent.ToggleViewPassword, "") }) {
             if (shouldShowPassword) Icon(

@@ -4,17 +4,22 @@ import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.data.model.SimpleResource
 import com.avocado.expensescompose.data.model.auth.Auth
 import com.avocado.expensescompose.data.model.auth.AuthParameters
-import com.avocado.expensescompose.presentation.util.Constants
 import com.avocado.expensescompose.data.model.auth.CognitoResponse
 import com.avocado.expensescompose.data.network.LoginJwtClient
+import com.avocado.expensescompose.presentation.util.Constants
 import okio.IOException
 import retrofit2.HttpException
 import javax.inject.Inject
 
 class AuthRepository @Inject constructor(
-  private val awsApi: LoginJwtClient,
-  private val tokenManagerRepository: TokenManagerRepository
+  private val awsApi: LoginJwtClient, private val tokenManagerRepository: TokenManagerRepository
 ) {
+
+  suspend fun saveUsername(username: String) = tokenManagerRepository.saveUsername(username)
+
+  suspend fun getUsername() = tokenManagerRepository.getUsername()
+
+
   private suspend fun saveAccessToken(value: String): MyResult<Boolean> =
     tokenManagerRepository.saveAccessToken(
       value
