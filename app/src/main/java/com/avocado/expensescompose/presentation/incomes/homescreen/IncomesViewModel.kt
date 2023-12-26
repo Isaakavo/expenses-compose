@@ -1,5 +1,6 @@
 package com.avocado.expensescompose.presentation.incomes.homescreen
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.avocado.HomeScreenAllIncomesQuery
@@ -25,16 +26,6 @@ sealed class BackPress {
   object InitialTouch : BackPress()
 }
 
-data class IncomeState(
-  val incomesMap: Map<String, MutableMap<String, MutableMap<String, MutableList<Income>?>>>? = null,
-  val totalByMonth: List<Total?> = emptyList(),
-  val showAddButtons: Boolean = false,
-  val backPressState: BackPress = BackPress.Idle,
-  val showToast: Boolean = false,
-  val isLoading: Boolean = false,
-  val errorMessage: String = ""
-)
-
 sealed class IncomeEvent {
   //  object FetchQuery : IncomeEvent()
   object BackPressInitialTouch : IncomeEvent()
@@ -43,6 +34,17 @@ sealed class IncomeEvent {
   object OpenToast : IncomeEvent()
   object FetchIncomes : IncomeEvent()
 }
+
+data class IncomeState(
+  val incomesMap: Map<String, MutableMap<String, MutableMap<String, MutableList<Income>?>>>? = null,
+  val totalByMonth: List<Total?> = emptyList(),
+  val showAddButtons: Boolean = false,
+  val backPressState: BackPress = BackPress.Idle,
+  val showToast: Boolean = false,
+  val isLoading: Boolean = false,
+  val uiError: String = "",
+  val errorMessage: String = ""
+)
 
 @HiltViewModel
 class IncomesViewModel @Inject constructor(
@@ -153,7 +155,8 @@ class IncomesViewModel @Inject constructor(
       }
     }.catch {
       // TODO find a way to detect the type of apollo error and create an error screen
-      _state.emit(IncomeState(isLoading = false))
+      _state.emit(IncomeState(isLoading = false, uiError = "Algo salio mal Dx"))
+      Log.e("IncomesViewModel", it.stackTraceToString())
     }.collect { incomes ->
       incomes.successOrError(onSuccess = { success ->
         val incomesList = success.data.incomesList

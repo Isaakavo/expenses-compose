@@ -1,19 +1,22 @@
 package com.avocado.expensescompose.presentation.cards.cardsscreen
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apollographql.apollo3.api.Optional
-import com.apollographql.apollo3.exception.ApolloException
 import com.avocado.AllCardsQuery
 import com.avocado.CreateCardMutation
 import com.avocado.expensescompose.data.adapters.graphql.types.toCard
+import com.avocado.expensescompose.data.adapters.graphql.utils.validateDataWithoutErrors
 import com.avocado.expensescompose.data.apolloclients.GraphQlClientImpl
 import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.data.model.card.Card
+import com.avocado.expensescompose.data.model.successOrError
 import com.avocado.type.CreateCardInput
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -32,6 +35,7 @@ data class CardsScreenState(
   val cardsList: List<Card> = emptyList(),
   val bank: String = "",
   val alias: String = "",
+  val uiError: String = "",
   val openAddCardDialog: Boolean = false,
   val isDebit: Boolean = true,
   val isCredit: Boolean = false,
@@ -48,9 +52,9 @@ class CardsScreenViewModel @Inject constructor(private val graphQlClient: GraphQ
   val state = _state.asStateFlow()
 
   init {
-    viewModelScope.launch {
-      getAllCards()
-    }
+
+    getAllCards()
+
   }
 
   fun onEvent(events: CardsScreenEvents, inputValue: String = "") {
@@ -149,28 +153,38 @@ class CardsScreenViewModel @Inject constructor(private val graphQlClient: GraphQ
     }
   }
 
-  private suspend fun getAllCards() {
-    graphQlClient.query(AllCardsQuery()).map { apolloResponse ->
-      try {
-        val cardsList = apolloResponse.data?.cardList
-        MyResult.Success(
-          cardsList?.mapNotNull {
-            it?.toCard()
-          }
-        )
-      } catch (e: ApolloException) {
-        MyResult.Error(data = null, uiText = "Something went wrong")
+  private fun getAllCards() {
+    viewModelScope.launch {
+      graphQlClient.query(AllCardsQuery()).map { apolloResponse ->
+        validateDataWithoutErrors(apolloResponse)
       }
-    }.collect {
-      when (it) {
-        is MyResult.Success -> {
-          _state.emit(CardsScreenState(cardsList = it.data ?: emptyList()))
+        .catch {
+          Log.e("CardsScreenViewModel", it.message.toString())
+          _state.emit(CardsScreenState(uiError = "Algo salio mal en el servidor Dx"))
         }
-
-        is MyResult.Error -> {
-
+        .collect { collectResult ->
+          collectResult.successOrError(
+            onSuccess = {
+              this.launch {
+                _state.emit(
+                  CardsScreenState(
+                    cardsList = it.data.cardList?.mapNotNull { it?.toCard() }
+                      ?: emptyList()
+                  )
+                )
+              }
+            },
+            onError = {
+              this.launch {
+                _state.emit(
+                  CardsScreenState(
+                    uiError = it.uiText.toString()
+                  )
+                )
+              }
+            }
+          )
         }
-      }
     }
   }
 }

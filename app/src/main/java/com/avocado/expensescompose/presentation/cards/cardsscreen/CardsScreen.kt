@@ -13,8 +13,10 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -30,12 +32,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.model.card.Card
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.topbar.AppBar
@@ -55,6 +61,7 @@ fun CardsScreen(
     cardsList = state.cardsList,
     bank = state.bank,
     alias = state.alias,
+    uiError = state.uiError,
     openAddCardDialog = state.openAddCardDialog,
     isDebitCard = state.isDebit,
     isCreditCard = state.isCredit,
@@ -72,6 +79,7 @@ fun CardsScreenContent(
   cardsList: List<Card>,
   bank: String,
   alias: String,
+  uiError: String,
   openAddCardDialog: Boolean,
   isDebitCard: Boolean,
   isCreditCard: Boolean,
@@ -133,19 +141,70 @@ fun CardsScreenContent(
         .fillMaxSize()
         .padding(paddingValues)
     ) {
-      LazyColumn(
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = Modifier.padding(start = 12.dp, end = 12.dp, top = 8.dp),
-      ) {
-        items(cardsList) { card ->
-          CardItem(
-            id = card.id,
-            alias = card.alias ?: "",
-            bank = card.bank,
-            cardType = if (card.isDebit == true) "Tarjeta de débito" else "Tarjeta de crédito",
-            onNavigate = onNavigate
-          )
+      if (uiError.isNotEmpty()) {
+        Column(
+          modifier = Modifier
+            .fillMaxSize()
+            .padding(18.dp),
+          horizontalAlignment = Alignment.CenterHorizontally,
+          verticalArrangement = Arrangement.Center
+        ) {
+          Text(text = uiError, style = MaterialTheme.typography.headlineMedium)
+        }
+      } else if (cardsList.isEmpty()) {
+        Card(
+          modifier = Modifier
+            .padding(16.dp)
+            .wrapContentHeight(),
+          shape = RoundedCornerShape(16.dp),
+        ) {
+          Column(
+            modifier = Modifier
+              .fillMaxSize()
+              .padding(22.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(18.dp)
+          ) {
+            Text(
+              text = "No hay tarjetas ",
+              style = MaterialTheme.typography.headlineLarge,
+              modifier = Modifier.padding(bottom = 16.dp)
+            )
+            Text(
+              text = "Agregar tarjetas te permitira trackear " +
+                  "los gastos que se ha realizado en cada una por mes o quincena",
+              style = MaterialTheme.typography.headlineMedium,
+              modifier = Modifier.padding(bottom = 8.dp),
+              textAlign = TextAlign.Center
+            )
+            Button(
+              onClick = { /* TODO */ },
+              modifier = Modifier.align(Alignment.CenterHorizontally)
+            ) {
+              Icon(
+                painterResource(id = R.drawable.baseline_credit_card_24),
+                contentDescription = "",
+                modifier = Modifier.padding(end = 12.dp)
+              )
+              Text(text = "Agregar tarjeta")
+            }
+          }
+        }
+      } else {
+        LazyColumn(
+          contentPadding = PaddingValues(16.dp),
+          verticalArrangement = Arrangement.spacedBy(16.dp),
+          modifier = Modifier.padding(start = 12.dp, end = 12.dp, top = 8.dp),
+        ) {
+          items(cardsList) { card ->
+            CardItem(
+              id = card.id,
+              alias = card.alias ?: "",
+              bank = card.bank,
+              cardType = if (card.isDebit == true) "Tarjeta de débito" else "Tarjeta de crédito",
+              onNavigate = onNavigate
+            )
+          }
         }
       }
     }
@@ -269,6 +328,46 @@ fun AddCardDialog(
             Text("Aceptar")
           }
         }
+      }
+    }
+  }
+}
+
+@Preview
+@Composable
+fun NoCardsPRev() {
+  Card(
+    modifier = Modifier
+      .padding(16.dp)
+      .wrapContentHeight(),
+    shape = RoundedCornerShape(16.dp),
+  ) {
+    Column(
+      modifier = Modifier
+        .fillMaxSize()
+        .padding(22.dp),
+      horizontalAlignment = Alignment.CenterHorizontally,
+      verticalArrangement = Arrangement.spacedBy(18.dp)
+    ) {
+      Text(
+        text = "No hay tarjetas ",
+        style = MaterialTheme.typography.headlineLarge,
+        modifier = Modifier.padding(bottom = 16.dp)
+      )
+      Text(
+        text = "Agregar tarjetas te permitira trackear " +
+            "los gastos que se ha realizado en cada una por mes o quincena",
+        style = MaterialTheme.typography.headlineMedium,
+        modifier = Modifier.padding(bottom = 8.dp),
+        textAlign = TextAlign.Center
+      )
+      Button(onClick = { /* TODO */ }, modifier = Modifier.align(Alignment.CenterHorizontally)) {
+        Icon(
+          painterResource(id = R.drawable.baseline_credit_card_24),
+          contentDescription = "",
+          modifier = Modifier.padding(end = 12.dp)
+        )
+        Text(text = "Agregar tarjeta")
       }
     }
   }

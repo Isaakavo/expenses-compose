@@ -113,12 +113,20 @@ fun IncomeWithExpensesContent(
             text = "Borrar",
             icon = Icons.Rounded.Delete,
             action = { onEvent(IncomeWithExpenseEvent.DeleteIncome, "") }
+          ),
+          MenuItems(
+            text = "Agregar gasto",
+            icon = Icons.Rounded.Add,
+            action = {
+              onNavigate(
+                NavigateEvent.NavigateAddExpenseScreen,
+                "",
+                false
+              )
+            }
           )
         )
       )
-    },
-    floatingActionButton = {
-      FABAddExpense(onNavigate)
     }
   ) { paddingValues ->
     Surface(
