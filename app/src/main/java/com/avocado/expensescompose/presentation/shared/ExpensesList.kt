@@ -50,7 +50,7 @@ fun ExpenseItem(expense: Expense) {
       Text(
         text = expense.concept,
         fontSize = 16.sp,
-        fontWeight = FontWeight.SemiBold,
+        fontWeight = FontWeight.Normal,
         overflow = TextOverflow.Ellipsis,
         maxLines = 1,
         modifier = Modifier.weight(1f)
@@ -59,7 +59,7 @@ fun ExpenseItem(expense: Expense) {
         text = expense.total.formatMoney(),
         fontSize = 16.sp,
         textAlign = TextAlign.End,
-        fontWeight = FontWeight.SemiBold,
+        fontWeight = FontWeight.Normal,
         modifier = Modifier.padding(start = 22.dp)
       )
     }
@@ -81,7 +81,7 @@ fun ExpenseDateRow(payBefore: LocalDateTime?, index: Int, expenseList: List<Expe
         .fillMaxWidth()
         .padding(start = 6.dp, bottom = 6.dp)
     ) {
-      Text(text = date ?: "", fontSize = 16.sp, fontWeight = FontWeight.W300)
+      Text(text = date ?: "", fontSize = 18.sp, fontWeight = FontWeight.Bold)
     }
   } else if (index == 0) {
     Row(
@@ -89,7 +89,7 @@ fun ExpenseDateRow(payBefore: LocalDateTime?, index: Int, expenseList: List<Expe
         .fillMaxWidth()
         .padding(start = 6.dp, bottom = 6.dp)
     ) {
-      Text(text = date ?: "", fontSize = 16.sp, fontWeight = FontWeight.W300)
+      Text(text = date ?: "", fontSize = 18.sp, fontWeight = FontWeight.Bold)
     }
   }
 }
