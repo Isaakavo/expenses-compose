@@ -29,7 +29,7 @@ fun DateDialog(
   onDismiss: () -> Unit,
   onSelectTextField: () -> Unit,
 ) {
-  // TODO find why the initial state is not taking the new value when data from server is back (update income)
+  //TODO find why the initial state is not taking the new value when data from server is back (update income)
   val datePickerState = rememberDatePickerState(initialSelectedDateMillis = initialSelectedDate)
   Row(
     horizontalArrangement = Arrangement.Center,

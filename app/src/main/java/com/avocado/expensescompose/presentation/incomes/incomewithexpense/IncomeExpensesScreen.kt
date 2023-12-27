@@ -154,11 +154,11 @@ fun IncomeWithExpensesContent(
             .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 12.dp),
           verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-          DateRow(date = month)
           IncomeDetails(
             incomesTotal = incomesTotal,
             remaining = remaining,
-            expended = expended
+            expended = expended,
+            month = month
           )
           ExpensesList(expenseList)
         }
@@ -171,9 +171,9 @@ fun IncomeWithExpensesContent(
 fun DateRow(date: String) {
   Row(
     modifier = Modifier
-      .padding(bottom = 8.dp)
+      .padding(bottom = 4.dp)
       .fillMaxWidth(),
-    horizontalArrangement = Arrangement.End
+    horizontalArrangement = Arrangement.Start
   ) {
     Text(
       text = date,
@@ -183,7 +183,7 @@ fun DateRow(date: String) {
 }
 
 @Composable
-fun IncomeDetails(incomesTotal: Double, remaining: Double, expended: Double) {
+fun IncomeDetails(incomesTotal: Double, remaining: Double, expended: Double, month: String) {
   Card(
     modifier = Modifier.fillMaxWidth(),
     elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
@@ -192,6 +192,7 @@ fun IncomeDetails(incomesTotal: Double, remaining: Double, expended: Double) {
       modifier = Modifier.padding(16.dp),
       verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
+      DateRow(date = month)
       Row(
         modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
       ) {
@@ -247,21 +248,6 @@ fun IncomeDetails(incomesTotal: Double, remaining: Double, expended: Double) {
 }
 
 @Composable
-fun FABAddExpense(
-  onNavigate: (navigateEvent: NavigateEvent, shouldRefresh: String, isSuccessLogin: Boolean) -> Unit = { one, two, three -> }
-) {
-  FloatingActionButton(onClick = {
-    onNavigate(
-      NavigateEvent.NavigateAddExpenseScreen,
-      "",
-      false
-    )
-  }) {
-    Icon(Icons.Rounded.Add, contentDescription = "")
-  }
-}
-
-@Composable
 fun DeleteAlertDialog(
   shouldDisplay: Boolean,
   onConfirmRequest: () -> Unit,
@@ -300,7 +286,8 @@ fun IncomeDetailsPreview() {
     IncomeDetails(
       incomesTotal = 18750.23,
       remaining = 5000.0,
-      expended = 8000.0
+      expended = 8000.0,
+      month = "DECEMBER"
     )
   }
 }
