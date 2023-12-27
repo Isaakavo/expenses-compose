@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.avocado.CardByIdQuery
+import com.avocado.DeleteCardMutation
 import com.avocado.ExpensesTotalByCardIdQuery
 import com.avocado.expensescompose.data.adapters.graphql.fragments.toTotal
 import com.avocado.expensescompose.data.adapters.graphql.fragments.toTotalFortnight
@@ -28,6 +29,7 @@ import javax.inject.Inject
 sealed class ExpensesTotalByCardEvent {
   object MonthData : ExpensesTotalByCardEvent()
   object FortnightData : ExpensesTotalByCardEvent()
+  object DeleteCard : ExpensesTotalByCardEvent()
 }
 
 enum class DataSelector {
@@ -41,7 +43,8 @@ data class CardsWithExpensesState(
   val cardBank: String = "",
   val cardAlias: String = "",
   val dataSelector: DataSelector = DataSelector.FORTNIGHT,
-  val uiError: String = ""
+  val uiError: String = "",
+  val isDeleted: Boolean = false
 )
 
 @HiltViewModel
@@ -51,7 +54,7 @@ class ExpensesTotalByCardViewModel @Inject constructor(private val graphQlClient
   private val _state = MutableStateFlow(CardsWithExpensesState())
   val state = _state.asStateFlow()
 
-  fun onEvent(event: ExpensesTotalByCardEvent) {
+  fun onEvent(event: ExpensesTotalByCardEvent, param: String = "") {
     when (event) {
 
       ExpensesTotalByCardEvent.FortnightData -> {
@@ -60,6 +63,10 @@ class ExpensesTotalByCardViewModel @Inject constructor(private val graphQlClient
 
       ExpensesTotalByCardEvent.MonthData -> {
         _state.update { it.copy(dataSelector = DataSelector.MONTH) }
+      }
+
+      ExpensesTotalByCardEvent.DeleteCard -> {
+        deleteCard(param)
       }
     }
   }
@@ -124,6 +131,37 @@ class ExpensesTotalByCardViewModel @Inject constructor(private val graphQlClient
       Flow<MyResult<ExpensesTotalByCardIdQuery.Data>> {
     return graphQlClientImpl.query(ExpensesTotalByCardIdQuery(cardId)).map { apolloResponse ->
       validateDataWithoutErrors(apolloResponse)
+    }
+  }
+
+  private fun deleteCard(cardId: String) {
+    viewModelScope.launch {
+      graphQlClientImpl.mutate(DeleteCardMutation(deleteCardId = cardId)).map {
+        validateDataWithoutErrors(it)
+      }.collect { collectResult ->
+        collectResult.successOrError(
+          onSuccess = { data ->
+            val isDeleted = data.data.deleteCard
+            this.launch {
+              if (isDeleted) {
+                _state.emit(CardsWithExpensesState(isDeleted = true))
+              } else {
+                _state.emit(
+                  CardsWithExpensesState(
+                    isDeleted = false,
+                    uiError = "Error al borrar la tarjeta"
+                  )
+                )
+              }
+            }
+          },
+          onError = { error ->
+            this.launch {
+              _state.emit(CardsWithExpensesState(uiError = error.uiText.orEmpty()))
+            }
+          }
+        )
+      }
     }
   }
 }

@@ -28,6 +28,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.shared.DateDialog
 import com.avocado.expensescompose.presentation.topbar.AppBar
+import com.avocado.expensescompose.presentation.util.Operations
 
 @Composable
 fun AddIncomeScreen(
@@ -144,11 +145,11 @@ fun AddIncomeContent(
 
       if (isInserted) {
         LaunchedEffect(key1 = Unit) {
-          onNavigate(NavigateEvent.NavigateIncomeOverview, "ADDED", false)
+          onNavigate(NavigateEvent.NavigateIncomeOverview, Operations.ADD.name, false)
         }
       } else if (isUpdated) {
         LaunchedEffect(key1 = Unit) {
-          onNavigate(NavigateEvent.NavigateIncomeOverview, "UPDATED", false)
+          onNavigate(NavigateEvent.NavigateIncomeOverview, Operations.UPDATE.name, false)
         }
       }
     }

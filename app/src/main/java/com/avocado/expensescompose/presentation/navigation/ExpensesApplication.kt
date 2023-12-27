@@ -17,6 +17,7 @@ import com.avocado.expensescompose.presentation.incomes.addscreen.AddIncomeScree
 import com.avocado.expensescompose.presentation.incomes.homescreen.IncomesScreen
 import com.avocado.expensescompose.presentation.incomes.incomewithexpense.IncomeExpensesScreen
 import com.avocado.expensescompose.presentation.login.LoginScreen
+import com.avocado.expensescompose.presentation.util.Operations
 
 sealed class NavigateEvent {
   object NavigateLogin : NavigateEvent()
@@ -71,7 +72,7 @@ private fun <T> navigate(navigateEvent: NavigateEvent, navController: NavControl
     }
 
     is NavigateEvent.NavigateCardsScreen -> {
-      navController.navigate(RoutesConstants.CARDS_SCREEN)
+      navController.navigate("${RoutesConstants.CARDS_SCREEN}/${param}")
     }
 
     is NavigateEvent.NavigateCardsWithExpenseScreen -> {
@@ -96,9 +97,9 @@ fun ExpensesApplication() {
     // Login Screen
     composable(RoutesConstants.LOGIN_SCREEN) {
       LoginScreen(
-        onNavigate = { event, shouldRefresh, isSuccessLogin ->
-          if (isSuccessLogin) {
-            navigate(event, navController, "$shouldRefresh/$isSuccessLogin")
+        onNavigate = { event, operation ->
+          if (Operations.valueOf(operation) == Operations.SUCCESS_LOGIN) {
+            navigate(event, navController, operation)
           }
         }
       )
@@ -106,19 +107,19 @@ fun ExpensesApplication() {
 
     // Incomes Screen
     composable(
-      "${RoutesConstants.INCOME_OVERVIEW}/{shouldRefresh}/{isSuccessLogin}",
+      "${RoutesConstants.INCOME_OVERVIEW}/{operation}",
       arguments = listOf(
-        navArgument("shouldRefresh") { type = NavType.StringType },
-        navArgument("isSuccessLogin") { type = NavType.BoolType }
+        navArgument("operation") { type = NavType.StringType }
       )
     ) {
-      val shouldRefresh = it.arguments?.getString("shouldRefresh") ?: ""
-      val isSuccessLogin = it.arguments?.getBoolean("isSuccessLogin") ?: false
+      val operation = it.arguments?.getString("operation").orEmpty()
       IncomesScreen(
-        shouldRefresh = shouldRefresh,
-        isSuccessLogin = isSuccessLogin,
+        operation = operation,
         onNavigate = { navigateEventVal, incomeDetails ->
           navigate(navigateEventVal, navController, incomeDetails?.paymentDate.toString())
+        },
+        onNavigateCardsScreen = { event, navigateOperation ->
+          navigate(event, navController, navigateOperation)
         }
       )
     }
@@ -176,8 +177,17 @@ fun ExpensesApplication() {
     }
 
     // Cards Screen
-    composable(RoutesConstants.CARDS_SCREEN) {
+    composable(
+      "${RoutesConstants.CARDS_SCREEN}/{operation}",
+      arguments = listOf(
+        navArgument("operation") {
+          type = NavType.StringType
+        }
+      )
+    ) { navBackStackEntry ->
+      val operation = navBackStackEntry.arguments?.getString("operation").orEmpty()
       CardsScreen(
+        operation = operation,
         onPopBackStack = { navController.popBackStack() },
         onNavigate = { event, cardId ->
           navigate(event, navController, cardId)

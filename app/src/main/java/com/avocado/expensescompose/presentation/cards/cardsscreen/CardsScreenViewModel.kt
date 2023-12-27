@@ -52,9 +52,7 @@ class CardsScreenViewModel @Inject constructor(private val graphQlClient: GraphQ
   val state = _state.asStateFlow()
 
   init {
-
     getAllCards()
-
   }
 
   fun onEvent(events: CardsScreenEvents, inputValue: String = "") {

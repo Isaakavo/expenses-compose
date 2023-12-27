@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -30,6 +32,7 @@ import com.avocado.expensescompose.data.model.total.TotalFortnight
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.expensescompose.presentation.topbar.MenuItems
+import com.avocado.expensescompose.presentation.util.Operations
 import com.avocado.expensescompose.presentation.util.formatDateMonthWithYear
 import com.avocado.expensescompose.presentation.util.getLastDayOfMonth
 import com.avocado.expensescompose.presentation.util.prepareDateForRequest
@@ -54,6 +57,7 @@ fun ExpensesTotalByCardScreen(
     cardBank = state.cardBank,
     uiError = state.uiError,
     dataSelector = state.dataSelector,
+    isDeleted = state.isDeleted,
     onPopBackStack = onPopBackStack,
     onEvent = viewModel::onEvent,
     onNavigate = onNavigate
@@ -69,10 +73,16 @@ fun CardWithExpenseContent(
   cardBank: String,
   uiError: String,
   dataSelector: DataSelector,
+  isDeleted: Boolean,
   onPopBackStack: () -> Unit = {},
-  onEvent: (event: ExpensesTotalByCardEvent) -> Unit,
+  onEvent: (event: ExpensesTotalByCardEvent, param: String) -> Unit,
   onNavigate: (navigateEvent: NavigateEvent, param: String) -> Unit
 ) {
+  if (isDeleted) {
+    LaunchedEffect(key1 = Unit) {
+      onNavigate(NavigateEvent.NavigateCardsScreen, Operations.DELETE.name)
+    }
+  }
 
   Scaffold(
     topBar = {
@@ -81,12 +91,17 @@ fun CardWithExpenseContent(
         dropDownMenuItems = listOf(
           MenuItems(
             text = "Quincenal",
-            action = { onEvent(ExpensesTotalByCardEvent.FortnightData) }
+            action = { onEvent(ExpensesTotalByCardEvent.FortnightData, "") }
           ),
           MenuItems(
             text = "Mensual",
-            action = { onEvent(ExpensesTotalByCardEvent.MonthData) }
+            action = { onEvent(ExpensesTotalByCardEvent.MonthData, "") }
           ),
+          MenuItems(
+            text = "Borrar tarjeta",
+            icon = Icons.Rounded.Delete,
+            action = { onEvent(ExpensesTotalByCardEvent.DeleteCard, cardId) }
+          )
         ),
         onNavigationIconClick = { onPopBackStack() })
     }

@@ -30,25 +30,28 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.avocado.expensescompose.R
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
+import com.avocado.expensescompose.presentation.util.Operations
 
 
 @Composable
 fun LoginScreen(
   viewModel: LoginViewModel = hiltViewModel(),
-  onNavigate: (navigateEvent: NavigateEvent, shouldRefresh: Boolean, isSuccessLogin: Boolean) -> Unit,
+  onNavigate: (navigateEvent: NavigateEvent, operation: String) -> Unit,
 ) {
-  val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+  val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-  LaunchedEffect(key1 = uiState.isSuccess) {
-    onNavigate(NavigateEvent.NavigateIncomeOverview, false, uiState.isSuccess)
+  if (state.isSuccess) {
+    LaunchedEffect(key1 = Unit) {
+      onNavigate(NavigateEvent.NavigateIncomeOverview, Operations.SUCCESS_LOGIN.name)
+    }
   }
 
   LoginScreenContent(
-    username = uiState.username,
-    password = uiState.password,
-    userMessage = uiState.userMessage ?: "",
-    shouldShowPassword = uiState.shouldShowPassword,
-    isLoading = uiState.isLoading,
+    username = state.username,
+    password = state.password,
+    userMessage = state.userMessage ?: "",
+    shouldShowPassword = state.shouldShowPassword,
+    isLoading = state.isLoading,
     onEvent = viewModel::onEvent,
   )
 }

@@ -46,10 +46,12 @@ import com.avocado.expensescompose.data.model.card.Card
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.expensescompose.presentation.topbar.MenuItems
+import com.avocado.expensescompose.presentation.util.validateOperation
 import kotlinx.coroutines.launch
 
 @Composable
 fun CardsScreen(
+  operation: String = "",
   viewModel: CardsScreenViewModel = hiltViewModel(),
   onPopBackStack: () -> Unit = {},
   onNavigate: (navigateEvent: NavigateEvent, cardId: String) -> Unit
@@ -58,6 +60,7 @@ fun CardsScreen(
   val state by viewModel.state.collectAsStateWithLifecycle()
 
   CardsScreenContent(
+    operation = operation,
     cardsList = state.cardsList,
     bank = state.bank,
     alias = state.alias,
@@ -76,6 +79,7 @@ fun CardsScreen(
 
 @Composable
 fun CardsScreenContent(
+  operation: String,
   cardsList: List<Card>,
   bank: String,
   alias: String,
@@ -92,15 +96,27 @@ fun CardsScreenContent(
 ) {
 
   val scope = rememberCoroutineScope()
-  val snackbarHostState = remember { SnackbarHostState() }
+  val snackBarHostState = remember { SnackbarHostState() }
 
   if (isAdded) {
-    LaunchedEffect(key1 = snackbarHostState) {
+    LaunchedEffect(key1 = snackBarHostState) {
       scope.launch {
-        snackbarHostState.showSnackbar("Se agregó la tarjeta ${cardsList.last().alias}")
+        snackBarHostState.showSnackbar("Se agregó la tarjeta ${cardsList.last().alias}")
       }
     }
   }
+
+  LaunchedEffect(key1 = Unit) {
+    validateOperation(
+      operation,
+      onDelete = {
+        scope.launch {
+          snackBarHostState.showSnackbar("Se elimino una targeta")
+        }
+      }
+    )
+  }
+
 
   if (openAddCardDialog) {
     AddCardDialog(
@@ -120,7 +136,7 @@ fun CardsScreenContent(
 
   Scaffold(
     snackbarHost = {
-      SnackbarHost(hostState = snackbarHostState)
+      SnackbarHost(hostState = snackBarHostState)
     },
     topBar = {
       AppBar(

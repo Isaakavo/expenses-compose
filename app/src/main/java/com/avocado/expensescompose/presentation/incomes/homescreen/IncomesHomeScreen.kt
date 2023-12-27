@@ -70,8 +70,10 @@ import com.avocado.expensescompose.data.model.total.Total
 import com.avocado.expensescompose.domain.income.models.Income
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.topbar.AppBar
+import com.avocado.expensescompose.presentation.util.Operations
 import com.avocado.expensescompose.presentation.util.formatDateDaysWithMonth
 import com.avocado.expensescompose.presentation.util.formatDateOnlyMonth
+import com.avocado.expensescompose.presentation.util.validateOperation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -84,15 +86,15 @@ data class NavigationIncomeDetails(
 
 @Composable
 fun IncomesScreen(
-  shouldRefresh: String = "",
-  isSuccessLogin: Boolean = false,
+  operation: String = "",
   viewModel: IncomesViewModel = hiltViewModel(),
-  onNavigate: (navigateEvent: NavigateEvent, income: NavigationIncomeDetails?) -> Unit
+  onNavigate: (navigateEvent: NavigateEvent, income: NavigationIncomeDetails?) -> Unit,
+  onNavigateCardsScreen: (navigateEvent: NavigateEvent, operation: String) -> Unit
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
 
   LaunchedEffect(key1 = Unit) {
-    if (shouldRefresh.isNotEmpty() || isSuccessLogin) {
+    if (operation.isNotEmpty()) {
       viewModel.onEvent(IncomeEvent.FetchIncomes)
     }
   }
@@ -101,12 +103,13 @@ fun IncomesScreen(
     backPressState = state.backPressState,
     isLoading = state.isLoading,
     uiError = state.uiError,
-    shouldRefresh = shouldRefresh,
+    operation = operation,
     incomesMap = state.incomesMap,
     totalByMonth = state.totalByMonth,
     showToast = state.showToast,
     onNavigate = onNavigate,
-    onEvent = viewModel::onEvent
+    onEvent = viewModel::onEvent,
+    onNavigateCardsScreen = onNavigateCardsScreen
   )
 }
 
@@ -115,26 +118,31 @@ fun IncomeScreenContent(
   backPressState: BackPress?,
   isLoading: Boolean,
   uiError: String,
-  shouldRefresh: String,
+  operation: String,
   incomesMap: Map<String, MutableMap<String, MutableMap<String, MutableList<Income>?>>>?,
   totalByMonth: List<Total?>,
   showToast: Boolean,
   onNavigate: (navigateEvent: NavigateEvent, income: NavigationIncomeDetails?) -> Unit,
-  onEvent: (IncomeEvent) -> Unit = {}
+  onEvent: (IncomeEvent) -> Unit = {},
+  onNavigateCardsScreen: (navigateEvent: NavigateEvent, operation: String) -> Unit = { one, two -> }
 ) {
   val scope: CoroutineScope = rememberCoroutineScope()
   val drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
   val snackBarHostState = remember { SnackbarHostState() }
 
-  if (shouldRefresh.isNotEmpty()) {
+  if (operation.isNotEmpty()) {
     LaunchedEffect(key1 = Unit) {
-      scope.launch {
-        if (shouldRefresh == "ADDED") {
+      validateOperation(operation, onAdd = {
+        scope.launch {
           snackBarHostState.showSnackbar("Income added successfully")
-        } else if (shouldRefresh == "UPDATED") {
+        }
+      }, onUpdate = {
+        scope.launch {
           snackBarHostState.showSnackbar("Income updated successfully")
         }
-      }
+      }, onSuccessLogin = {
+        onEvent(IncomeEvent.FetchIncomes)
+      })
     }
   }
 
@@ -150,7 +158,12 @@ fun IncomeScreenContent(
           .fillMaxWidth()
       ) {
         FilledTonalButton(
-          onClick = { onNavigate(NavigateEvent.NavigateCardsScreen, null) },
+          onClick = {
+            onNavigateCardsScreen(
+              NavigateEvent.NavigateCardsScreen,
+              Operations.NONE.name
+            )
+          },
           contentPadding = PaddingValues(start = 24.dp)
         ) {
           Icon(
@@ -177,11 +190,9 @@ fun IncomeScreenContent(
     }, floatingActionButton = {
       FabAddButtons(onNavigateAddIncome = {
         onNavigate(
-          NavigateEvent.NavigationAddIncomeScreen,
-          null
+          NavigateEvent.NavigationAddIncomeScreen, null
         )
-      },
-        onNavigateAddExpense = { onNavigate(NavigateEvent.NavigateAddExpenseScreen, null) })
+      }, onNavigateAddExpense = { onNavigate(NavigateEvent.NavigateAddExpenseScreen, null) })
     }) { paddingValues ->
       Surface(
         modifier = Modifier
@@ -370,8 +381,7 @@ fun FabAddButtons(
       .wrapContentHeight()
       .wrapContentWidth()
       .animateContentSize()
-      .padding(bottom = 8.dp, end = 4.dp),
-    horizontalAlignment = Alignment.End
+      .padding(bottom = 8.dp, end = 4.dp), horizontalAlignment = Alignment.End
   ) {
     if (expanded) {
       ExtendedFloatingActionButton(
@@ -393,8 +403,9 @@ fun FabAddButtons(
 
     Spacer(modifier = Modifier.height(8.dp))
     Row(modifier = Modifier.wrapContentWidth(), horizontalArrangement = Arrangement.End) {
-      FloatingActionButton(
-        elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation(defaultElevation = 2.dp),
+      FloatingActionButton(elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation(
+        defaultElevation = 2.dp
+      ),
         onClick = {
           expanded = !expanded
           scope.launch {
@@ -404,11 +415,9 @@ fun FabAddButtons(
               animateRotation(rotation, 0f, 800)
             }
           }
-        }
-      ) {
+        }) {
         Icon(
-          Icons.Rounded.Add, contentDescription = "",
-          modifier = Modifier.rotate(rotation.value)
+          Icons.Rounded.Add, contentDescription = "", modifier = Modifier.rotate(rotation.value)
         )
       }
     }
@@ -422,13 +431,10 @@ fun getMonthTotal(totalByMonth: List<Total?>, month: String, year: String) =
   }?.total ?: 0.0
 
 suspend fun animateRotation(
-  rotation: Animatable<Float, AnimationVector1D>,
-  target: Float,
-  durationMillis: Int
+  rotation: Animatable<Float, AnimationVector1D>, target: Float, durationMillis: Int
 ) {
   rotation.animateTo(
-    targetValue = target,
-    animationSpec = tween(durationMillis, easing = LinearEasing)
+    targetValue = target, animationSpec = tween(durationMillis, easing = LinearEasing)
   )
 }
 
@@ -436,11 +442,9 @@ suspend fun animateRotation(
 @Preview
 @Composable
 fun FABPrev() {
-  Scaffold(
-    floatingActionButton = {
-      FabAddButtons()
-    }
-  ) {
+  Scaffold(floatingActionButton = {
+    FabAddButtons()
+  }) {
     Surface(modifier = Modifier.padding(it)) {
 
     }
