@@ -37,6 +37,7 @@ import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.shared.ExpensesList
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.expensescompose.presentation.topbar.MenuItems
+import com.avocado.expensescompose.presentation.util.Operations
 import com.avocado.expensescompose.presentation.util.formatDateMonthWithYear
 
 @Composable
@@ -44,7 +45,7 @@ fun IncomeExpensesScreen(
   viewModel: IncomeWithExpenseViewModel = hiltViewModel(),
   paymentDate: String,
   onNavigateBack: () -> Unit = {},
-  onNavigate: (navigateEvent: NavigateEvent, shouldRefresh: String, isSuccessLogin: Boolean) -> Unit = { one, two, three -> },
+  onNavigate: (navigateEvent: NavigateEvent, operation: String) -> Unit = { one, two -> },
   onEditIncome: (navigateEvent: NavigateEvent, incomeId: String) -> Unit = { one, two -> }
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
@@ -56,7 +57,7 @@ fun IncomeExpensesScreen(
 
   if (state.isDeleted) {
     LaunchedEffect(key1 = Unit) {
-      onNavigate(NavigateEvent.NavigateIncomeOverview, "DELETED", false)
+      onNavigate(NavigateEvent.NavigateIncomeOverview, Operations.DELETE.name)
     }
   }
 
@@ -89,7 +90,7 @@ fun IncomeWithExpensesContent(
   isLoading: Boolean = false,
   shouldDisplayAlertDialog: Boolean = false,
   onNavigateBack: () -> Unit = {},
-  onNavigate: (navigateEvent: NavigateEvent, shouldRefresh: String, isSuccessLogin: Boolean) -> Unit = { one, two, three -> },
+  onNavigate: (navigateEvent: NavigateEvent, operation: String) -> Unit = { one, two -> },
   onEditIncome: (navigateEvent: NavigateEvent, incomeId: String) -> Unit = { one, two -> },
   onEvent: (event: IncomeWithExpenseEvent, param: String) -> Unit = { one, two -> }
 ) {
@@ -119,8 +120,7 @@ fun IncomeWithExpensesContent(
             action = {
               onNavigate(
                 NavigateEvent.NavigateAddExpenseScreen,
-                "",
-                false
+                Operations.FETCH.name,
               )
             }
           )

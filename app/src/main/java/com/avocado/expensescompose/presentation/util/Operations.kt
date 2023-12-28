@@ -7,6 +7,7 @@ enum class Operations {
   DELETE,
   ADD,
   SUCCESS_LOGIN,
+  FETCH,
   NONE
 }
 
@@ -15,23 +16,34 @@ fun validateOperation(
   onAdd: () -> Unit = {},
   onUpdate: () -> Unit = {},
   onDelete: () -> Unit = {},
-  onSuccessLogin: () -> Unit = {}
+  onFetch: () -> Unit = {},
+  onSuccessLogin: () -> Unit = {},
+  onAlwaysExecute: () -> Unit = {}
 ) {
   when (Operations.valueOf(operation)) {
     Operations.UPDATE -> {
       onUpdate()
+      onAlwaysExecute()
     }
 
     Operations.DELETE -> {
       onDelete()
+      onAlwaysExecute()
     }
 
     Operations.ADD -> {
       onAdd()
+      onAlwaysExecute()
     }
 
     Operations.SUCCESS_LOGIN -> {
       onSuccessLogin()
+      onAlwaysExecute()
+    }
+
+    Operations.FETCH -> {
+      onFetch()
+      onAlwaysExecute()
     }
 
     Operations.NONE -> Log.i("Operations", "None operation")

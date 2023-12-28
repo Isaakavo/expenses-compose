@@ -93,12 +93,6 @@ fun IncomesScreen(
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
 
-  LaunchedEffect(key1 = Unit) {
-    if (operation.isNotEmpty()) {
-      viewModel.onEvent(IncomeEvent.FetchIncomes)
-    }
-  }
-
   IncomeScreenContent(
     backPressState = state.backPressState,
     isLoading = state.isLoading,
@@ -132,17 +126,27 @@ fun IncomeScreenContent(
 
   if (operation.isNotEmpty()) {
     LaunchedEffect(key1 = Unit) {
-      validateOperation(operation, onAdd = {
-        scope.launch {
-          snackBarHostState.showSnackbar("Income added successfully")
+      validateOperation(
+        operation,
+        onAdd = {
+          scope.launch {
+            snackBarHostState.showSnackbar("Element added successfully")
+          }
+        },
+        onUpdate = {
+          scope.launch {
+            snackBarHostState.showSnackbar("Element updated successfully")
+          }
+        },
+        onDelete = {
+          scope.launch {
+            snackBarHostState.showSnackbar("Element deleted successfully")
+          }
+        },
+        onAlwaysExecute = {
+          onEvent(IncomeEvent.FetchIncomes)
         }
-      }, onUpdate = {
-        scope.launch {
-          snackBarHostState.showSnackbar("Income updated successfully")
-        }
-      }, onSuccessLogin = {
-        onEvent(IncomeEvent.FetchIncomes)
-      })
+      )
     }
   }
 

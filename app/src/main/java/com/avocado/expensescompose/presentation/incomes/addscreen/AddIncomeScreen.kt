@@ -35,7 +35,7 @@ fun AddIncomeScreen(
   incomeId: String = "",
   viewModel: AddIncomeViewModel = hiltViewModel(),
   onPopBackStack: () -> Unit = {},
-  onNavigate: (navigateEvent: NavigateEvent, shouldRefresh: String, isSuccessLogin: Boolean) -> Unit,
+  onNavigate: (navigateEvent: NavigateEvent, shouldRefresh: String) -> Unit,
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -72,7 +72,7 @@ fun AddIncomeContent(
   isUpdated: Boolean,
   openDateDialog: Boolean,
   onPopBackStack: () -> Unit = {},
-  onNavigate: (navigateEvent: NavigateEvent, shouldRefresh: String, isSuccessLogin: Boolean) -> Unit,
+  onNavigate: (navigateEvent: NavigateEvent, shouldRefresh: String) -> Unit,
   onEvent: (addIncomeEvent: AddIncomeEvent, param: String?) -> Unit
 ) {
   val focusRequester = remember { FocusRequester() }
@@ -145,11 +145,11 @@ fun AddIncomeContent(
 
       if (isInserted) {
         LaunchedEffect(key1 = Unit) {
-          onNavigate(NavigateEvent.NavigateIncomeOverview, Operations.ADD.name, false)
+          onNavigate(NavigateEvent.NavigateIncomeOverview, Operations.ADD.name)
         }
       } else if (isUpdated) {
         LaunchedEffect(key1 = Unit) {
-          onNavigate(NavigateEvent.NavigateIncomeOverview, Operations.UPDATE.name, false)
+          onNavigate(NavigateEvent.NavigateIncomeOverview, Operations.UPDATE.name)
         }
       }
     }

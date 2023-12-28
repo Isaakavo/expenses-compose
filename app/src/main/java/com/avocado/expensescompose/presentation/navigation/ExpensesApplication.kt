@@ -136,8 +136,8 @@ fun ExpensesApplication() {
         onNavigateBack = {
           navController.popBackStack()
         },
-        onNavigate = { event, shouldRefresh, isSuccessLogin ->
-          navigate(event, navController, "$shouldRefresh/$isSuccessLogin")
+        onNavigate = { event, operation ->
+          navigate(event, navController, operation)
         },
         onEditIncome = { event, incomeId ->
           navigate(event, navController, incomeId)
@@ -149,8 +149,8 @@ fun ExpensesApplication() {
     composable(RoutesConstants.INCOME_ADD) {
       AddIncomeScreen(
         onPopBackStack = { navController.popBackStack() },
-        onNavigate = { navigateEvent, shouldRefresh, isSuccessLogin ->
-          navigate(navigateEvent, navController, "$shouldRefresh/$isSuccessLogin")
+        onNavigate = { navigateEvent, operation ->
+          navigate(navigateEvent, navController, operation)
         })
     }
 
@@ -163,8 +163,8 @@ fun ExpensesApplication() {
       AddIncomeScreen(
         incomeId = incomeId,
         onPopBackStack = { navController.popBackStack() },
-        onNavigate = { navigateEvent, shouldRefresh, isSuccessLogin ->
-          navigate(navigateEvent, navController, "$shouldRefresh/$isSuccessLogin")
+        onNavigate = { navigateEvent, operation ->
+          navigate(navigateEvent, navController, operation)
         }
       )
     }
