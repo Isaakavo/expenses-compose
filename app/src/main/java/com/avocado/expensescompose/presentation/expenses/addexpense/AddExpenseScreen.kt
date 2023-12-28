@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
@@ -50,11 +51,18 @@ const val ADD_EXPENSE_SCREEN_LOG = "AddExpenseScreen"
 
 @Composable
 fun AddExpenseScreen(
+  expenseId: String = "",
   viewModel: AddExpenseViewModel = hiltViewModel(),
   context: Context = LocalContext.current,
   onPopBackStack: () -> Unit = {}
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
+
+  if (expenseId.isNotEmpty()) {
+    LaunchedEffect(key1 = Unit) {
+      viewModel.getExpenseById(expenseId = expenseId)
+    }
+  }
 
   if (state.showToast && !state.loadingCard) {
     Toast.makeText(context, state.toastMessage, Toast.LENGTH_LONG).show()
@@ -68,6 +76,7 @@ fun AddExpenseScreen(
   }
 
   AddExpenseScreenContent(
+    expenseId = expenseId,
     cards = state.cardsList,
     selectedCard = state.selectedCard,
     categories = state.category,
@@ -76,6 +85,7 @@ fun AddExpenseScreen(
     comment = state.comment,
     total = state.total,
     date = state.date,
+    buttonText = state.buttonText,
     openDateDialog = state.openDateDialog,
     openCardMenu = state.openCardMenu,
     openCategoryList = state.openCategoryList,
@@ -89,6 +99,7 @@ fun AddExpenseScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddExpenseScreenContent(
+  expenseId: String,
   cards: List<Card>,
   selectedCard: Card?,
   categories: Category,
@@ -97,6 +108,7 @@ fun AddExpenseScreenContent(
   comment: String,
   total: String,
   date: String,
+  buttonText: String,
   openDateDialog: Boolean,
   openCardMenu: Boolean,
   openCategoryList: Boolean,
@@ -120,9 +132,15 @@ fun AddExpenseScreenContent(
   Scaffold(
     topBar = {
       AppBar(
-        title = "Agregar gasto", buttonText = "Agregar",
+        title = "Agregar gasto",
+        buttonText = buttonText,
         onActionButtonClick = {
-          onEvent(AddExpenseEvent.AddExpense, null)
+          if (expenseId.isEmpty())
+            onEvent(AddExpenseEvent.AddExpense, null)
+          else onEvent(
+            AddExpenseEvent.UpdateExpense,
+            expenseId
+          )
         },
         onNavigationIconClick = { onPopBackStack() }
       )
@@ -190,25 +208,6 @@ fun AddExpenseScreenContent(
 
         AddExpenseRow {
           Icon(
-            painter = painterResource(R.drawable.round_comment_24),
-            contentDescription = "Comment"
-          )
-          OutlinedTextField(
-            value = comment,
-            onValueChange = { onEvent(AddExpenseEvent.UpdateComment, it) },
-            label = { Text(text = "Comentario") },
-            modifier = Modifier.focusRequester(focusRequester),
-            keyboardOptions = KeyboardOptions(
-              imeAction = ImeAction.Next
-            ),
-            keyboardActions = KeyboardActions(
-              onNext = { focusRequester.requestFocus() }
-            )
-          )
-        }
-
-        AddExpenseRow {
-          Icon(
             painter = painterResource(id = R.drawable.baseline_credit_card_24),
             contentDescription = "Credit card"
           )
@@ -259,6 +258,36 @@ fun AddExpenseScreenContent(
               )
             }
           }
+        }
+
+        AddExpenseRow {
+          Icon(
+            painter = painterResource(R.drawable.round_comment_24),
+            contentDescription = "Comment"
+          )
+          OutlinedTextField(
+            value = comment,
+            onValueChange = { onEvent(AddExpenseEvent.UpdateComment, it) },
+            label = { Text(text = "Comentario") },
+            modifier = Modifier
+              .focusRequester(focusRequester)
+              .height(120.dp),
+            maxLines = 3,
+            keyboardOptions = KeyboardOptions(
+              imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+              onNext = { focusRequester.requestFocus() },
+              onDone = {
+                if (expenseId.isEmpty())
+                  onEvent(AddExpenseEvent.AddExpense, null)
+                else onEvent(
+                  AddExpenseEvent.UpdateExpense,
+                  expenseId
+                )
+              }
+            )
+          )
         }
       }
     }

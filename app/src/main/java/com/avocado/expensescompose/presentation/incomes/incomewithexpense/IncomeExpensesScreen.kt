@@ -169,6 +169,7 @@ fun IncomeWithExpensesContent(
           )
           ExpensesList(
             expenseList = expenseList,
+            onEdit = { onNavigate(NavigateEvent.NavigateEditExpenseScreen, it) },
             onDelete = { onEvent(IncomeWithExpenseEvent.DeleteExpense, it) }
           )
         }

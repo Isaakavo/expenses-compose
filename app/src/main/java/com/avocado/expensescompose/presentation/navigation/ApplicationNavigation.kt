@@ -34,6 +34,7 @@ sealed class NavigateEvent {
   object NavigationEditIncomeScreen : NavigateEvent()
   object NavigateCardsScreen : NavigateEvent()
   object NavigateAddExpenseScreen : NavigateEvent()
+  object NavigateEditExpenseScreen : NavigateEvent()
   object NavigateCardsWithExpenseScreen : NavigateEvent()
   object NavigateExpensesByCardScreen : NavigateEvent()
 }
@@ -42,7 +43,7 @@ private fun <T> navigate(navigateEvent: NavigateEvent, navController: NavControl
 
   when (navigateEvent) {
 
-    is NavigateEvent.NavigateLogin -> {
+    NavigateEvent.NavigateLogin -> {
       navController.navigate(RoutesConstants.LOGIN_SCREEN) {
         popUpTo(navController.graph.id) {
           inclusive = true
@@ -50,17 +51,17 @@ private fun <T> navigate(navigateEvent: NavigateEvent, navController: NavControl
       }
     }
 
-    is NavigateEvent.NavigateIncomeOverview -> {
+    NavigateEvent.NavigateIncomeOverview -> {
       navController.navigate("${RoutesConstants.INCOME_OVERVIEW}/${param}")
     }
 
-    is NavigateEvent.NavigateIncomeExpensesList -> {
+    NavigateEvent.NavigateIncomeExpensesList -> {
       navController.navigate(
         "${RoutesConstants.INCOME_EXPENSES_LIST}/${param}"
       )
     }
 
-    is NavigateEvent.NavigationAddIncomeScreen -> {
+    NavigateEvent.NavigationAddIncomeScreen -> {
       navController.navigate(RoutesConstants.INCOME_ADD) {
         launchSingleTop = true
         popUpTo("${RoutesConstants.INCOME_OVERVIEW}/${param}") {
@@ -69,7 +70,7 @@ private fun <T> navigate(navigateEvent: NavigateEvent, navController: NavControl
       }
     }
 
-    is NavigateEvent.NavigationEditIncomeScreen -> {
+    NavigateEvent.NavigationEditIncomeScreen -> {
       navController.navigate("${RoutesConstants.INCOME_ADD}/$param") {
         launchSingleTop = true
         popUpTo("${RoutesConstants.INCOME_OVERVIEW}/${param}") {
@@ -78,11 +79,11 @@ private fun <T> navigate(navigateEvent: NavigateEvent, navController: NavControl
       }
     }
 
-    is NavigateEvent.NavigateCardsScreen -> {
+    NavigateEvent.NavigateCardsScreen -> {
       navController.navigate("${RoutesConstants.CARDS_SCREEN}/${param}")
     }
 
-    is NavigateEvent.NavigateCardsWithExpenseScreen -> {
+    NavigateEvent.NavigateCardsWithExpenseScreen -> {
       navController.navigate("${RoutesConstants.CARDS_EXPENSE_SCREEN}/${param}") {
         launchSingleTop = true
         popUpTo("${RoutesConstants.CARDS_SCREEN}/${param}") {
@@ -91,11 +92,15 @@ private fun <T> navigate(navigateEvent: NavigateEvent, navController: NavControl
       }
     }
 
-    is NavigateEvent.NavigateAddExpenseScreen -> {
+    NavigateEvent.NavigateAddExpenseScreen -> {
       navController.navigate(RoutesConstants.EXPENSE_ADD)
     }
 
-    is NavigateEvent.NavigateExpensesByCardScreen -> {
+    NavigateEvent.NavigateEditExpenseScreen -> {
+      navController.navigate("${RoutesConstants.EXPENSE_ADD}/$param")
+    }
+
+    NavigateEvent.NavigateExpensesByCardScreen -> {
       navController.navigate("${RoutesConstants.EXPENSES_CARD_SCREEN}/$param")
     }
   }
@@ -209,6 +214,22 @@ fun ExpensesApplication() {
       AddExpenseScreen {
         navController.popBackStack()
       }
+    }
+
+    // Edit Expense Screen
+    composable(
+      route = "${RoutesConstants.EXPENSE_ADD}/{expenseId}",
+      arguments = listOf(
+        navArgument("expenseId") {
+          type = NavType.StringType
+        }
+      )
+    ) { navBackStackEntry ->
+      val expenseId = navBackStackEntry.arguments?.getString("expenseId") ?: ""
+      AddExpenseScreen(
+        expenseId = expenseId,
+        onPopBackStack = { navController.popBackStack() }
+      )
     }
 
     // Cards Screen

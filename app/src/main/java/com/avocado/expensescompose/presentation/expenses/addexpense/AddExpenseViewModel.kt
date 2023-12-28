@@ -1,24 +1,33 @@
 package com.avocado.expensescompose.presentation.expenses.addexpense
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apollographql.apollo3.api.Optional
 import com.apollographql.apollo3.exception.ApolloException
 import com.avocado.AllCardsQuery
 import com.avocado.CreateExpenseMutation
+import com.avocado.ExpenseByIdQuery
+import com.avocado.UpdateExpenseMutation
+import com.avocado.expensescompose.data.adapters.graphql.fragments.toExpense
+import com.avocado.expensescompose.data.adapters.graphql.scalar.Date
 import com.avocado.expensescompose.data.adapters.graphql.scalar.adaptDateForInput
 import com.avocado.expensescompose.data.adapters.graphql.types.toCard
 import com.avocado.expensescompose.data.adapters.graphql.utils.validateData
+import com.avocado.expensescompose.data.adapters.graphql.utils.validateDataWithoutErrors
 import com.avocado.expensescompose.data.apolloclients.GraphQlClientImpl
 import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.data.model.card.Card
 import com.avocado.expensescompose.data.model.successOrError
 import com.avocado.expensescompose.presentation.util.formatDateDaysWithMonth
+import com.avocado.expensescompose.presentation.util.formatDateToISO
 import com.avocado.type.Category
 import com.avocado.type.CreateExpenseInput
+import com.avocado.type.UpdateExpenseInput
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -33,6 +42,7 @@ sealed class AddExpenseEvent {
   object UpdateTotal : AddExpenseEvent()
   object UpdateDate : AddExpenseEvent()
   object AddExpense : AddExpenseEvent()
+  object UpdateExpense : AddExpenseEvent()
   object DateDialogOpen : AddExpenseEvent()
   object DateDialogClose : AddExpenseEvent()
   object CategoryListOpen : AddExpenseEvent()
@@ -51,6 +61,7 @@ data class AddExpensesState(
   val comment: String = "",
   val total: String = "",
   val date: String = "",
+  val buttonText: String = "Agregar",
   val expenseAdded: Boolean = false,
   val expenseAddedError: Boolean = false,
   val openDateDialog: Boolean = false,
@@ -68,64 +79,66 @@ class AddExpenseViewModel @Inject constructor(
   val state = _state.asStateFlow()
 
   init {
-    viewModelScope.launch {
-      getAllCards()
-    }
+    getAllCards()
     _state.update { it.copy(date = LocalDateTime.now().formatDateDaysWithMonth()) }
   }
 
   fun <T> onEvent(event: AddExpenseEvent, params: T) {
     when (event) {
-      is AddExpenseEvent.SelectCard -> {
+      AddExpenseEvent.SelectCard -> {
         addSelectedCard(params as String)
       }
 
-      is AddExpenseEvent.SelectCategory -> {
+      AddExpenseEvent.SelectCategory -> {
         _state.update { it.copy(category = Category.valueOf(params as String)) }
       }
 
-      is AddExpenseEvent.UpdateConcept -> {
+      AddExpenseEvent.UpdateConcept -> {
         _state.update { it.copy(concept = params as String) }
       }
 
-      is AddExpenseEvent.UpdateComment -> {
+      AddExpenseEvent.UpdateComment -> {
         _state.update { it.copy(comment = params as String) }
       }
 
-      is AddExpenseEvent.UpdateTotal -> {
+      AddExpenseEvent.UpdateTotal -> {
         _state.update { it.copy(total = params as String) }
       }
 
-      is AddExpenseEvent.UpdateDate -> {
+      AddExpenseEvent.UpdateDate -> {
         _state.update { it.copy(date = params as String) }
       }
 
-      is AddExpenseEvent.AddExpense -> {
+      AddExpenseEvent.AddExpense -> {
         createExpense()
       }
 
+      AddExpenseEvent.UpdateExpense -> {
+        updateExpenseById(params as String)
+      }
 
-      is AddExpenseEvent.DateDialogOpen -> {
+
+      AddExpenseEvent.DateDialogOpen -> {
         _state.update { it.copy(openDateDialog = true) }
       }
 
-      is AddExpenseEvent.DateDialogClose -> {
+      AddExpenseEvent.DateDialogClose -> {
         _state.update { it.copy(openDateDialog = false) }
       }
 
-      is AddExpenseEvent.CategoryListClose -> {
+      AddExpenseEvent.CategoryListClose -> {
         _state.update { it.copy(openCategoryList = false) }
       }
 
-      is AddExpenseEvent.CategoryListOpen -> {
+      AddExpenseEvent.CategoryListOpen -> {
         _state.update { it.copy(openCategoryList = true) }
       }
 
-      is AddExpenseEvent.OpenCardMenu -> {
+      AddExpenseEvent.OpenCardMenu -> {
         _state.update { it.copy(openCardMenu = true) }
       }
 
-      is AddExpenseEvent.CloseCardMenu -> {
+      AddExpenseEvent.CloseCardMenu -> {
         _state.update { it.copy(openCardMenu = false) }
       }
     }
@@ -183,28 +196,101 @@ class AddExpenseViewModel @Inject constructor(
     }
   }
 
-  private suspend fun getAllCards() {
-    _state.update { it.copy(loadingCard = true) }
-    graphQlClientImpl.query(AllCardsQuery()).map { apolloResponse ->
-      try {
-        val cardsList = apolloResponse.data?.cardList
-        MyResult.Success(
-          cardsList?.mapNotNull {
-            it?.toCard()
+  private fun getAllCards() {
+    viewModelScope.launch {
+      _state.update { it.copy(loadingCard = true) }
+      graphQlClientImpl.query(AllCardsQuery()).map { apolloResponse ->
+        try {
+          val cardsList = apolloResponse.data?.cardList
+          MyResult.Success(
+            cardsList?.mapNotNull {
+              it?.toCard()
+            }
+          )
+        } catch (e: ApolloException) {
+          MyResult.Error(data = null, uiText = "Something went wrong")
+        }
+      }.collect { result ->
+        when (result) {
+          is MyResult.Success -> {
+            _state.update { it.copy(cardsList = result.data ?: emptyList(), loadingCard = false) }
+          }
+
+          is MyResult.Error -> {
+            _state.update { it.copy(loadingCard = false) }
+          }
+        }
+      }
+    }
+  }
+
+  fun getExpenseById(expenseId: String) {
+    _state.update {
+      it.copy(buttonText = "Actualizar")
+    }
+    viewModelScope.launch {
+      graphQlClientImpl.query(ExpenseByIdQuery(expenseByIdId = expenseId)).map {
+        validateDataWithoutErrors(it)
+      }
+        .catch {
+          if (it::class.java == IllegalStateException::class.java) {
+            Log.d("AddExpenseViewModel", "Algo salio mal en el collect ${it.stackTrace}")
+          }
+        }
+        .collect { collectResult ->
+          collectResult.successOrError(
+            onSuccess = { success ->
+              val expense =
+                success.data.expenseById?.expenseFragment ?: throw IllegalStateException()
+              _state.update {
+                it.copy(
+                  category = expense.category,
+                  concept = expense.concept,
+                  comment = expense.comment.orEmpty(),
+                  total = expense.total.toString(),
+                  date = expense.payBefore.date.formatDateDaysWithMonth(),
+                  selectedCard = expense.toExpense().card
+                )
+              }
+            },
+            onError = {}
+          )
+        }
+    }
+  }
+
+  private fun updateExpenseById(expenseId: String) {
+    viewModelScope.launch {
+      val input = UpdateExpenseInput(
+        id = expenseId,
+        cardId = Optional.present(_state.value.selectedCard?.id.orEmpty()),
+        category = _state.value.category,
+        concept = _state.value.concept,
+        comment = Optional.present(_state.value.comment),
+        total = _state.value.total.toDouble(),
+        payBefore = Date(_state.value.date.formatDateToISO() ?: LocalDateTime.now())
+      )
+      graphQlClientImpl.mutate(UpdateExpenseMutation(input = input)).map {
+        validateDataWithoutErrors(it)
+      }.collect { collectResult ->
+        collectResult.successOrError(
+          onSuccess = { success ->
+            this.launch {
+              _state.emit(
+                value = AddExpensesState(
+                  expenseAdded = true,
+                  isAdded = true,
+                  cardsList = _state.value.cardsList,
+                  category = _state.value.category,
+                  date = _state.value.date
+                )
+              )
+            }
+          },
+          onError = {
+            Log.d("AddExpenseViewMode", "${it.exception?.stackTrace}")
           }
         )
-      } catch (e: ApolloException) {
-        MyResult.Error(data = null, uiText = "Something went wrong")
-      }
-    }.collect { result ->
-      when (result) {
-        is MyResult.Success -> {
-          _state.update { it.copy(cardsList = result.data ?: emptyList(), loadingCard = false) }
-        }
-
-        is MyResult.Error -> {
-          _state.update { it.copy(loadingCard = false) }
-        }
       }
     }
   }

@@ -46,6 +46,7 @@ import java.time.LocalDateTime
 @Composable
 fun ExpensesList(
   expenseList: List<Expense>,
+  onEdit: (expenseId: String) -> Unit = {},
   onDelete: (expenseId: String) -> Unit = {}
 ) {
   Text(
@@ -61,6 +62,7 @@ fun ExpensesList(
       Row(modifier = Modifier.animateItemPlacement()) {
         ExpenseItem(
           expense = expense,
+          onEdit = onEdit,
           onDelete = onDelete
         )
       }

@@ -1,0 +1,5 @@
+query ExpenseById($expenseByIdId: ID!) {
+    expenseById(id: $expenseByIdId) {
+        ...expenseFragment
+    }
+}

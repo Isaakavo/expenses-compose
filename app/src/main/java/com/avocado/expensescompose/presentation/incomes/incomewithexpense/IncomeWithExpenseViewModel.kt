@@ -31,7 +31,6 @@ sealed class IncomeWithExpenseEvent {
   object CancelDeleteIncome : IncomeWithExpenseEvent()
   object ConfirmDeleteIncome : IncomeWithExpenseEvent()
   object ConfirmDeleteExpense : IncomeWithExpenseEvent()
-  object EditExpense : IncomeWithExpenseEvent()
   object DeleteExpense : IncomeWithExpenseEvent()
 }
 
@@ -67,9 +66,6 @@ class IncomeWithExpenseViewModel @Inject constructor(
 
       IncomeWithExpenseEvent.ConfirmDeleteIncome -> {
         deleteIncome(param)
-      }
-
-      IncomeWithExpenseEvent.EditExpense -> {
       }
 
       IncomeWithExpenseEvent.DeleteExpense -> {

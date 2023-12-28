@@ -271,6 +271,8 @@ type Query {
 
   expensesByMonth(input: PayBeforeInput!): ExpensesBy
 
+  expenseById(id: ID!): Expense
+
   incomesAndExpensesByFortnight(input: PayBeforeInput!): IncomesListAndExpenses!
 
   allExpenses: [Expense]
@@ -293,7 +295,7 @@ type Mutation {
 
   createExpense(input: CreateExpenseInput!): Expense
 
-  updateExpense(input: UpdateExpenseInput): Expense!
+  updateExpense(input: UpdateExpenseInput!): Expense!
 
   deleteExpense(id: ID!): Boolean!
 
