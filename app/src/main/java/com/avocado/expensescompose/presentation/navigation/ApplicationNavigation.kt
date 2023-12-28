@@ -1,5 +1,12 @@
 package com.avocado.expensescompose.presentation.navigation
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.EaseIn
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import androidx.navigation.NavType
@@ -92,7 +99,30 @@ private fun <T> navigate(navigateEvent: NavigateEvent, navController: NavControl
 @Composable
 fun ExpensesApplication() {
   val navController = rememberNavController()
-  NavHost(navController = navController, startDestination = "login_screen") {
+  NavHost(
+    navController = navController,
+    startDestination = "login_screen",
+    enterTransition = {
+      fadeIn(
+        animationSpec = tween(
+          300, easing = LinearEasing
+        )
+      ) + slideIntoContainer(
+        animationSpec = tween(350, easing = EaseIn),
+        towards = AnimatedContentTransitionScope.SlideDirection.Start
+      )
+    },
+    exitTransition = {
+      fadeOut(
+        animationSpec = tween(
+          300, easing = LinearEasing
+        )
+      ) + slideOutOfContainer(
+        animationSpec = tween(350, easing = EaseOut),
+        towards = AnimatedContentTransitionScope.SlideDirection.End
+      )
+    }
+  ) {
 
     // Login Screen
     composable(RoutesConstants.LOGIN_SCREEN) {
