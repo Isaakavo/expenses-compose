@@ -83,7 +83,12 @@ private fun <T> navigate(navigateEvent: NavigateEvent, navController: NavControl
     }
 
     is NavigateEvent.NavigateCardsWithExpenseScreen -> {
-      navController.navigate("${RoutesConstants.CARDS_EXPENSE_SCREEN}/${param}")
+      navController.navigate("${RoutesConstants.CARDS_EXPENSE_SCREEN}/${param}") {
+        launchSingleTop = true
+        popUpTo("${RoutesConstants.CARDS_SCREEN}/${param}") {
+          inclusive = true
+        }
+      }
     }
 
     is NavigateEvent.NavigateAddExpenseScreen -> {

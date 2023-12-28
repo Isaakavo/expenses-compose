@@ -1,7 +1,9 @@
 package com.avocado.expensescompose.presentation.incomes.incomewithexpense
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.avocado.DeleteExpenseMutation
 import com.avocado.DeleteIncomeByIdMutation
 import com.avocado.IncomeByIdWithExpensesListQuery
 import com.avocado.expensescompose.data.adapters.graphql.fragments.toExpense
@@ -28,6 +30,9 @@ sealed class IncomeWithExpenseEvent {
   object DeleteIncome : IncomeWithExpenseEvent()
   object CancelDeleteIncome : IncomeWithExpenseEvent()
   object ConfirmDeleteIncome : IncomeWithExpenseEvent()
+  object ConfirmDeleteExpense : IncomeWithExpenseEvent()
+  object EditExpense : IncomeWithExpenseEvent()
+  object DeleteExpense : IncomeWithExpenseEvent()
 }
 
 data class IncomeWithExpenseState(
@@ -38,7 +43,9 @@ data class IncomeWithExpenseState(
   val remaining: Double = 0.0,
   val isLoading: Boolean = false,
   val isDeleted: Boolean = false,
-  val shouldDisplayAlertDialog: Boolean = false
+  val shouldDeleteIncome: Boolean = false,
+  val shouldDeleteExpense: Boolean = false,
+  val expenseToDeleteId: String = ""
 )
 
 @HiltViewModel
@@ -51,15 +58,32 @@ class IncomeWithExpenseViewModel @Inject constructor(
   fun onEvent(event: IncomeWithExpenseEvent, param: String = "") {
     when (event) {
       IncomeWithExpenseEvent.DeleteIncome -> {
-        _state.update { it.copy(shouldDisplayAlertDialog = true) }
+        _state.update { it.copy(shouldDeleteIncome = true, shouldDeleteExpense = false) }
       }
 
       IncomeWithExpenseEvent.CancelDeleteIncome -> {
-        _state.update { it.copy(shouldDisplayAlertDialog = false) }
+        _state.update { it.copy(shouldDeleteIncome = false) }
       }
 
       IncomeWithExpenseEvent.ConfirmDeleteIncome -> {
         deleteIncome(param)
+      }
+
+      IncomeWithExpenseEvent.EditExpense -> {
+      }
+
+      IncomeWithExpenseEvent.DeleteExpense -> {
+        _state.update {
+          it.copy(
+            shouldDeleteExpense = true,
+            shouldDeleteIncome = false,
+            expenseToDeleteId = param
+          )
+        }
+      }
+
+      IncomeWithExpenseEvent.ConfirmDeleteExpense -> {
+        deleteExpense(_state.value.expenseToDeleteId)
       }
     }
   }
@@ -116,7 +140,7 @@ class IncomeWithExpenseViewModel @Inject constructor(
       }.collect { collectResult ->
         collectResult.successOrError(
           onSuccess = { success ->
-            if (success.data.deleteIncomeById == true) {
+            if (success.data.deleteIncomeById) {
               this.launch {
                 _state.emit(
                   IncomeWithExpenseState(isDeleted = true)
@@ -127,6 +151,39 @@ class IncomeWithExpenseViewModel @Inject constructor(
           onError = {}
         )
       }
+    }
+  }
+
+  private fun deleteExpense(expenseId: String) {
+    if (expenseId.isEmpty()) {
+      Log.d("IncomeWithExpenseViewModel", "Expense id was empty")
+      return
+    }
+    viewModelScope.launch {
+      graphQlClientImpl.mutate(DeleteExpenseMutation(deleteExpenseId = expenseId)).map {
+        validateDataWithoutErrors(it)
+      }
+        .collect { collectResult ->
+          collectResult.successOrError(
+            onSuccess = { success ->
+              if (success.data.deleteExpense) {
+                val newList = _state.value.expensesList.filter { it.id != expenseId }
+                _state.update {
+                  it.copy(
+                    expensesList = newList,
+                    shouldDeleteExpense = false,
+                    shouldDeleteIncome = false,
+                    expenseToDeleteId = ""
+                  )
+                }
+              }
+            },
+            onError = {
+              Log.d("IncomeWithExpenseViewModel", "${it.exception}")
+            }
+          )
+
+        }
     }
   }
 }

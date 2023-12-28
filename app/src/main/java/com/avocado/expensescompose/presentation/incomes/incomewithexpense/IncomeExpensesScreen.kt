@@ -66,7 +66,8 @@ fun IncomeExpensesScreen(
     incomesTotal = state.incomesTotal,
     fortnight = state.incomes?.get(0)?.paymentDate?.fortnight?.translate() ?: "",
     month = state.incomes?.get(0)?.paymentDate?.date?.formatDateMonthWithYear() ?: "",
-    shouldDisplayAlertDialog = state.shouldDisplayAlertDialog,
+    shouldDeleteIncome = state.shouldDeleteIncome,
+    shouldDeleteExpense = state.shouldDeleteExpense,
     remaining = state.remaining,
     expended = state.expensesTotal,
     expenseList = state.expensesList,
@@ -88,7 +89,8 @@ fun IncomeWithExpensesContent(
   expended: Double,
   expenseList: List<Expense>,
   isLoading: Boolean = false,
-  shouldDisplayAlertDialog: Boolean = false,
+  shouldDeleteIncome: Boolean = false,
+  shouldDeleteExpense: Boolean = false,
   onNavigateBack: () -> Unit = {},
   onNavigate: (navigateEvent: NavigateEvent, operation: String) -> Unit = { one, two -> },
   onEditIncome: (navigateEvent: NavigateEvent, incomeId: String) -> Unit = { one, two -> },
@@ -143,8 +145,14 @@ fun IncomeWithExpensesContent(
         }
       } else {
         DeleteAlertDialog(
-          shouldDisplay = shouldDisplayAlertDialog,
-          onConfirmRequest = { onEvent(IncomeWithExpenseEvent.ConfirmDeleteIncome, incomeId) },
+          shouldDisplay = shouldDeleteIncome || shouldDeleteExpense,
+          deleteMessage = if (shouldDeleteIncome) "Eliminar Ingreso" else "Eliminar Gasto",
+          onConfirmRequest = {
+            if (shouldDeleteIncome) onEvent(
+              IncomeWithExpenseEvent.ConfirmDeleteIncome,
+              incomeId
+            ) else onEvent(IncomeWithExpenseEvent.ConfirmDeleteExpense, "")
+          },
           onDismissRequest = { onEvent(IncomeWithExpenseEvent.CancelDeleteIncome, "") }
         )
         Column(
@@ -159,7 +167,10 @@ fun IncomeWithExpensesContent(
             expended = expended,
             month = month
           )
-          ExpensesList(expenseList)
+          ExpensesList(
+            expenseList = expenseList,
+            onDelete = { onEvent(IncomeWithExpenseEvent.DeleteExpense, it) }
+          )
         }
       }
     }
@@ -249,6 +260,7 @@ fun IncomeDetails(incomesTotal: Double, remaining: Double, expended: Double, mon
 @Composable
 fun DeleteAlertDialog(
   shouldDisplay: Boolean,
+  deleteMessage: String,
   onConfirmRequest: () -> Unit,
   onDismissRequest: () -> Unit
 ) {
@@ -268,7 +280,7 @@ fun DeleteAlertDialog(
         }
       },
       icon = { Icon(imageVector = Icons.Rounded.Delete, contentDescription = "") },
-      title = { Text(text = "Eliminar Ingreso") },
+      title = { Text(text = deleteMessage) },
       text = {
         Text(
           text = "Esta accion no se puede deshacer. Los gastos asociados a este ingreso no seran eliminados"
