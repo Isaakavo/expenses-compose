@@ -71,7 +71,6 @@ fun ExpenseItem(
   onEdit: (expenseId: String) -> Unit = {}
 ) {
   var expanded by remember { mutableStateOf(false) }
-  val expandedTextSize = if (!expanded) 16.sp else 22.sp
   val expandedTextFont = if (!expanded) FontWeight.Normal else FontWeight.Bold
   val expandedPadding = if (!expanded) Modifier.padding(
     start = 8.dp,
