@@ -1,7 +1,6 @@
 package com.avocado.expensescompose.data.repositories
 
 import android.content.Context
-import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -11,6 +10,7 @@ import com.avocado.expensescompose.data.TokenService
 import com.avocado.expensescompose.data.model.MyResult
 import kotlinx.coroutines.flow.first
 import okio.IOException
+import timber.log.Timber
 import javax.inject.Inject
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "auth")
@@ -28,7 +28,7 @@ class TokenManagerRepository @Inject constructor(private val context: Context) :
       context.dataStore.edit { preferences ->
         preferences[USER_NAME_KEY] = username
       }
-      Log.d("TokenManagerRepository", "Username saved correctly")
+      Timber.d("Username saved correctly")
       MyResult.Success(true)
     } catch (exception: IOException) {
       MyResult.Error(false, exception.message, exception = exception)
@@ -55,7 +55,7 @@ class TokenManagerRepository @Inject constructor(private val context: Context) :
       context.dataStore.edit { preferences ->
         preferences[JWT_ACCESS_KEY] = value
       }
-      Log.d("JWT", "Access Token saved $value")
+      Timber.d("Access Token saved $value")
       MyResult.Success(true)
     } catch (exception: IOException) {
       MyResult.Error(false, exception.message)
@@ -90,7 +90,7 @@ class TokenManagerRepository @Inject constructor(private val context: Context) :
         preferences[JWT_REFRESH_KEY] = value
       }
 
-      Log.d("JWT", "Refresh Token saved $value")
+      Timber.d("Refresh Token saved $value")
       MyResult.Success(true)
     } catch (exception: IOException) {
       MyResult.Error(false, exception.message)

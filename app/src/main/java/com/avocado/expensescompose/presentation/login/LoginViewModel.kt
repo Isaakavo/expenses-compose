@@ -1,6 +1,5 @@
 package com.avocado.expensescompose.presentation.login
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.avocado.expensescompose.data.model.MyResult
@@ -11,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 sealed class LoginEvent {
@@ -91,7 +91,7 @@ class LoginViewModel @Inject constructor(
 
       when (loginResult.result) {
         is MyResult.Success -> {
-          Log.d("LoginViewModel", "Setting success")
+          Timber.d("Setting success")
           _uiState.update {
             it.copy(isSuccess = true, isLoading = false)
           }
@@ -113,10 +113,8 @@ class LoginViewModel @Inject constructor(
     viewModelScope.launch {
       when (val isSaved = loginUseCase.saveUsername(_uiState.value.username)) {
         is MyResult.Error -> {
-          Log.e(
-            "LoginViewModel",
-            "Error trying to save the username in data storage ${isSaved.exception?.stackTraceToString()}"
-          )
+          Timber
+            .e("Error trying to save the username in data storage: " + isSaved.exception?.stackTraceToString())
         }
 
         is MyResult.Success -> {

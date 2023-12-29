@@ -1,6 +1,5 @@
 package com.avocado.expensescompose.data.interceptor
 
-import android.util.Log
 import com.apollographql.apollo3.api.http.HttpRequest
 import com.apollographql.apollo3.api.http.HttpResponse
 import com.apollographql.apollo3.network.http.HttpInterceptor
@@ -12,6 +11,7 @@ import com.avocado.expensescompose.data.repositories.AuthRepository
 import com.avocado.expensescompose.data.repositories.TokenManagerRepository
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import timber.log.Timber
 import javax.inject.Inject
 
 class AuthorizationInterceptor @Inject constructor(
@@ -34,10 +34,12 @@ class AuthorizationInterceptor @Inject constructor(
 
 
   private suspend fun validateJwtIsNotNullOrEmpty(
-    jwt: String?, request: HttpRequest, chain: HttpInterceptorChain
+    jwt: String?,
+    request: HttpRequest,
+    chain: HttpInterceptorChain
   ): HttpResponse {
     if (jwt.isNullOrBlank()) {
-      Log.d("AUTH", "Error jwt empty")
+      Timber.d("Error jwt empty")
       return chain.proceed(request)
     }
 
@@ -88,7 +90,7 @@ class AuthorizationInterceptor @Inject constructor(
         response
       }
     } catch (e: Exception) {
-      e.message?.let { Log.d("AUTH", it) }
+      Timber.e(e)
     }
 
     return chain.proceed(request)

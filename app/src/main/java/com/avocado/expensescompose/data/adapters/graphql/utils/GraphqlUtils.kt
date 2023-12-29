@@ -1,10 +1,11 @@
 package com.avocado.expensescompose.data.adapters.graphql.utils
 
-import android.util.Log
 import com.apollographql.apollo3.api.ApolloResponse
 import com.apollographql.apollo3.api.Operation
 import com.apollographql.apollo3.exception.ApolloException
+import com.apollographql.apollo3.exception.ApolloHttpException
 import com.avocado.expensescompose.data.model.MyResult
+import timber.log.Timber
 
 fun <D> validateData(data: D): MyResult<D> = try {
   if (data != null) {
@@ -23,6 +24,9 @@ fun <D : Operation.Data> validateDataWithoutErrors(
   try {
     MyResult.Success(data.dataAssertNoErrors)
   } catch (e: ApolloException) {
-    Log.e("VALIDATE_DATA", e.localizedMessage.orEmpty())
+    Timber.e(e.localizedMessage.orEmpty())
+    MyResult.Error(data = data.data, uiText = uiText, exception = e)
+  } catch (e: ApolloHttpException) {
+    Timber.e(e.localizedMessage)
     MyResult.Error(data = data.data, uiText = uiText, exception = e)
   }
