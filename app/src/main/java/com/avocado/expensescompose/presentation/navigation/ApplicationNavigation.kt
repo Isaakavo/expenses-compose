@@ -288,7 +288,10 @@ fun ExpensesApplication() {
         cardId = cardId,
         payBefore = payBefore,
         dataSelector = DataSelector.valueOf(dataSelector),
-        onPopBackStack = { navController.popBackStack() }
+        onPopBackStack = { navController.popBackStack() },
+        onNavigate = { event, param ->
+          navigate(event, navController, param)
+        }
       )
     }
   }

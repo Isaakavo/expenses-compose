@@ -80,7 +80,7 @@ class AddExpenseViewModel @Inject constructor(
 
   init {
     getAllCards()
-    _state.update { it.copy(date = LocalDateTime.now().formatDateDaysWithMonth()) }
+//    _state.update { it.copy(date = LocalDateTime.now().formatDateDaysWithMonth()) }
   }
 
   fun <T> onEvent(event: AddExpenseEvent, params: T) {

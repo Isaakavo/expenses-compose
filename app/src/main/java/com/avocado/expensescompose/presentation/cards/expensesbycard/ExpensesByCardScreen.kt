@@ -24,6 +24,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.avocado.expensescompose.data.adapters.formatMoney
 import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.presentation.cards.expensestotalbycard.DataSelector
+import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.shared.ExpensesList
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.expensescompose.presentation.util.formatDateOnlyMonth
@@ -35,6 +36,7 @@ fun ExpensesByCardScreen(
   dataSelector: DataSelector,
   payBefore: String,
   onPopBackStack: () -> Unit = {},
+  onNavigate: (navigateEvent: NavigateEvent, param: String) -> Unit = {one, two -> }
 ) {
 
   val state by viewModel.state.collectAsStateWithLifecycle()
@@ -58,7 +60,8 @@ fun ExpensesByCardScreen(
     expensesList = state.expensesList,
     expensesTotal = state.expenseTotal,
     payBefore = payBefore,
-    onPopBackStack = onPopBackStack
+    onPopBackStack = onPopBackStack,
+    onNavigate = onNavigate
   )
 }
 
@@ -67,7 +70,8 @@ fun ExpensesByCardContent(
   expensesList: List<Expense>,
   expensesTotal: Double,
   payBefore: String,
-  onPopBackStack: () -> Unit
+  onPopBackStack: () -> Unit,
+  onNavigate: (navigateEvent: NavigateEvent, param: String) -> Unit = {one, two -> }
 ) {
   Scaffold(
     topBar = {
@@ -86,7 +90,10 @@ fun ExpensesByCardContent(
         verticalArrangement = Arrangement.spacedBy(22.dp)
       ) {
         CardExpensesDetails(expensesTotal = expensesTotal, payBefore = payBefore)
-        ExpensesList(expenseList = expensesList)
+        ExpensesList(
+          expenseList = expensesList,
+          onEdit = { onNavigate(NavigateEvent.NavigateEditExpenseScreen, it) }
+          )
       }
     }
   }

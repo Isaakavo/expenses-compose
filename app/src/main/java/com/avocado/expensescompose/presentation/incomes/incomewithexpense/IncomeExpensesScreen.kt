@@ -11,12 +11,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -34,6 +31,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.avocado.expensescompose.data.adapters.formatMoney
 import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
+import com.avocado.expensescompose.presentation.shared.DeleteAlertDialog
 import com.avocado.expensescompose.presentation.shared.ExpensesList
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.expensescompose.presentation.topbar.MenuItems
@@ -255,39 +253,6 @@ fun IncomeDetails(incomesTotal: Double, remaining: Double, expended: Double, mon
         )
       }
     }
-  }
-}
-
-@Composable
-fun DeleteAlertDialog(
-  shouldDisplay: Boolean,
-  deleteMessage: String,
-  onConfirmRequest: () -> Unit,
-  onDismissRequest: () -> Unit
-) {
-  if (shouldDisplay) {
-    AlertDialog(
-      onDismissRequest = { onDismissRequest() },
-      confirmButton =
-      {
-        Button(onClick = { onConfirmRequest() }) {
-          Text(text = "Aceptar")
-        }
-      },
-      dismissButton =
-      {
-        Button(onClick = { onDismissRequest() }) {
-          Text(text = "Cancelar")
-        }
-      },
-      icon = { Icon(imageVector = Icons.Rounded.Delete, contentDescription = "") },
-      title = { Text(text = deleteMessage) },
-      text = {
-        Text(
-          text = "Esta accion no se puede deshacer. Los gastos asociados a este ingreso no seran eliminados"
-        )
-      }
-    )
   }
 }
 

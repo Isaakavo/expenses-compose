@@ -14,15 +14,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,7 +25,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -111,7 +105,7 @@ fun ExpenseItem(
       ) {
         Text(
           text = expense.concept,
-          fontSize = expandedTextSize,
+          fontSize = 18.sp,
           fontWeight = expandedTextFont,
           overflow = if (!expanded) TextOverflow.Ellipsis else TextOverflow.Clip,
           maxLines = if (!expanded) 1 else 3,
@@ -119,7 +113,7 @@ fun ExpenseItem(
         )
         Text(
           text = expense.total.formatMoney(),
-          fontSize = expandedTextSize,
+          fontSize = 18.sp,
           textAlign = TextAlign.End,
           fontWeight = expandedTextFont,
           modifier = Modifier.padding(start = 22.dp)
@@ -130,7 +124,7 @@ fun ExpenseItem(
           if (expanded) {
             Text(
               text = if (!expense.card.alias.isNullOrEmpty()) "${expense.card.alias}" else expense.card.bank,
-              fontSize = 20.sp
+              fontSize = 18.sp
             )
           } else {
             Text(text = "Tarjeta", fontSize = 14.sp)
@@ -139,32 +133,24 @@ fun ExpenseItem(
       }
 
       if (expanded) {
-        Row {
-          Text(text = "${expense.comment}", fontSize = 18.sp, maxLines = 5)
+        if (!expense.comment.isNullOrEmpty()) {
+          Row(modifier = Modifier.fillMaxWidth()) {
+            Text(text = "${expense.comment}", fontSize = 16.sp, maxLines = 5)
+          }
         }
         Column {
           Row(
-            horizontalArrangement = Arrangement.Absolute.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.Absolute.Right,
             modifier = Modifier.fillMaxWidth()
           ) {
-            Button(
-              colors = ButtonDefaults.buttonColors(Color.Red),
-              modifier = Modifier
-                .weight(0.5f)
-                .fillMaxWidth(),
+            TextButton(
               onClick = { onDelete(expense.id) }
             ) {
-              Icon(imageVector = Icons.Rounded.Delete, contentDescription = "")
               Text(text = "Borrar")
             }
-            Button(
-              colors = ButtonDefaults.buttonColors(Color.Green),
-              modifier = Modifier
-                .weight(0.5f)
-                .fillMaxWidth(),
+            TextButton(
               onClick = { onEdit(expense.id) }
             ) {
-              Icon(imageVector = Icons.Rounded.Edit, contentDescription = "")
               Text(text = "Editar")
             }
           }
@@ -172,7 +158,6 @@ fun ExpenseItem(
       }
     }
   }
-
 }
 
 @Composable
@@ -222,7 +207,7 @@ fun ExpenseListPreview() {
       createdAt = LocalDateTime.now(),
       payBefore = LocalDateTime.of(2023, 11, 22, 0, 0, 0),
       comment = "Comentario mega largo de prueba alv como no apoco si",
-      id = "1",
+      id = "2",
       card = com.avocado.expensescompose.data.model.card.Card(
         bank = "Banco de prueba 2",
         id = "kajshdfkajd"
@@ -235,7 +220,7 @@ fun ExpenseListPreview() {
       createdAt = LocalDateTime.now(),
       payBefore = LocalDateTime.now(),
       comment = "",
-      id = "1",
+      id = "3",
       card = com.avocado.expensescompose.data.model.card.Card(
         bank = "Test",
         alias = "alv",
@@ -249,7 +234,7 @@ fun ExpenseListPreview() {
       createdAt = LocalDateTime.now(),
       payBefore = LocalDateTime.now(),
       comment = "",
-      id = "1",
+      id = "4",
       card = com.avocado.expensescompose.data.model.card.Card(
         bank = "Test",
         alias = "alv",
@@ -263,7 +248,7 @@ fun ExpenseListPreview() {
       payBefore = LocalDateTime.now(),
       createdAt = LocalDateTime.now(),
       comment = "",
-      id = "1"
+      id = "5"
     ),
   )
   Surface {
