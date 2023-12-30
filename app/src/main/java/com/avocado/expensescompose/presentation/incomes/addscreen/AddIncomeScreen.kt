@@ -50,7 +50,7 @@ fun AddIncomeScreen(
     total = state.total,
     comment = state.comments,
     date = state.date,
-    initialDate = state.initialDate,
+    initialSelectedDate = state.initialDate,
     isInserted = state.isInserted,
     isUpdated = state.isUpdated,
     openDateDialog = state.openDateDialog,
@@ -67,7 +67,7 @@ fun AddIncomeContent(
   total: String,
   comment: String,
   date: String,
-  initialDate: Long?,
+  initialSelectedDate: Long,
   isInserted: Boolean,
   isUpdated: Boolean,
   openDateDialog: Boolean,
@@ -106,9 +106,10 @@ fun AddIncomeContent(
       ) {
         DateDialog(
           date = date,
+          initialSelectedDate = initialSelectedDate,
+          useCurrentTime = incomeId.isEmpty(),
           openDateDialog = openDateDialog,
           modifier = Modifier.fillMaxWidth(),
-          initialSelectedDate = initialDate,
           onConfirm = { formattedDate ->
             onEvent(
               AddIncomeEvent.UpdateDate,

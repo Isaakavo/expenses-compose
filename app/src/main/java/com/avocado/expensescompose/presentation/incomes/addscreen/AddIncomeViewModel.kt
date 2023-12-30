@@ -8,11 +8,11 @@ import com.avocado.UpdateIncomeMutation
 import com.avocado.expensescompose.data.adapters.graphql.scalar.Date
 import com.avocado.expensescompose.data.adapters.graphql.utils.validateDataWithoutErrors
 import com.avocado.expensescompose.data.apolloclients.GraphQlClientImpl
-import com.avocado.expensescompose.presentation.util.formatDateToISO
 import com.avocado.expensescompose.data.model.successOrError
 import com.avocado.expensescompose.domain.income.models.Income
 import com.avocado.expensescompose.domain.income.usecase.CreateIncomeUseCase
 import com.avocado.expensescompose.presentation.util.convertDateToMillis
+import com.avocado.expensescompose.presentation.util.formatDateToISO
 import com.avocado.expensescompose.presentation.util.formatDateWithYear
 import com.avocado.type.UpdateIncomeInput
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -44,7 +44,7 @@ data class AddIncomeState(
   val openDateDialog: Boolean = false,
   val total: String = "",
   val comments: String = "",
-  val initialDate: Long? = null
+  val initialDate: Long = 0L
 )
 
 @HiltViewModel
@@ -86,35 +86,7 @@ class AddIncomeViewModel @Inject constructor(
       }
 
       AddIncomeEvent.UpdateIncome -> {
-        viewModelScope.launch {
-          val total = _state.value.total.toDouble()
-          val comment = state.value.comments
-          val date = _state.value.date.formatDateToISO() ?: return@launch
-
-          val input = UpdateIncomeInput(
-            incomeId = _state.value.incomeId,
-            total = total,
-            comment = if (comment.isNotEmpty()) Optional.present(comment) else Optional.absent(),
-            paymentDate = Date(date)
-          )
-          graphQlClientImpl.mutate(UpdateIncomeMutation(input = Optional.present(input)))
-            .map { validateDataWithoutErrors(it) }
-            .collect { result ->
-              result.successOrError(
-                onSuccess = { successResult ->
-                  this.launch {
-                    _state.emit(
-                      AddIncomeState(
-                        isUpdated = true,
-                        isInserted = false
-                      )
-                    )
-                  }
-                },
-                onError = {}
-              )
-            }
-        }
+        updateIncome()
       }
 
       AddIncomeEvent.UpdateDate -> {
@@ -139,6 +111,38 @@ class AddIncomeViewModel @Inject constructor(
     }
   }
 
+  private fun updateIncome() {
+    viewModelScope.launch {
+      val total = _state.value.total.toDouble()
+      val comment = state.value.comments
+      val date = _state.value.date.formatDateToISO() ?: return@launch
+
+      val input = UpdateIncomeInput(
+        incomeId = _state.value.incomeId,
+        total = total,
+        comment = if (comment.isNotEmpty()) Optional.present(comment) else Optional.absent(),
+        paymentDate = Date(date)
+      )
+      graphQlClientImpl.mutate(UpdateIncomeMutation(input = Optional.present(input)))
+        .map { validateDataWithoutErrors(it) }
+        .collect { result ->
+          result.successOrError(
+            onSuccess = { successResult ->
+              this.launch {
+                _state.emit(
+                  AddIncomeState(
+                    isUpdated = true,
+                    isInserted = false
+                  )
+                )
+              }
+            },
+            onError = {}
+          )
+        }
+    }
+  }
+
   fun getIncomeById(incomeId: String) {
     viewModelScope.launch {
       graphQlClientImpl.query(IncomeByIdQuery(incomeId = incomeId)).map {
@@ -151,14 +155,14 @@ class AddIncomeViewModel @Inject constructor(
               val date = incomeData?.paymentDate?.date?.date
               val formattedDate = date?.formatDateWithYear().orEmpty()
               val initialDate =
-                date?.convertDateToMillis() ?: 0L
+                date?.convertDateToMillis()
               _state.emit(
                 AddIncomeState(
                   incomeId = incomeId,
                   total = incomeData?.total.toString(),
                   comments = incomeData?.comment.orEmpty(),
                   date = formattedDate,
-                  initialDate = initialDate
+                  initialDate = initialDate ?: 0
                 )
               )
             }

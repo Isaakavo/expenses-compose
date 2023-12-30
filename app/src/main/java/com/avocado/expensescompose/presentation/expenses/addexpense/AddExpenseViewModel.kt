@@ -1,6 +1,5 @@
 package com.avocado.expensescompose.presentation.expenses.addexpense
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apollographql.apollo3.api.Optional
@@ -19,8 +18,9 @@ import com.avocado.expensescompose.data.apolloclients.GraphQlClientImpl
 import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.data.model.card.Card
 import com.avocado.expensescompose.data.model.successOrError
-import com.avocado.expensescompose.presentation.util.formatDateDaysWithMonth
+import com.avocado.expensescompose.presentation.util.convertDateToMillis
 import com.avocado.expensescompose.presentation.util.formatDateToISO
+import com.avocado.expensescompose.presentation.util.formatDateWithYear
 import com.avocado.type.Category
 import com.avocado.type.CreateExpenseInput
 import com.avocado.type.UpdateExpenseInput
@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.time.LocalDateTime
 import javax.inject.Inject
 
@@ -56,11 +57,11 @@ data class AddExpensesState(
   val category: Category = Category.BILLS,
   val selectedCard: Card? = null,
   val showToast: Boolean = false,
-  val toastMessage: String = "",
   val concept: String = "",
   val comment: String = "",
   val total: String = "",
   val date: String = "",
+  val initialDate: Long = 0L,
   val buttonText: String = "Agregar",
   val expenseAdded: Boolean = false,
   val expenseAddedError: Boolean = false,
@@ -142,14 +143,6 @@ class AddExpenseViewModel @Inject constructor(
         _state.update { it.copy(openCardMenu = false) }
       }
     }
-  }
-
-  private fun showToast(message: String) {
-    _state.update { it.copy(showToast = true, toastMessage = message) }
-  }
-
-  fun resetToast() {
-    _state.update { it.copy(showToast = false, toastMessage = "") }
   }
 
   private fun createExpense() {
@@ -234,7 +227,7 @@ class AddExpenseViewModel @Inject constructor(
       }
         .catch {
           if (it::class.java == IllegalStateException::class.java) {
-            Log.d("AddExpenseViewModel", "Algo salio mal en el collect ${it.stackTrace}")
+            Timber.d("Algo salio mal en el collect ${it.stackTrace}")
           }
         }
         .collect { collectResult ->
@@ -248,7 +241,8 @@ class AddExpenseViewModel @Inject constructor(
                   concept = expense.concept,
                   comment = expense.comment.orEmpty(),
                   total = expense.total.toString(),
-                  date = expense.payBefore.date.formatDateDaysWithMonth(),
+                  date = expense.payBefore.date.formatDateWithYear(),
+                  initialDate = expense.payBefore.date.convertDateToMillis(),
                   selectedCard = expense.toExpense().card
                 )
               }
@@ -288,7 +282,7 @@ class AddExpenseViewModel @Inject constructor(
             }
           },
           onError = {
-            Log.d("AddExpenseViewMode", "${it.exception?.stackTrace}")
+            Timber.d(it.exception?.stackTrace.toString())
           }
         )
       }

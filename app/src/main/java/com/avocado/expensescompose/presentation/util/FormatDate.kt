@@ -1,8 +1,8 @@
 package com.avocado.expensescompose.presentation.util
 
-import android.util.Log
 import com.avocado.expensescompose.data.model.total.TotalFortnight
 import com.avocado.type.Fortnight
+import timber.log.Timber
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -32,8 +32,9 @@ fun LocalDateTime.formatDateMonthWithYear(): String {
   return this.format(format)
 }
 
-fun LocalDateTime.convertDateToMillis(): Long =
-  this.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+fun LocalDateTime.convertDateToMillis(): Long {
+  return this.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+}
 
 fun TotalFortnight.prepareDateForRequest(): String? {
   return when (Fortnight.valueOf(this.fortnight?.name.orEmpty())) {
@@ -83,7 +84,7 @@ fun String.formatDateToISO(): LocalDateTime? {
 
     localDate.atStartOfDay()
   } catch (e: Exception) {
-    Log.d("Format Date to ISO", "Error al convertir la cadena a LocalDateTime: ${e.message}")
+    Timber.d("Error converting string to LocalDateTime: ${e.message}")
     null
   }
 }
@@ -93,7 +94,7 @@ fun String.formatDateForRequest(): LocalDateTime? = try {
   val localDate = LocalDate.parse(this, originalFormatter)
   localDate.atStartOfDay()
 } catch (e: Exception) {
-  Log.d("Format date for Request", "Error al convertir la cadena a LocalDateTime: ${e.message}")
+  Timber.d("Error al convertir la cadena a LocalDateTime: " + e.message)
   null
 }
 
@@ -102,7 +103,7 @@ fun String.formatDateForRequestPayBefore(): LocalDateTime? = try {
   val localDateValue = LocalDate.parse(this, formatter)
   localDateValue.atStartOfDay()
 } catch (e: Exception) {
-  Log.d("Format date for Request", "Error al convertir la cadena a LocalDateTime: ${e.message}")
+  Timber.d("Error al convertir la cadena a LocalDateTime: " + e.message)
   null
 }
 
@@ -114,6 +115,6 @@ fun Long.formatDateFromMillis(): String = try {
       .toLocalDateTime()
   convertedDate.formatDateWithYear()
 } catch (e: Exception) {
-  Log.d("formatDateFromMillis", "Error al convertir la cadena a LocalDateTime: ${e.message}")
+  Timber.d("Error al convertir la cadena a LocalDateTime: " + e.message)
   ""
 }

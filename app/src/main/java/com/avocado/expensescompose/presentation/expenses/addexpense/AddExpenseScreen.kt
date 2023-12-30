@@ -1,12 +1,10 @@
 package com.avocado.expensescompose.presentation.expenses.addexpense
 
-import android.content.Context
-import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -33,7 +31,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -46,14 +43,12 @@ import com.avocado.expensescompose.presentation.shared.DateDialog
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.type.Category
 import kotlinx.coroutines.launch
-
-const val ADD_EXPENSE_SCREEN_LOG = "AddExpenseScreen"
+import timber.log.Timber
 
 @Composable
 fun AddExpenseScreen(
   expenseId: String = "",
   viewModel: AddExpenseViewModel = hiltViewModel(),
-  context: Context = LocalContext.current,
   onPopBackStack: () -> Unit = {}
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
@@ -62,11 +57,6 @@ fun AddExpenseScreen(
     LaunchedEffect(key1 = Unit) {
       viewModel.getExpenseById(expenseId = expenseId)
     }
-  }
-
-  if (state.showToast && !state.loadingCard) {
-    Toast.makeText(context, state.toastMessage, Toast.LENGTH_LONG).show()
-    viewModel.resetToast()
   }
 
   if (state.isAdded) {
@@ -85,6 +75,7 @@ fun AddExpenseScreen(
     comment = state.comment,
     total = state.total,
     date = state.date,
+    initialSelectedDate = state.initialDate,
     buttonText = state.buttonText,
     openDateDialog = state.openDateDialog,
     openCardMenu = state.openCardMenu,
@@ -96,7 +87,6 @@ fun AddExpenseScreen(
   )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddExpenseScreenContent(
   expenseId: String,
@@ -108,6 +98,7 @@ fun AddExpenseScreenContent(
   comment: String,
   total: String,
   date: String,
+  initialSelectedDate: Long,
   buttonText: String,
   openDateDialog: Boolean,
   openCardMenu: Boolean,
@@ -162,14 +153,19 @@ fun AddExpenseScreenContent(
         verticalArrangement = Arrangement.spacedBy(12.dp)
       ) {
 
+        Timber.d(initialSelectedDate.toString())
         DateDialog(
           date = date,
+          initialSelectedDate = initialSelectedDate,
+          useCurrentTime = expenseId.isEmpty(),
           iconResource = R.drawable.baseline_calendar_month_24,
           openDateDialog = openDateDialog,
           onConfirm = { formattedDate -> onEvent(AddExpenseEvent.UpdateDate, formattedDate) },
           onDismiss = { onEvent(AddExpenseEvent.DateDialogClose, null) },
-          onSelectTextField = { onEvent(AddExpenseEvent.DateDialogOpen, null) }
+          onSelectTextField = { onEvent(AddExpenseEvent.DateDialogOpen, null) },
+          modifier = Modifier.padding(start = 8.dp)
         )
+
 
 
         AddExpenseRow {
@@ -246,7 +242,7 @@ fun AddExpenseScreenContent(
             onOpenEvent = { onEvent(AddExpenseEvent.CategoryListOpen, null) },
             onCloseEvent = { onEvent(AddExpenseEvent.CategoryListClose, null) }) {
             Category.values().map {
-              Log.d("Categories", it.name)
+              Timber.d(it.name)
               DropdownMenuItem(
                 text = {
                   Text(text = it.name)
@@ -344,7 +340,8 @@ fun DropDownMenu(
 fun AddExpenseRow(content: @Composable () -> Unit) {
   Row(
     horizontalArrangement = Arrangement.spacedBy(12.dp),
-    verticalAlignment = Alignment.CenterVertically
+    verticalAlignment = Alignment.CenterVertically,
+    modifier = Modifier.fillMaxWidth()
   ) {
     content()
   }
