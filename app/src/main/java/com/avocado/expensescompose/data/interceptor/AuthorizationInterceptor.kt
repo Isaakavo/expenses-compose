@@ -68,19 +68,19 @@ class AuthorizationInterceptor @Inject constructor(
           }
         }
 
-        val auth = Auth(
-          authFlow = "REFRESH_TOKEN_AUTH",
-          authParameters = AuthParameters(refreshToken = refreshToken ?: "")
+        val refreshTokenResponse = authClient.refreshToken(
+          Auth(
+            authFlow = "REFRESH_TOKEN_AUTH",
+            authParameters = AuthParameters(refreshToken = refreshToken ?: "")
+          )
         )
-
-        val refreshTokenResponse = authClient.refreshToken(auth)
         // If cognito returns the new access token, save it to replace the old one and proceed with
-        // the request, if not TODO validate what to do when response is not valid
+        // the request
         if (refreshTokenResponse is MyResult.Success) {
           val authResults = refreshTokenResponse.data.authenticationResult
           val accessToken = authResults.accessToken
           tokenManagerRepository.saveAccessToken(accessToken)
-          chain.proceed(
+          return chain.proceed(
             request.newBuilder()
               .addHeader("X-Session-Key", accessToken).build()
           )

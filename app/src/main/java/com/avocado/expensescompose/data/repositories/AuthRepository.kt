@@ -9,6 +9,7 @@ import com.avocado.expensescompose.data.network.LoginJwtClient
 import com.avocado.expensescompose.presentation.util.Constants
 import okio.IOException
 import retrofit2.HttpException
+import timber.log.Timber
 import javax.inject.Inject
 
 class AuthRepository @Inject constructor(
@@ -32,14 +33,15 @@ class AuthRepository @Inject constructor(
   private suspend fun getRefreshToken(): MyResult<String?> =
     tokenManagerRepository.getRefreshToken()
 
-  private suspend fun getTokenFromApi(email: String, password: String): SimpleResource {
-    val auth = Auth(
-      authParameters = AuthParameters(
-        password = password, username = email
+  private suspend fun getTokenFromApi(email: String, password: String): SimpleResource =
+    try {
+      val response = awsApi.getJwtToken(
+        base = Constants.AWS_PROVIDER, auth = Auth(
+          authParameters = AuthParameters(
+            password = password, username = email
+          )
+        )
       )
-    )
-    return try {
-      val response = awsApi.getJwtToken(base = Constants.AWS_PROVIDER, auth = auth)
       val accessToken = response.authenticationResult.accessToken
       val refreshToken = response.authenticationResult.refreshToken
       run {
@@ -54,47 +56,45 @@ class AuthRepository @Inject constructor(
         //TODO convert this to object and handle the error to return
         // "Contraseña o email incorrectos"
         val errorResponse = e.response()?.errorBody()?.string()
-        return MyResult.Error(uiText = errorResponse)
+        MyResult.Error<String>(uiText = errorResponse)
       }
       MyResult.Error(uiText = "Something went wrong")
     }
 
-  }
-
   suspend fun getAccessToken(email: String, password: String): SimpleResource {
-    return getTokenFromApi(email, password)
-//    return try {
-//      // Validate the existence of a previous Access Token
-//      // If exists, continue and use it
-//       when (val savedAccessToken = getAccessToken()) {
-//        is MyResult.Success -> {
-//          if (savedAccessToken.data != null) {
-//            // Validate also that there is a refresh token available
-//            // If exists, we are safe to make the request
-//            // Interceptor will use it to ask for a new access token
-//            when (val savedRefreshToken = getRefreshToken()) {
-//              is MyResult.Success -> {
-//                if (savedRefreshToken.data != null) {
-//                  return MyResult.Success(Unit)
-//                }
-//              }
-//
-//              is MyResult.Error -> {
-//                Log.d("JWT", savedRefreshToken.uiText.toString())
-//              }
-//            }
-//          }
-//        }
-//
-//        is MyResult.Error -> {
-//          Log.d("JWT", "Access Token not found, requesting a new one")
-//          return getTokenFromApi(email, password)
-//        }
-//      }
-//      MyResult.Error(uiText = "Something went wrong retrieving your credentials")
-//    } catch (e: Exception) {
-//      MyResult.Error(null, e.message)
-//    }
+//    return getTokenFromApi(email, password)
+    return try {
+      // Validate the existence of a previous Access Token
+      // If exists, continue and use it
+      when (val savedAccessToken = getAccessToken()) {
+        is MyResult.Success -> {
+          if (savedAccessToken.data != null) {
+            // Validate also that there is a refresh token available
+            // If exists, we are safe to make the request
+            // Interceptor will use it to ask for a new access token
+            when (val savedRefreshToken = getRefreshToken()) {
+              is MyResult.Success -> {
+                if (savedRefreshToken.data != null) {
+                  return MyResult.Success(Unit)
+                }
+              }
+
+              is MyResult.Error -> {
+                Timber.d(savedRefreshToken.uiText.toString())
+              }
+            }
+          }
+        }
+
+        is MyResult.Error -> {
+          Timber.d("Access Token not found, requesting a new one")
+          return getTokenFromApi(email, password)
+        }
+      }
+      MyResult.Error(uiText = "Something went wrong retrieving your credentials")
+    } catch (e: Exception) {
+      MyResult.Error(null, e.message)
+    }
   }
 
   suspend fun refreshToken(auth: Auth): MyResult<CognitoResponse> = try {
