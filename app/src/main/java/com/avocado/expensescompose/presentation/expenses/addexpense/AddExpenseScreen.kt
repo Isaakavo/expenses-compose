@@ -82,6 +82,7 @@ fun AddExpenseScreen(
     openCategoryList = state.openCategoryList,
     expenseAdded = state.expenseAdded,
     expenseAddedError = state.expenseAddedError,
+    loading = state.loading,
     onEvent = viewModel::onEvent,
     onPopBackStack = onPopBackStack
   )
@@ -105,6 +106,7 @@ fun AddExpenseScreenContent(
   openCategoryList: Boolean,
   expenseAdded: Boolean,
   expenseAddedError: Boolean,
+  loading: Boolean,
   onEvent: (event: AddExpenseEvent, elementId: String?) -> Unit,
   onPopBackStack: () -> Unit = {}
 ) {
@@ -152,21 +154,17 @@ fun AddExpenseScreenContent(
           .verticalScroll(state = rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(12.dp)
       ) {
-
-        Timber.d(initialSelectedDate.toString())
-        DateDialog(
-          date = date,
-          initialSelectedDate = initialSelectedDate,
-          useCurrentTime = expenseId.isEmpty(),
-          iconResource = R.drawable.baseline_calendar_month_24,
-          openDateDialog = openDateDialog,
-          onConfirm = { formattedDate -> onEvent(AddExpenseEvent.UpdateDate, formattedDate) },
-          onDismiss = { onEvent(AddExpenseEvent.DateDialogClose, null) },
-          onSelectTextField = { onEvent(AddExpenseEvent.DateDialogOpen, null) },
-          modifier = Modifier.padding(start = 8.dp)
-        )
-
-
+        if (!loading && !loadingCard)
+          DateDialog(
+            date = date,
+            initialSelectedDate = initialSelectedDate,
+            iconResource = R.drawable.baseline_calendar_month_24,
+            openDateDialog = openDateDialog,
+            onConfirm = { formattedDate -> onEvent(AddExpenseEvent.UpdateDate, formattedDate) },
+            onDismiss = { onEvent(AddExpenseEvent.DateDialogClose, null) },
+            onSelectTextField = { onEvent(AddExpenseEvent.DateDialogOpen, null) },
+            modifier = Modifier.padding(start = 8.dp)
+          )
 
         AddExpenseRow {
           Icon(

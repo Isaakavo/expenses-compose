@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.DatePickerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -29,22 +28,16 @@ fun DateDialog(
   iconResource: Int? = null,
   openDateDialog: Boolean,
   initialSelectedDate: Long? = null,
-  useCurrentTime: Boolean = false,
   onConfirm: (String) -> Unit,
   onDismiss: () -> Unit,
   onSelectTextField: () -> Unit,
 ) {
-  val datePickerState: DatePickerState?
-  var dateToDisplay = date
-  if (useCurrentTime) {
-    dateToDisplay = LocalDateTime.now().formatDateWithYear()
-    datePickerState = rememberDatePickerState(LocalDateTime.now().convertDateToMillis())
-  } else {
-    if (initialSelectedDate == 0L) return
-    datePickerState = rememberDatePickerState(
-      initialSelectedDateMillis = initialSelectedDate
-    )
-  }
+  val dateToDisplay = date.ifEmpty { LocalDateTime.now().formatDateWithYear() }
+
+  val datePickerState = rememberDatePickerState(
+    initialSelectedDateMillis = if (initialSelectedDate == 0L) LocalDateTime.now()
+      .convertDateToMillis() else initialSelectedDate
+  )
   Row(
     horizontalArrangement = Arrangement.Center,
     modifier = Modifier

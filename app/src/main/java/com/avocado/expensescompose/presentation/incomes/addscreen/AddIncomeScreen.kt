@@ -54,6 +54,7 @@ fun AddIncomeScreen(
     isInserted = state.isInserted,
     isUpdated = state.isUpdated,
     openDateDialog = state.openDateDialog,
+    loading = state.loading,
     onPopBackStack = onPopBackStack,
     onNavigate = onNavigate,
     onEvent = viewModel::onEvent
@@ -71,6 +72,7 @@ fun AddIncomeContent(
   isInserted: Boolean,
   isUpdated: Boolean,
   openDateDialog: Boolean,
+  loading: Boolean,
   onPopBackStack: () -> Unit = {},
   onNavigate: (navigateEvent: NavigateEvent, shouldRefresh: String) -> Unit,
   onEvent: (addIncomeEvent: AddIncomeEvent, param: String?) -> Unit
@@ -104,21 +106,22 @@ fun AddIncomeContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp)
       ) {
-        DateDialog(
-          date = date,
-          initialSelectedDate = initialSelectedDate,
-          useCurrentTime = incomeId.isEmpty(),
-          openDateDialog = openDateDialog,
-          modifier = Modifier.fillMaxWidth(),
-          onConfirm = { formattedDate ->
-            onEvent(
-              AddIncomeEvent.UpdateDate,
-              formattedDate
-            )
-          },
-          onDismiss = { onEvent(AddIncomeEvent.DateDialogClose, null) },
-          onSelectTextField = { onEvent(AddIncomeEvent.DateDialogOpen, null) }
-        )
+        if (!loading) {
+          DateDialog(
+            date = date,
+            initialSelectedDate = initialSelectedDate,
+            openDateDialog = openDateDialog,
+            modifier = Modifier.fillMaxWidth(),
+            onConfirm = { formattedDate ->
+              onEvent(
+                AddIncomeEvent.UpdateDate,
+                formattedDate
+              )
+            },
+            onDismiss = { onEvent(AddIncomeEvent.DateDialogClose, null) },
+            onSelectTextField = { onEvent(AddIncomeEvent.DateDialogOpen, null) }
+          )
+        }
         OutlinedTextField(
           value = total,
           label = { Text(text = "Total") },

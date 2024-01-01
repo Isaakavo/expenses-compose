@@ -39,6 +39,7 @@ data class AddIncomeState(
   val insertedIncome: Income? = null,
   val isInserted: Boolean = false,
   val isUpdated: Boolean = false,
+  val loading: Boolean = true,
   val userMessage: String = "",
   val date: String = "",
   val openDateDialog: Boolean = false,
@@ -57,7 +58,7 @@ class AddIncomeViewModel @Inject constructor(
   val state = _state.asStateFlow()
 
   init {
-    _state.update { it.copy(date = LocalDateTime.now().formatDateWithYear()) }
+    _state.update { it.copy(date = LocalDateTime.now().formatDateWithYear(), loading = false) }
   }
 
   fun onEvent(addIncomeEvent: AddIncomeEvent, param: String? = null) {
@@ -162,7 +163,8 @@ class AddIncomeViewModel @Inject constructor(
                   total = incomeData?.total.toString(),
                   comments = incomeData?.comment.orEmpty(),
                   date = formattedDate,
-                  initialDate = initialDate ?: 0
+                  initialDate = initialDate ?: 0,
+                  loading = false
                 )
               )
             }

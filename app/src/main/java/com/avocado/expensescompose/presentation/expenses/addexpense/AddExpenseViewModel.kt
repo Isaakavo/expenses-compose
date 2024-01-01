@@ -69,6 +69,7 @@ data class AddExpensesState(
   val openCategoryList: Boolean = false,
   val openCardMenu: Boolean = false,
   val loadingCard: Boolean = true,
+  val loading: Boolean = true,
   val isAdded: Boolean = false
 )
 
@@ -206,7 +207,13 @@ class AddExpenseViewModel @Inject constructor(
       }.collect { result ->
         when (result) {
           is MyResult.Success -> {
-            _state.update { it.copy(cardsList = result.data ?: emptyList(), loadingCard = false) }
+            _state.update {
+              it.copy(
+                cardsList = result.data ?: emptyList(),
+                loadingCard = false,
+                loading = false
+              )
+            }
           }
 
           is MyResult.Error -> {
@@ -243,7 +250,8 @@ class AddExpenseViewModel @Inject constructor(
                   total = expense.total.toString(),
                   date = expense.payBefore.date.formatDateWithYear(),
                   initialDate = expense.payBefore.date.convertDateToMillis(),
-                  selectedCard = expense.toExpense().card
+                  selectedCard = expense.toExpense().card,
+                  loading = false
                 )
               }
             },
