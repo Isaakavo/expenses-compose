@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import com.avocado.expensescompose.data.adapters.formatMoney
 import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.presentation.util.formatDateDaysWithMonth
+import com.avocado.type.Category
 import java.time.LocalDateTime
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -118,16 +119,20 @@ fun ExpenseItem(
           modifier = Modifier.padding(start = 22.dp)
         )
       }
-      if (expense.card != null) {
-        Row {
-          if (expanded) {
-            Text(
-              text = if (!expense.card.alias.isNullOrEmpty()) "${expense.card.alias}" else expense.card.bank,
-              fontSize = 18.sp
-            )
-          } else {
-            Text(text = "Tarjeta", fontSize = 14.sp)
-          }
+
+      Row(
+        horizontalArrangement = Arrangement.Absolute.SpaceBetween,
+        modifier = Modifier.fillMaxWidth()
+      ) {
+        val fontSize = if (expanded) 18.sp else 14.sp
+
+        Text(text = expense.category.name, fontSize = fontSize)
+
+        if (expanded) {
+          val cardInfo = expense.card?.alias ?: expense.card?.bank
+          cardInfo?.let { Text(text = it, fontSize = fontSize) }
+        } else {
+          expense.card?.let { Text(text = "Tarjeta", fontSize = fontSize) }
         }
       }
 
@@ -188,7 +193,9 @@ fun ExpenseListPreview() {
     Expense(
       total = 18063.0,
       incomeId = "1",
+      category = Category.BILLS,
       concept = "Gasto de prueba lasdhjflhsdfklhjasdfhklasdhfdfadsflkasdhflkadhs",
+
       createdAt = LocalDateTime.now(),
       payBefore = LocalDateTime.now(),
       comment = "Comentario de prueba",
@@ -202,6 +209,7 @@ fun ExpenseListPreview() {
     Expense(
       total = 5500.0,
       incomeId = "1",
+      category = Category.FOOD,
       concept = "Gasto de prueba",
       createdAt = LocalDateTime.now(),
       payBefore = LocalDateTime.of(2023, 11, 22, 0, 0, 0),
@@ -215,6 +223,7 @@ fun ExpenseListPreview() {
     Expense(
       total = 5500.0,
       incomeId = "1",
+      category = Category.SAVINGS,
       concept = "Gasto de prueba",
       createdAt = LocalDateTime.now(),
       payBefore = LocalDateTime.now(),
@@ -229,6 +238,7 @@ fun ExpenseListPreview() {
     Expense(
       total = 5500.0,
       incomeId = "1",
+      category = Category.COMMUNICATION,
       concept = "Gasto de prueba",
       createdAt = LocalDateTime.now(),
       payBefore = LocalDateTime.now(),
@@ -243,6 +253,7 @@ fun ExpenseListPreview() {
     Expense(
       total = 5500.0,
       incomeId = "1",
+      category = Category.BILLS,
       concept = "Gasto de prueba sin tarjeta",
       payBefore = LocalDateTime.now(),
       createdAt = LocalDateTime.now(),

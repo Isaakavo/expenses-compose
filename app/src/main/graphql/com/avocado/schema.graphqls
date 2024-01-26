@@ -34,6 +34,12 @@ enum Category {
   SPORTS
 
   TRANSPORT
+
+  SUPER_MARKET
+
+  HANG_OUT
+
+  SAVINGS
 }
 
 interface Total {

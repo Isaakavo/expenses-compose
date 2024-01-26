@@ -6,6 +6,7 @@ import com.avocado.fragment.ExpenseFragment
 
 fun ExpenseFragment.toExpense(): Expense = Expense(
   id = id,
+  category = category,
   concept = concept,
   comment = comment,
   total = total,

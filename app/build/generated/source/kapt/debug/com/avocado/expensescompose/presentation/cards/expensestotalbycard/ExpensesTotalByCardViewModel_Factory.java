@@ -17,7 +17,9 @@ import javax.inject.Provider;
 )
 @SuppressWarnings({
     "unchecked",
-    "rawtypes"
+    "rawtypes",
+    "KotlinInternal",
+    "KotlinInternalInJava"
 })
 public final class ExpensesTotalByCardViewModel_Factory implements Factory<ExpensesTotalByCardViewModel> {
   private final Provider<GraphQlClientImpl> graphQlClientImplProvider;
