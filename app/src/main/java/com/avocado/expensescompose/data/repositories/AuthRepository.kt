@@ -58,6 +58,7 @@ class AuthRepository @Inject constructor(
         //TODO convert this to object and handle the error to return
         // "Contraseña o email incorrectos"
         val errorResponse = e.response()?.errorBody()?.string()
+        Timber.e("AWS error $errorResponse")
         MyResult.Error<String>(uiText = R.string.general_error)
       }
       MyResult.Error(uiText = R.string.general_error)

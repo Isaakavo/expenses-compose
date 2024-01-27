@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.time.LocalDateTime
 import javax.inject.Inject
 
@@ -157,7 +158,7 @@ class IncomeWithExpenseViewModel @Inject constructor(
 
   private fun deleteExpense(expenseId: String) {
     if (expenseId.isEmpty()) {
-      Log.d("IncomeWithExpenseViewModel", "Expense id was empty")
+      Timber.d("Expense id was empty")
       return
     }
     viewModelScope.launch {
@@ -180,7 +181,7 @@ class IncomeWithExpenseViewModel @Inject constructor(
               }
             },
             onError = {
-              Log.d("IncomeWithExpenseViewModel", "${it.exception}")
+              Timber.d(it.exception)
             }
           )
 
