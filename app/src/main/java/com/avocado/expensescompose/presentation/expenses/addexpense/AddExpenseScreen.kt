@@ -31,7 +31,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -113,11 +115,12 @@ fun AddExpenseScreenContent(
   val scope = rememberCoroutineScope()
   val snackBarHostState = remember { SnackbarHostState() }
   val focusRequester = remember { FocusRequester() }
+  val context = LocalContext.current
 
   LaunchedEffect(key1 = snackBarHostState) {
     if (expenseAdded || expenseAddedError) {
       scope.launch {
-        snackBarHostState.showSnackbar(if (expenseAdded) "Gasto añadido correctamente" else "Ocurrió un error al añadir el gasto")
+        snackBarHostState.showSnackbar(context.resources.getString(if (expenseAdded) R.string.add_expense_successfully else R.string.add_expense_error))
       }
     }
   }
@@ -125,7 +128,7 @@ fun AddExpenseScreenContent(
   Scaffold(
     topBar = {
       AppBar(
-        title = "Agregar gasto",
+        title = stringResource(id = R.string.add_expense_add_expense),
         buttonText = buttonText,
         onActionButtonClick = {
           if (expenseId.isEmpty())
@@ -174,7 +177,7 @@ fun AddExpenseScreenContent(
           OutlinedTextField(
             value = concept,
             onValueChange = { onEvent(AddExpenseEvent.UpdateConcept, it) },
-            label = { Text(text = "Concepto") },
+            label = { Text(text = stringResource(id = R.string.add_expense_concept)) },
             keyboardOptions = KeyboardOptions(
               imeAction = ImeAction.Next
             )
@@ -189,7 +192,7 @@ fun AddExpenseScreenContent(
           OutlinedTextField(
             value = total,
             onValueChange = { onEvent(AddExpenseEvent.UpdateTotal, it) },
-            label = { Text(text = "Total") },
+            label = { Text(text = stringResource(id = R.string.add_expense_total)) },
             keyboardOptions = KeyboardOptions(
               keyboardType = KeyboardType.Decimal,
               imeAction = ImeAction.Next
@@ -207,7 +210,7 @@ fun AddExpenseScreenContent(
           )
           DropDownMenu(
             expanded = openCardMenu,
-            textFieldLabel = "Asociar Tarjeta",
+            textFieldLabel = stringResource(id = R.string.add_expense_link_card),
             textFieldValue = selectedCard?.aliasWithBankText() ?: selectedCard?.bank ?: "",
             textFieldEnabled = cards.isNotEmpty(),
             dropDownMenuEnabled = cards.isEmpty() && !loadingCard,
@@ -235,7 +238,7 @@ fun AddExpenseScreenContent(
           )
           DropDownMenu(
             expanded = openCategoryList,
-            textFieldLabel = "Categorias",
+            textFieldLabel = stringResource(id = R.string.add_expense_category),
             textFieldValue = categories.name,
             onOpenEvent = { onEvent(AddExpenseEvent.CategoryListOpen, null) },
             onCloseEvent = { onEvent(AddExpenseEvent.CategoryListClose, null) }) {
@@ -262,7 +265,7 @@ fun AddExpenseScreenContent(
           OutlinedTextField(
             value = comment,
             onValueChange = { onEvent(AddExpenseEvent.UpdateComment, it) },
-            label = { Text(text = "Comentario") },
+            label = { Text(text = stringResource(id = R.string.add_expense_comment)) },
             modifier = Modifier
               .focusRequester(focusRequester)
               .height(120.dp),

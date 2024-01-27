@@ -20,11 +20,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.avocado.expensescompose.R
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.shared.DateDialog
 import com.avocado.expensescompose.presentation.topbar.AppBar
@@ -82,9 +84,9 @@ fun AddIncomeContent(
   Scaffold(
     topBar = {
       AppBar(
-        title = "Agregar ingreso",
+        title = stringResource(id = R.string.add_income_add),
         navigationIcon = Icons.Rounded.ArrowBack,
-        buttonText = "Guardar",
+        buttonText = stringResource(R.string.add_income_save),
         onNavigationIconClick = { onPopBackStack() },
         onActionButtonClick = {
           if (incomeId.isEmpty()) {
@@ -124,7 +126,7 @@ fun AddIncomeContent(
         }
         OutlinedTextField(
           value = total,
-          label = { Text(text = "Total") },
+          label = { Text(text = stringResource(id = R.string.add_income_total)) },
           onValueChange = { onEvent(AddIncomeEvent.UpdateTotal, it) },
           keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Decimal,
@@ -134,7 +136,7 @@ fun AddIncomeContent(
 
         OutlinedTextField(
           value = comment,
-          label = { Text(text = "Comentarios") },
+          label = { Text(text = stringResource(id = R.string.add_income_comments)) },
           onValueChange = { onEvent(AddIncomeEvent.UpdateComment, it) },
           maxLines = 12,
           keyboardOptions = KeyboardOptions(

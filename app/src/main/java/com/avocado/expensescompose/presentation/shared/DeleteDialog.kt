@@ -7,6 +7,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import com.avocado.expensescompose.R
 
 @Composable
 fun DeleteAlertDialog(
@@ -21,20 +23,20 @@ fun DeleteAlertDialog(
       confirmButton =
       {
         Button(onClick = { onConfirmRequest() }) {
-          Text(text = "Aceptar")
+          Text(text = stringResource(id = R.string.dialog_accept))
         }
       },
       dismissButton =
       {
         Button(onClick = { onDismissRequest() }) {
-          Text(text = "Cancelar")
+          Text(text = stringResource(R.string.dialog_cancel))
         }
       },
       icon = { Icon(imageVector = Icons.Rounded.Delete, contentDescription = "") },
       title = { Text(text = deleteMessage) },
       text = {
         Text(
-          text = "Esta accion no se puede deshacer. Los gastos asociados a este ingreso no seran eliminados"
+          text = stringResource(id = R.string.delete_dialog_warning)
         )
       }
     )

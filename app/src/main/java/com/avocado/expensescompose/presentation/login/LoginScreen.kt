@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -72,26 +73,26 @@ fun LoginScreenContent(
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally
       ) {
-        Text(text = "Iniciar Sesión", modifier = Modifier)
+        Text(text = stringResource(id = R.string.login_login), modifier = Modifier)
         OutlinedTextField(
           value = username,
           onValueChange = { onEvent(LoginEvent.UpdateUsername, it) },
-          placeholder = { Text(text = "Usuario") },
+          placeholder = { Text(text = stringResource(id = R.string.login_user)) },
         )
         OutlinedTextField(
           value = password,
           onValueChange = { onEvent(LoginEvent.UpdatePassword, it) },
-          placeholder = { Text(text = "Contraseña") },
+          placeholder = { Text(text = stringResource(id = R.string.login_password)) },
           keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
           trailingIcon = {
             IconButton(onClick = { onEvent(LoginEvent.ToggleViewPassword, "") }) {
               if (shouldShowPassword) Icon(
                 painter = painterResource(id = R.drawable.baseline_visibility_24),
-                contentDescription = "Mostrar contraseña"
+                contentDescription = stringResource(id = R.string.login_show_password)
               )
               else Icon(
                 painter = painterResource(id = R.drawable.baseline_visibility_off_24),
-                contentDescription = "Ocultar contraseña"
+                contentDescription = stringResource(id = R.string.login_hide_password)
               )
             }
           },
@@ -109,7 +110,7 @@ fun LoginScreenContent(
                   .padding(top = 1.dp, end = 4.dp)
               )
             }
-            Text(text = "Iniciar Sesión")
+            Text(text = stringResource(id = R.string.login_login))
           }
         }
 

@@ -22,12 +22,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.adapters.formatMoney
 import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
@@ -37,6 +39,7 @@ import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.expensescompose.presentation.topbar.MenuItems
 import com.avocado.expensescompose.presentation.util.Operations
 import com.avocado.expensescompose.presentation.util.formatDateMonthWithYear
+import timber.log.Timber
 
 @Composable
 fun IncomeExpensesScreen(
@@ -97,25 +100,25 @@ fun IncomeWithExpensesContent(
   Scaffold(
     topBar = {
       AppBar(
-        title = "$fortnight Quincena",
+        title = stringResource(id = R.string.income_fortnight, fortnight),
         onNavigationIconClick = { onNavigateBack() },
         dropDownMenuItems = listOf(
           MenuItems(
-            text = "Editar",
+            text = stringResource(id = R.string.appbar_edit),
             icon = Icons.Rounded.Edit,
             action = {
               // Hardcoding the first id for the income
-              Log.d("IncomeExpensesScreen", "Clicking on edit")
+              Timber.d("Clicking on edit")
               onEditIncome(NavigateEvent.NavigationEditIncomeScreen, incomeId)
             }
           ),
           MenuItems(
-            text = "Borrar",
+            text = stringResource(id = R.string.appbar_delete),
             icon = Icons.Rounded.Delete,
             action = { onEvent(IncomeWithExpenseEvent.DeleteIncome, "") }
           ),
           MenuItems(
-            text = "Agregar gasto",
+            text = stringResource(id = R.string.appbar_add_expense),
             icon = Icons.Rounded.Add,
             action = {
               onNavigate(
@@ -144,7 +147,7 @@ fun IncomeWithExpensesContent(
       } else {
         DeleteAlertDialog(
           shouldDisplay = shouldDeleteIncome || shouldDeleteExpense,
-          deleteMessage = if (shouldDeleteIncome) "Eliminar Ingreso" else "Eliminar Gasto",
+          deleteMessage = stringResource(id = if (shouldDeleteIncome) R.string.income_expense_delete_income else R.string.income_expense_delete_expense),
           onConfirmRequest = {
             if (shouldDeleteIncome) onEvent(
               IncomeWithExpenseEvent.ConfirmDeleteIncome,
@@ -208,7 +211,7 @@ fun IncomeDetails(incomesTotal: Double, remaining: Double, expended: Double, mon
         //TODO make text color of remaining
         // if remaining is more than income make it green if not red
         Text(
-          text = "Ingreso",
+          text = stringResource(id = R.string.income_expense_income),
           color = MaterialTheme.colorScheme.secondary,
           style = MaterialTheme.typography.bodyLarge
         )
@@ -225,7 +228,7 @@ fun IncomeDetails(incomesTotal: Double, remaining: Double, expended: Double, mon
         horizontalArrangement = Arrangement.SpaceBetween
       ) {
         Text(
-          text = "Gastos",
+          text = stringResource(id = R.string.income_expense_expense),
           color = MaterialTheme.colorScheme.secondary,
           style = MaterialTheme.typography.bodyLarge
         )
@@ -242,7 +245,7 @@ fun IncomeDetails(incomesTotal: Double, remaining: Double, expended: Double, mon
         horizontalArrangement = Arrangement.SpaceBetween
       ) {
         Text(
-          text = "Restante",
+          text = stringResource(id = R.string.income_expense_remaining),
           color = MaterialTheme.colorScheme.secondary,
           style = MaterialTheme.typography.bodyLarge
         )

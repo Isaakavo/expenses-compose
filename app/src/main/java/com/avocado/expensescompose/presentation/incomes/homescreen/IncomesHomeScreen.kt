@@ -59,6 +59,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -111,7 +112,7 @@ fun IncomesScreen(
 fun IncomeScreenContent(
   backPressState: BackPress?,
   isLoading: Boolean,
-  uiError: String,
+  uiError: Int,
   operation: String,
   incomesMap: Map<String, MutableMap<String, MutableMap<String, MutableList<Income>?>>>?,
   totalByMonth: List<Total?>,
@@ -123,24 +124,24 @@ fun IncomeScreenContent(
   val scope: CoroutineScope = rememberCoroutineScope()
   val drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
   val snackBarHostState = remember { SnackbarHostState() }
-
+  val context = LocalContext.current
   if (operation.isNotEmpty()) {
     LaunchedEffect(key1 = Unit) {
       validateOperation(
         operation,
         onAdd = {
           scope.launch {
-            snackBarHostState.showSnackbar("Element added successfully")
+            snackBarHostState.showSnackbar(context.resources.getString(R.string.income_add_successfully))
           }
         },
         onUpdate = {
           scope.launch {
-            snackBarHostState.showSnackbar("Element updated successfully")
+            snackBarHostState.showSnackbar(context.resources.getString(R.string.income_update_successfully))
           }
         },
         onDelete = {
           scope.launch {
-            snackBarHostState.showSnackbar("Element deleted successfully")
+            snackBarHostState.showSnackbar(context.resources.getString(R.string.income_delete_successfully))
           }
         },
         onAlwaysExecute = {
@@ -175,20 +176,23 @@ fun IncomeScreenContent(
             contentDescription = ""
           )
           Spacer(modifier = Modifier.width(10.dp))
-          Text(text = "Tarjetas", textAlign = TextAlign.Start)
+          Text(text = stringResource(id = R.string.income_card), textAlign = TextAlign.Start)
           Spacer(modifier = Modifier.weight(1f))
         }
       }
     }
   }) {
     Scaffold(topBar = {
-      AppBar(title = "Ingresos", navigationIcon = Icons.Rounded.Menu, onNavigationIconClick = {
-        scope.launch {
-          drawerState.apply {
-            if (isClosed) open() else close()
+      AppBar(
+        title = stringResource(id = R.string.income_income),
+        navigationIcon = Icons.Rounded.Menu,
+        onNavigationIconClick = {
+          scope.launch {
+            drawerState.apply {
+              if (isClosed) open() else close()
+            }
           }
-        }
-      })
+        })
     }, snackbarHost = {
       SnackbarHost(hostState = snackBarHostState)
     }, floatingActionButton = {
@@ -203,13 +207,13 @@ fun IncomeScreenContent(
           .fillMaxSize()
           .padding(paddingValues)
       ) {
-        if (uiError.isNotEmpty()) {
+        if (uiError != 0) {
           Column(
             modifier = Modifier.padding(paddingValues),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
           ) {
-            Text(text = uiError, style = MaterialTheme.typography.headlineLarge)
+            Text(text = stringResource(uiError), style = MaterialTheme.typography.headlineLarge)
           }
         } else if (isLoading) {
           Column(
@@ -263,7 +267,7 @@ fun IncomeScreenContent(
               modifier = Modifier.padding(start = 12.dp, end = 12.dp)
             ) {
               Text(
-                text = "Aun no tienes ingresos añadidos, no te preocupes, eso se puede solucionar facil",
+                text = stringResource(id = R.string.income_empty_list),
                 style = MaterialTheme.typography.headlineLarge
               )
             }
@@ -286,7 +290,11 @@ fun IncomeScreenContent(
       }
 
       if (showToast) {
-        Toast.makeText(LocalContext.current, "Presiona de nuevo para salir", Toast.LENGTH_LONG)
+        Toast.makeText(
+          LocalContext.current,
+          stringResource(id = R.string.income_press_again_exit),
+          Toast.LENGTH_LONG
+        )
           .show()
         onEvent(IncomeEvent.CloseToast)
       }
@@ -307,7 +315,7 @@ fun IncomeItem(
       )
     )
   }) {
-    Text(text = "$fortnight quincena")
+    Text(text = stringResource(id = R.string.income_fortnight, fortnight))
     if (items.size == 1) {
       IncomeItemRow(item = items[0], false)
     } else {
@@ -393,7 +401,7 @@ fun FabAddButtons(
         onClick = { onNavigateAddIncome() },
       ) {
         Icon(painterResource(id = R.drawable.round_account_balance_24), contentDescription = "")
-        Text(text = "Agregar ingreso")
+        Text(text = stringResource(id = R.string.fab_add_income))
       }
       Spacer(modifier = Modifier.height(8.dp))
       ExtendedFloatingActionButton(
@@ -401,7 +409,7 @@ fun FabAddButtons(
         onClick = { onNavigateAddExpense() },
       ) {
         Icon(painterResource(id = R.drawable.round_attach_money_24), contentDescription = "")
-        Text(text = "Agregar gasto")
+        Text(text = stringResource(id = R.string.fab_add_expense))
       }
     }
 

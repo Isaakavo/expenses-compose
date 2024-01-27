@@ -14,7 +14,9 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.avocado.expensescompose.R
 import com.avocado.expensescompose.presentation.util.convertDateToMillis
 import com.avocado.expensescompose.presentation.util.formatDateFromMillis
 import com.avocado.expensescompose.presentation.util.formatDateWithYear
@@ -46,7 +48,8 @@ fun DateDialog(
   ) {
     if (iconResource != null) {
       Icon(
-        painter = painterResource(id = iconResource), contentDescription = "Fecha"
+        painter = painterResource(id = iconResource),
+        contentDescription = stringResource(id = R.string.date_dialog_date)
       )
     }
     ClickableText(text = dateToDisplay, modifier = modifier) {
@@ -63,11 +66,11 @@ fun DateDialog(
         }
         onDismiss()
       }) {
-        Text(text = "Aceptar")
+        Text(text = stringResource(id = R.string.dialog_accept))
       }
     }, dismissButton = {
       TextButton(onClick = { onDismiss() }) {
-        Text(text = "Cancelar")
+        Text(text = stringResource(id = R.string.dialog_cancel))
       }
     }) {
       DatePicker(state = datePickerState)

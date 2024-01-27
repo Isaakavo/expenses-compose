@@ -32,7 +32,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -97,11 +99,17 @@ fun CardsScreenContent(
 
   val scope = rememberCoroutineScope()
   val snackBarHostState = remember { SnackbarHostState() }
+  val context = LocalContext.current
 
   if (isAdded) {
     LaunchedEffect(key1 = snackBarHostState) {
       scope.launch {
-        snackBarHostState.showSnackbar("Se agregó la tarjeta ${cardsList.last().alias}")
+        snackBarHostState.showSnackbar(
+          context.resources.getString(
+            R.string.cards_add_successfully,
+            cardsList.last().alias
+          )
+        )
       }
     }
   }
@@ -111,7 +119,7 @@ fun CardsScreenContent(
       operation,
       onDelete = {
         scope.launch {
-          snackBarHostState.showSnackbar("Se elimino una targeta")
+          snackBarHostState.showSnackbar(context.resources.getString(R.string.cards_delete))
         }
       }
     )
@@ -140,10 +148,10 @@ fun CardsScreenContent(
     },
     topBar = {
       AppBar(
-        title = "Tarjetas",
+        title = stringResource(id = R.string.appbar_cards),
         dropDownMenuItems = listOf(
           MenuItems(
-            text = "Agregar tarjeta",
+            text = stringResource(id = R.string.appbar_cards_menu_item1),
             action = { onEvent(CardsScreenEvents.OpenAddCardDialog, "") })
         ),
         onNavigationIconClick = { onPopBackStack() }
@@ -182,19 +190,18 @@ fun CardsScreenContent(
             verticalArrangement = Arrangement.spacedBy(18.dp)
           ) {
             Text(
-              text = "No hay tarjetas ",
+              text = stringResource(id = R.string.cards_empty_list_title),
               style = MaterialTheme.typography.headlineLarge,
               modifier = Modifier.padding(bottom = 16.dp)
             )
             Text(
-              text = "Agregar tarjetas te permitira trackear " +
-                  "los gastos que se ha realizado en cada una por mes o quincena",
+              text = stringResource(id = R.string.cards_empty_list_body),
               style = MaterialTheme.typography.headlineMedium,
               modifier = Modifier.padding(bottom = 8.dp),
               textAlign = TextAlign.Center
             )
             Button(
-              onClick = { /* TODO */ },
+              onClick = { onEvent(CardsScreenEvents.OpenAddCardDialog, "") },
               modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
               Icon(
@@ -202,7 +209,7 @@ fun CardsScreenContent(
                 contentDescription = "",
                 modifier = Modifier.padding(end = 12.dp)
               )
-              Text(text = "Agregar tarjeta")
+              Text(text = stringResource(id = R.string.cards_empty_list_button))
             }
           }
         }
@@ -217,7 +224,7 @@ fun CardsScreenContent(
               id = card.id,
               alias = card.alias ?: "",
               bank = card.bank,
-              cardType = if (card.isDebit == true) "Tarjeta de débito" else "Tarjeta de crédito",
+              cardType = stringResource(if (card.isDebit == true) R.string.cards_list_type_debit else R.string.cards_list_type_credit),
               onNavigate = onNavigate
             )
           }
@@ -293,7 +300,7 @@ fun AddCardDialog(
         horizontalAlignment = Alignment.CenterHorizontally,
       ) {
         Text(
-          text = "Nueva Tajerta",
+          text = stringResource(id = R.string.cards_add_card_title),
           fontSize = 24.sp,
           style = MaterialTheme.typography.bodyLarge,
           modifier = Modifier.padding(bottom = 8.dp)
@@ -301,7 +308,7 @@ fun AddCardDialog(
         OutlinedTextField(
           value = bank,
           onValueChange = { onBankChange(it) },
-          label = { Text(text = "Banco") })
+          label = { Text(text = stringResource(id = R.string.cards_add_card_bank)) })
         OutlinedTextField(
           value = alias,
           onValueChange = { onAliasChange(it) },
@@ -311,18 +318,18 @@ fun AddCardDialog(
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-          Text(text = "Débito")
+          Text(text = stringResource(id = R.string.cards_add_card_debit))
           Checkbox(checked = isDebitCard, onCheckedChange = { onCheckedChange("debit") })
-          Text(text = "Crédito")
+          Text(text = stringResource(id = R.string.cards_add_card_credit))
           Checkbox(checked = isCreditCard, onCheckedChange = { onCheckedChange("credit") })
         }
         Row(
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-          Text(text = "Fisica")
+          Text(text = stringResource(id = R.string.cards_add_card_physical))
           Checkbox(checked = isPhysical, onCheckedChange = { onCheckedChange("physical") })
-          Text(text = "Digital")
+          Text(text = stringResource(id = R.string.cards_add_card_digital))
           Checkbox(checked = isDigital, onCheckedChange = { onCheckedChange("digital") })
         }
 
@@ -335,13 +342,13 @@ fun AddCardDialog(
             onClick = { onDismiss() },
             modifier = Modifier.padding(8.dp),
           ) {
-            Text("Cancelar")
+            Text(stringResource(id = R.string.cards_add_card_cancel))
           }
           TextButton(
             onClick = { onConfirm() },
             modifier = Modifier.padding(8.dp),
           ) {
-            Text("Aceptar")
+            Text(stringResource(id = R.string.cards_add_card_accept))
           }
         }
       }

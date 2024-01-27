@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.avocado.HomeScreenAllIncomesQuery
+import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.adapters.graphql.fragments.toIncome
 import com.avocado.expensescompose.data.adapters.graphql.fragments.toTotal
 import com.avocado.expensescompose.data.apolloclients.GraphQlClientImpl
@@ -19,6 +20,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 sealed class BackPress {
@@ -42,7 +44,7 @@ data class IncomeState(
   val backPressState: BackPress = BackPress.Idle,
   val showToast: Boolean = false,
   val isLoading: Boolean = false,
-  val uiError: String = "",
+  val uiError: Int = 0,
   val errorMessage: String = ""
 )
 
@@ -155,8 +157,8 @@ class IncomesViewModel @Inject constructor(
       }
     }.catch {
       // TODO find a way to detect the type of apollo error and create an error screen
-      _state.emit(IncomeState(isLoading = false, uiError = "Algo salio mal Dx"))
-      Log.e("IncomesViewModel", it.stackTraceToString())
+      _state.emit(IncomeState(isLoading = false, uiError = R.string.general_error))
+      Timber.tag("IncomesViewModel").e(it.stackTraceToString())
     }.collect { incomes ->
       incomes.successOrError(onSuccess = { success ->
         val incomesList = success.data.incomesList

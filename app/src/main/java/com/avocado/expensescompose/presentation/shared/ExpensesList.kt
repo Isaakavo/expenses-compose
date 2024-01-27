@@ -25,16 +25,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.adapters.formatMoney
 import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.presentation.util.formatDateDaysWithMonth
-import com.avocado.type.Category
+import com.avocado.expensescompose.util.expenseList
 import java.time.LocalDateTime
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -45,14 +47,14 @@ fun ExpensesList(
   onDelete: (expenseId: String) -> Unit = {}
 ) {
   Text(
-    text = "Transacciones",
+    text = stringResource(R.string.expenses_list_transaction),
     modifier = Modifier
       .fillMaxWidth()
       .padding(start = 8.dp),
     textAlign = TextAlign.Start
   )
   LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-    itemsIndexed(expenseList, key = { index, item -> item.id }) { index, expense ->
+    itemsIndexed(expenseList, key = { _, item -> item.id }) { index, expense ->
       ExpenseDateRow(payBefore = expense.payBefore, index = index, expenseList = expenseList)
       Row(modifier = Modifier.animateItemPlacement()) {
         ExpenseItem(
@@ -132,7 +134,12 @@ fun ExpenseItem(
           val cardInfo = expense.card?.alias ?: expense.card?.bank
           cardInfo?.let { Text(text = it, fontSize = fontSize) }
         } else {
-          expense.card?.let { Text(text = "Tarjeta", fontSize = fontSize) }
+          expense.card?.let {
+            Text(
+              text = stringResource(id = R.string.expenses_list_card),
+              fontSize = fontSize
+            )
+          }
         }
       }
 
@@ -150,12 +157,12 @@ fun ExpenseItem(
             TextButton(
               onClick = { onDelete(expense.id) }
             ) {
-              Text(text = "Borrar")
+              Text(text = stringResource(id = R.string.expenses_list_delete))
             }
             TextButton(
               onClick = { onEdit(expense.id) }
             ) {
-              Text(text = "Editar")
+              Text(text = stringResource(id = R.string.expenses_list_edit))
             }
           }
         }
@@ -189,78 +196,6 @@ fun ExpenseDateRow(payBefore: LocalDateTime?, index: Int, expenseList: List<Expe
 @Preview
 @Composable
 fun ExpenseListPreview() {
-  val expenseList = listOf(
-    Expense(
-      total = 18063.0,
-      incomeId = "1",
-      category = Category.BILLS,
-      concept = "Gasto de prueba lasdhjflhsdfklhjasdfhklasdhfdfadsflkasdhflkadhs",
-
-      createdAt = LocalDateTime.now(),
-      payBefore = LocalDateTime.now(),
-      comment = "Comentario de prueba",
-      id = "1",
-      card = com.avocado.expensescompose.data.model.card.Card(
-        bank = "Banco de prueba",
-        alias = "Tarjeta Naranja",
-        id = "kajshdfkajd"
-      )
-    ),
-    Expense(
-      total = 5500.0,
-      incomeId = "1",
-      category = Category.FOOD,
-      concept = "Gasto de prueba",
-      createdAt = LocalDateTime.now(),
-      payBefore = LocalDateTime.of(2023, 11, 22, 0, 0, 0),
-      comment = "Comentario mega largo de prueba alv como no apoco si",
-      id = "2",
-      card = com.avocado.expensescompose.data.model.card.Card(
-        bank = "Banco de prueba 2",
-        id = "kajshdfkajd"
-      )
-    ),
-    Expense(
-      total = 5500.0,
-      incomeId = "1",
-      category = Category.SAVINGS,
-      concept = "Gasto de prueba",
-      createdAt = LocalDateTime.now(),
-      payBefore = LocalDateTime.now(),
-      comment = "",
-      id = "3",
-      card = com.avocado.expensescompose.data.model.card.Card(
-        bank = "Test",
-        alias = "alv",
-        id = "kajshdfkajd"
-      )
-    ),
-    Expense(
-      total = 5500.0,
-      incomeId = "1",
-      category = Category.COMMUNICATION,
-      concept = "Gasto de prueba",
-      createdAt = LocalDateTime.now(),
-      payBefore = LocalDateTime.now(),
-      comment = "",
-      id = "4",
-      card = com.avocado.expensescompose.data.model.card.Card(
-        bank = "Test",
-        alias = "alv",
-        id = "kajshdfkajd"
-      )
-    ),
-    Expense(
-      total = 5500.0,
-      incomeId = "1",
-      category = Category.BILLS,
-      concept = "Gasto de prueba sin tarjeta",
-      payBefore = LocalDateTime.now(),
-      createdAt = LocalDateTime.now(),
-      comment = "",
-      id = "5"
-    ),
-  )
   Surface {
     ExpensesList(
       expenseList = expenseList

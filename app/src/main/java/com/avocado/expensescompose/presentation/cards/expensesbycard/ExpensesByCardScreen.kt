@@ -16,11 +16,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.adapters.formatMoney
 import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.presentation.cards.expensestotalbycard.DataSelector
@@ -28,6 +30,7 @@ import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.shared.ExpensesList
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.expensescompose.presentation.util.formatDateOnlyMonth
+import timber.log.Timber
 
 @Composable
 fun ExpensesByCardScreen(
@@ -44,12 +47,12 @@ fun ExpensesByCardScreen(
   LaunchedEffect(key1 = Unit) {
     when (dataSelector) {
       DataSelector.FORTNIGHT -> {
-        Log.d("ExpensesByCardScreen", "Querying fortnight")
+        Timber.d("Querying fortnight")
         viewModel.getExpensesByFortnight(payBefore = payBefore, cardId = cardId)
       }
 
       DataSelector.MONTH -> {
-        Log.d("ExpensesByCardScreen", "Querying month")
+        Timber.d("Querying month")
         viewModel.getExpensesByMonth(payBefore = payBefore, cardId = cardId)
       }
     }
@@ -75,7 +78,7 @@ fun ExpensesByCardContent(
 ) {
   Scaffold(
     topBar = {
-      AppBar(title = "Gastos tarjeta", onNavigationIconClick = { onPopBackStack() })
+      AppBar(title = stringResource(id = R.string.appbar_expenses_cards_title), onNavigationIconClick = { onPopBackStack() })
     }
   ) { paddingValues ->
     Surface(
