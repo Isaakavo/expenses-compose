@@ -1,11 +1,11 @@
 package com.avocado.expensescompose.data.apolloclients.incomes
 
-import android.util.Log
 import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.api.Optional
 import com.apollographql.apollo3.exception.ApolloException
-import com.avocado.HomeScreenAllIncomesQuery
 import com.avocado.CreateIncomeMutation
+import com.avocado.HomeScreenAllIncomesQuery
+import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.adapters.graphql.fragments.toIncome
 import com.avocado.expensescompose.data.adapters.graphql.fragments.toTotal
 import com.avocado.expensescompose.data.adapters.graphql.scalar.Date
@@ -16,6 +16,7 @@ import com.avocado.expensescompose.domain.income.models.Income
 import com.avocado.expensescompose.domain.income.models.Incomes
 import com.avocado.expensescompose.domain.income.models.PaymentDate
 import com.avocado.type.CreateIncomeInput
+import timber.log.Timber
 import java.time.LocalDateTime
 
 class ApolloIncomesClient(private val apolloClient: ApolloClient) : IncomesClient {
@@ -41,7 +42,7 @@ class ApolloIncomesClient(private val apolloClient: ApolloClient) : IncomesClien
         )
       )
     } catch (e: ApolloException) {
-      return MyResult.Error(uiText = e.message)
+      return MyResult.Error(uiText = R.string.general_error)
     }
 
   }
@@ -61,7 +62,7 @@ class ApolloIncomesClient(private val apolloClient: ApolloClient) : IncomesClien
           input = input
         )
       ).execute().data?.createIncome?.incomeFragment
-        ?: return MyResult.Error(uiText = "Error extracting the response")
+        ?: return MyResult.Error(uiText = R.string.general_error)
 
       return MyResult.Success(
         Income(
@@ -75,8 +76,8 @@ class ApolloIncomesClient(private val apolloClient: ApolloClient) : IncomesClien
         )
       )
     } catch (e: ApolloException) {
-      Log.d("Apollo Incomes", e.message.toString())
-      return MyResult.Error(uiText = e.message.toString())
+      Timber.d(e.message.toString())
+      return MyResult.Error(uiText = R.string.general_error)
     }
   }
 }

@@ -8,6 +8,7 @@ import com.avocado.AllCardsQuery
 import com.avocado.CreateExpenseMutation
 import com.avocado.ExpenseByIdQuery
 import com.avocado.UpdateExpenseMutation
+import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.adapters.graphql.fragments.toExpense
 import com.avocado.expensescompose.data.adapters.graphql.scalar.Date
 import com.avocado.expensescompose.data.adapters.graphql.scalar.adaptDateForInput
@@ -62,6 +63,7 @@ data class AddExpensesState(
   val total: String = "",
   val date: String = "",
   val initialDate: Long = 0L,
+  val uiError: Int = 0,
   val buttonText: String = "Agregar",
   val expenseAdded: Boolean = false,
   val expenseAddedError: Boolean = false,
@@ -193,34 +195,37 @@ class AddExpenseViewModel @Inject constructor(
   private fun getAllCards() {
     viewModelScope.launch {
       _state.update { it.copy(loadingCard = true) }
-      graphQlClientImpl.query(AllCardsQuery()).map { apolloResponse ->
-        try {
-          val cardsList = apolloResponse.data?.cardList
-          MyResult.Success(
-            cardsList?.mapNotNull {
-              it?.toCard()
-            }
-          )
-        } catch (e: ApolloException) {
-          MyResult.Error(data = null, uiText = "Something went wrong")
-        }
-      }.collect { result ->
-        when (result) {
-          is MyResult.Success -> {
-            _state.update {
-              it.copy(
-                cardsList = result.data ?: emptyList(),
-                loadingCard = false,
-                loading = false
-              )
-            }
+      graphQlClientImpl.query(
+        AllCardsQuery(),
+        onError = { _state.emit(AddExpensesState(uiError = R.string.general_error)) })
+        .map { apolloResponse ->
+          try {
+            val cardsList = apolloResponse.data?.cardList
+            MyResult.Success(
+              cardsList?.mapNotNull {
+                it?.toCard()
+              }
+            )
+          } catch (e: ApolloException) {
+            MyResult.Error(data = null, uiText = R.string.cards_add_card_retrieve_card_error)
           }
+        }.collect { result ->
+          when (result) {
+            is MyResult.Success -> {
+              _state.update {
+                it.copy(
+                  cardsList = result.data ?: emptyList(),
+                  loadingCard = false,
+                  loading = false
+                )
+              }
+            }
 
-          is MyResult.Error -> {
-            _state.update { it.copy(loadingCard = false) }
+            is MyResult.Error -> {
+              _state.update { it.copy(loadingCard = false) }
+            }
           }
         }
-      }
     }
   }
 
@@ -229,7 +234,10 @@ class AddExpenseViewModel @Inject constructor(
       it.copy(buttonText = "Actualizar")
     }
     viewModelScope.launch {
-      graphQlClientImpl.query(ExpenseByIdQuery(expenseByIdId = expenseId)).map {
+      graphQlClientImpl.query(
+        ExpenseByIdQuery(expenseByIdId = expenseId),
+        onError = { _state.emit(AddExpensesState(uiError = R.string.general_error)) }
+      ).map {
         validateDataWithoutErrors(it)
       }
         .catch {

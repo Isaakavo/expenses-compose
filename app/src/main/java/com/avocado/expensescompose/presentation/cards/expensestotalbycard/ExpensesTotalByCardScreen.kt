@@ -73,7 +73,7 @@ fun CardWithExpenseContent(
   cardId: String,
   cardAlias: String,
   cardBank: String,
-  uiError: String,
+  uiError: Int?,
   dataSelector: DataSelector,
   isDeleted: Boolean,
   onPopBackStack: () -> Unit = {},
@@ -86,42 +86,31 @@ fun CardWithExpenseContent(
     }
   }
 
-  Scaffold(
-    topBar = {
-      AppBar(
-        title = cardAlias.ifEmpty { cardBank },
-        dropDownMenuItems = listOf(
-          MenuItems(
-            text = stringResource(id = R.string.appbar_expenses_cards_total_menu_item_1),
-            action = { onEvent(ExpensesTotalByCardEvent.FortnightData, "") }
-          ),
-          MenuItems(
-            text = stringResource(id = R.string.appbar_expenses_cards_total_menu_item_2),
-            action = { onEvent(ExpensesTotalByCardEvent.MonthData, "") }
-          ),
-          MenuItems(
-            text = stringResource(id = R.string.appbar_expenses_cards_total_menu_item_3),
-            icon = Icons.Rounded.Delete,
-            action = { onEvent(ExpensesTotalByCardEvent.DeleteCard, cardId) }
-          )
-        ),
-        onNavigationIconClick = { onPopBackStack() })
-    }
-  ) { paddingValues ->
+  Scaffold(topBar = {
+    AppBar(title = cardAlias.ifEmpty { cardBank },
+      dropDownMenuItems = listOf(MenuItems(text = stringResource(id = R.string.appbar_expenses_cards_total_menu_item_1),
+        action = { onEvent(ExpensesTotalByCardEvent.FortnightData, "") }),
+        MenuItems(text = stringResource(id = R.string.appbar_expenses_cards_total_menu_item_2),
+          action = { onEvent(ExpensesTotalByCardEvent.MonthData, "") }),
+        MenuItems(text = stringResource(id = R.string.appbar_expenses_cards_total_menu_item_3),
+          icon = Icons.Rounded.Delete,
+          action = { onEvent(ExpensesTotalByCardEvent.DeleteCard, cardId) })),
+      onNavigationIconClick = { onPopBackStack() })
+  }) { paddingValues ->
     Surface(
       modifier = Modifier
         .padding(paddingValues)
         .fillMaxSize()
     ) {
-      if (uiError.isNotEmpty()) {
+      uiError?.takeIf { it != 0 }?.let {
         Column(
           modifier = Modifier.fillMaxSize(),
           verticalArrangement = Arrangement.Center,
           horizontalAlignment = Alignment.CenterHorizontally
         ) {
-          Text(text = uiError, fontSize = 26.sp)
+          Text(text = stringResource(it), fontSize = 26.sp)
         }
-      } else {
+      } ?: run {
         Column(
           modifier = Modifier
             .fillMaxSize()
@@ -180,8 +169,7 @@ fun TotalByFortnight(
 
           }
           Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
           ) {
             Text(text = item.fortnight?.adapt().orEmpty())
             Text(text = item.total?.formatMoney().orEmpty())
@@ -211,8 +199,7 @@ fun TotalByMonth(
         }) {
         Column(modifier = Modifier.padding(12.dp)) {
           Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
           ) {
             Text(
               text = item.date?.formatDateMonthWithYear() ?: "",

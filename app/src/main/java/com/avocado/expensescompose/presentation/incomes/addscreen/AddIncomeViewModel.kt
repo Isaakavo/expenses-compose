@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.apollographql.apollo3.api.Optional
 import com.avocado.IncomeByIdQuery
 import com.avocado.UpdateIncomeMutation
+import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.adapters.graphql.scalar.Date
 import com.avocado.expensescompose.data.adapters.graphql.utils.validateDataWithoutErrors
 import com.avocado.expensescompose.data.apolloclients.GraphQlClientImpl
@@ -45,7 +46,8 @@ data class AddIncomeState(
   val openDateDialog: Boolean = false,
   val total: String = "",
   val comments: String = "",
-  val initialDate: Long = 0L
+  val initialDate: Long = 0L,
+  val uiError: Int = 0
 )
 
 @HiltViewModel
@@ -146,7 +148,10 @@ class AddIncomeViewModel @Inject constructor(
 
   fun getIncomeById(incomeId: String) {
     viewModelScope.launch {
-      graphQlClientImpl.query(IncomeByIdQuery(incomeId = incomeId)).map {
+      graphQlClientImpl.query(
+        IncomeByIdQuery(incomeId = incomeId),
+        onError = { _state.emit(AddIncomeState(uiError = R.string.general_error)) }
+      ).map {
         validateDataWithoutErrors(it)
       }.collect { collectResult ->
         collectResult.successOrError(

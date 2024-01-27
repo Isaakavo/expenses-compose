@@ -1,0 +1,10 @@
+mutation UpdateCard($input: UpdateCardInput) {
+    updateCard(input: $input) {
+        id
+        userId
+        alias
+        bank
+        isDebit
+        isDigital
+    }
+}

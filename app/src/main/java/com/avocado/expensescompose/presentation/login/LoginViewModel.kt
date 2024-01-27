@@ -2,6 +2,7 @@ package com.avocado.expensescompose.presentation.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.domain.login.usecase.LoginUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -29,7 +30,7 @@ data class LoginUiState(
   val password: String = "",
   val isLoading: Boolean = false,
   val shouldShowPassword: Boolean = false,
-  var userMessage: String? = null,
+  var userMessage: Int? = null,
   var isSuccess: Boolean = false
 )
 
@@ -80,12 +81,12 @@ class LoginViewModel @Inject constructor(
 
       if (loginResult.emailError != null) {
         _uiState.update {
-          it.copy(userMessage = "Email incorrecto")
+          it.copy(userMessage = R.string.login_incorrect_email)
         }
       }
       if (loginResult.passwordError != null) {
         _uiState.update {
-          it.copy(userMessage = "password incorrecto")
+          it.copy(userMessage = R.string.login_incorrect_password)
         }
       }
 
@@ -128,7 +129,7 @@ class LoginViewModel @Inject constructor(
     viewModelScope.launch {
       when (val username = loginUseCase.getUsernameFromStorage()) {
         is MyResult.Error -> {
-          _uiState.update { it.copy(userMessage = "${username.uiText}") }
+          _uiState.update { it.copy(userMessage = username.uiText) }
         }
 
         is MyResult.Success -> {

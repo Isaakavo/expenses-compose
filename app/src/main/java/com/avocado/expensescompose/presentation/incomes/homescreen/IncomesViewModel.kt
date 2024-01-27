@@ -45,7 +45,7 @@ data class IncomeState(
   val showToast: Boolean = false,
   val isLoading: Boolean = false,
   val uiError: Int = 0,
-  val errorMessage: String = ""
+  val errorMessage: Int? = 0
 )
 
 @HiltViewModel
@@ -135,47 +135,48 @@ class IncomesViewModel @Inject constructor(
 
   private suspend fun getAllIncomes() {
     _state.update { it.copy(isLoading = true) }
-    graphQlClientImpl.query(HomeScreenAllIncomesQuery()).map {
-      val responseIncome = it.data
-      if (responseIncome != null) {
-        val incomesList = responseIncome.incomesList?.incomes?.map { item ->
-          item.incomeFragment.toIncome()
-        }
-        val totalByMonth = responseIncome.incomesList?.totalByMonth?.map { totalByMonth ->
-          totalByMonth.totalFragment.toTotal()
-        }
+    graphQlClientImpl.query(
+      HomeScreenAllIncomesQuery(),
+      onError = { _state.emit(IncomeState(isLoading = false, uiError = R.string.general_error)) })
+      .map {
+        val responseIncome = it.data
+        if (responseIncome != null) {
+          val incomesList = responseIncome.incomesList?.incomes?.map { item ->
+            item.incomeFragment.toIncome()
+          }
+          val totalByMonth = responseIncome.incomesList?.totalByMonth?.map { totalByMonth ->
+            totalByMonth.totalFragment.toTotal()
+          }
 
-        MyResult.Success(
-          Incomes(
-            incomesList = incomesList ?: emptyList(),
-            totalByMonth = totalByMonth ?: emptyList(),
-            total = responseIncome.incomesList?.total ?: 0.0
+          MyResult.Success(
+            Incomes(
+              incomesList = incomesList ?: emptyList(),
+              totalByMonth = totalByMonth ?: emptyList(),
+              total = responseIncome.incomesList?.total ?: 0.0
+            )
           )
-        )
-      } else {
-        MyResult.Error(uiText = "error", data = null)
+        } else {
+          MyResult.Error(uiText = R.string.general_error, data = null)
+        }
+      }.collect { incomes ->
+        incomes.successOrError(
+          onSuccess = { success ->
+            val incomesList = success.data.incomesList
+            _state.update {
+              it.copy(
+                incomesMap = getIncomesMap(incomesList),
+                totalByMonth = success.data.totalByMonth,
+                isLoading = false
+              )
+            }
+          },
+          onError = { error ->
+            _state.update {
+              it.copy(
+                errorMessage = error.uiText
+              )
+            }
+          })
       }
-    }.catch {
-      // TODO find a way to detect the type of apollo error and create an error screen
-      _state.emit(IncomeState(isLoading = false, uiError = R.string.general_error))
-      Timber.tag("IncomesViewModel").e(it.stackTraceToString())
-    }.collect { incomes ->
-      incomes.successOrError(onSuccess = { success ->
-        val incomesList = success.data.incomesList
-        _state.update {
-          it.copy(
-            incomesMap = getIncomesMap(incomesList),
-            totalByMonth = success.data.totalByMonth,
-            isLoading = false
-          )
-        }
-      }, onError = { error ->
-        _state.update {
-          it.copy(
-            errorMessage = error.uiText ?: ""
-          )
-        }
-      })
-    }
   }
 }

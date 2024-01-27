@@ -50,7 +50,7 @@ fun LoginScreen(
   LoginScreenContent(
     username = state.username,
     password = state.password,
-    userMessage = state.userMessage ?: "",
+    userMessage = state.userMessage,
     shouldShowPassword = state.shouldShowPassword,
     isLoading = state.isLoading,
     onEvent = viewModel::onEvent,
@@ -61,7 +61,7 @@ fun LoginScreen(
 fun LoginScreenContent(
   username: String,
   password: String,
-  userMessage: String,
+  userMessage: Int?,
   shouldShowPassword: Boolean,
   isLoading: Boolean,
   onEvent: (event: LoginEvent, value: String) -> Unit,
@@ -114,8 +114,8 @@ fun LoginScreenContent(
           }
         }
 
-        if (userMessage.isNotBlank()) {
-          Text(text = userMessage)
+        userMessage.takeIf { it != 0 }?.let {
+          Text(text = stringResource(it))
         }
       }
     }

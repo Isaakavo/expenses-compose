@@ -1,5 +1,6 @@
 package com.avocado.expensescompose.data.repositories
 
+import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.data.model.SimpleResource
 import com.avocado.expensescompose.data.model.auth.Auth
@@ -50,15 +51,16 @@ class AuthRepository @Inject constructor(
         MyResult.Success(Unit)
       }
     } catch (e: IOException) {
-      MyResult.Error(uiText = "Couldn't reach the server")
+      Timber.e("Error getting token from AWS ${e.message}")
+      MyResult.Error(uiText = R.string.general_error)
     } catch (e: HttpException) {
       if (e.code() == 400) {
         //TODO convert this to object and handle the error to return
         // "Contraseña o email incorrectos"
         val errorResponse = e.response()?.errorBody()?.string()
-        MyResult.Error<String>(uiText = errorResponse)
+        MyResult.Error<String>(uiText = R.string.general_error)
       }
-      MyResult.Error(uiText = "Something went wrong")
+      MyResult.Error(uiText = R.string.general_error)
     }
 
   suspend fun getAccessToken(email: String, password: String): SimpleResource {
@@ -91,9 +93,10 @@ class AuthRepository @Inject constructor(
           return getTokenFromApi(email, password)
         }
       }
-      MyResult.Error(uiText = "Something went wrong retrieving your credentials")
+      MyResult.Error(uiText = R.string.credentials_error)
     } catch (e: Exception) {
-      MyResult.Error(null, e.message)
+      Timber.e("Error retrieving credentials ${e.message}")
+      MyResult.Error(null, R.string.credentials_error)
     }
   }
 
@@ -101,6 +104,7 @@ class AuthRepository @Inject constructor(
     val result = awsApi.refreshToken(base = Constants.AWS_PROVIDER, auth)
     MyResult.Success(result)
   } catch (e: Exception) {
-    MyResult.Error(null, e.message)
+    Timber.e("Error refreshing the token ${e.message}")
+    MyResult.Error(null, R.string.credentials_error)
   }
 }

@@ -85,7 +85,7 @@ fun CardsScreenContent(
   cardsList: List<Card>,
   bank: String,
   alias: String,
-  uiError: String,
+  uiError: Int,
   openAddCardDialog: Boolean,
   isDebitCard: Boolean,
   isCreditCard: Boolean,
@@ -165,7 +165,7 @@ fun CardsScreenContent(
         .fillMaxSize()
         .padding(paddingValues)
     ) {
-      if (uiError.isNotEmpty()) {
+      if (uiError != 0) {
         Column(
           modifier = Modifier
             .fillMaxSize()
@@ -173,7 +173,7 @@ fun CardsScreenContent(
           horizontalAlignment = Alignment.CenterHorizontally,
           verticalArrangement = Arrangement.Center
         ) {
-          Text(text = uiError, style = MaterialTheme.typography.headlineMedium)
+          Text(text = stringResource(uiError), style = MaterialTheme.typography.headlineMedium)
         }
       } else if (cardsList.isEmpty()) {
         Card(

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.apollographql.apollo3.api.Optional
 import com.avocado.AllCardsQuery
 import com.avocado.CreateCardMutation
+import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.adapters.graphql.types.toCard
 import com.avocado.expensescompose.data.adapters.graphql.utils.validateDataWithoutErrors
 import com.avocado.expensescompose.data.apolloclients.GraphQlClientImpl
@@ -20,6 +21,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 sealed class CardsScreenEvents {
@@ -35,7 +37,7 @@ data class CardsScreenState(
   val cardsList: List<Card> = emptyList(),
   val bank: String = "",
   val alias: String = "",
-  val uiError: String = "",
+  val uiError: Int = 0,
   val openAddCardDialog: Boolean = false,
   val isDebit: Boolean = true,
   val isCredit: Boolean = false,
@@ -121,7 +123,7 @@ class CardsScreenViewModel @Inject constructor(private val graphQlClient: GraphQ
               )
               MyResult.Success(data = card)
             } else {
-              MyResult.Error(data = null, uiText = "No se pudo añadir la tarjeta")
+              MyResult.Error(data = null, uiText = R.string.cards_add_card_error)
             }
           }.collect { myResult ->
             when (myResult) {
@@ -153,13 +155,12 @@ class CardsScreenViewModel @Inject constructor(private val graphQlClient: GraphQ
 
   private fun getAllCards() {
     viewModelScope.launch {
-      graphQlClient.query(AllCardsQuery()).map { apolloResponse ->
+      graphQlClient.query(
+        AllCardsQuery(),
+        onError = { _state.emit(CardsScreenState(uiError = R.string.cards_add_card_retrieve_card_error)) }
+      ).map { apolloResponse ->
         validateDataWithoutErrors(apolloResponse)
       }
-        .catch {
-          Log.e("CardsScreenViewModel", it.message.toString())
-          _state.emit(CardsScreenState(uiError = "Algo salio mal en el servidor Dx"))
-        }
         .collect { collectResult ->
           collectResult.successOrError(
             onSuccess = {
@@ -176,7 +177,7 @@ class CardsScreenViewModel @Inject constructor(private val graphQlClient: GraphQ
               this.launch {
                 _state.emit(
                   CardsScreenState(
-                    uiError = it.uiText.toString()
+                    uiError = R.string.cards_add_card_retrieve_card_error
                   )
                 )
               }

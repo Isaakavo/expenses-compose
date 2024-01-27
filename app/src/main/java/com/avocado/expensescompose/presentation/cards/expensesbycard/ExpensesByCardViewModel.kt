@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.apollographql.apollo3.api.Optional
 import com.avocado.ExpensesByFortnightQuery
 import com.avocado.ExpensesByMonthQuery
+import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.adapters.graphql.fragments.toExpense
 import com.avocado.expensescompose.data.adapters.graphql.scalar.Date
 import com.avocado.expensescompose.data.adapters.graphql.utils.validateData
@@ -24,7 +25,8 @@ import javax.inject.Inject
 data class ExpensesByCardState(
   val expensesList: List<Expense> = emptyList(),
   val expenseTotal: Double = 0.0,
-  val card: Card? = null
+  val card: Card? = null,
+  val uiError: Int = 0
 )
 
 @HiltViewModel
@@ -38,7 +40,10 @@ class ExpensesByCardViewModel @Inject constructor(private val graphQlClientImpl:
     if (formattedDate != null) {
       val input = PayBeforeInput(payBefore = Date(formattedDate), cardId = Optional.present(cardId))
       viewModelScope.launch {
-        graphQlClientImpl.query(ExpensesByFortnightQuery(input = input)).map { apolloResponse ->
+        graphQlClientImpl.query(
+          ExpensesByFortnightQuery(input = input),
+          onError = { }
+        ).map { apolloResponse ->
           validateData(apolloResponse.data?.expensesByFortnight)
         }.collect { collectResult ->
           collectResult.successOrError(onSuccess = { successResult ->
@@ -65,7 +70,10 @@ class ExpensesByCardViewModel @Inject constructor(private val graphQlClientImpl:
     if (formattedDate != null) {
       val input = PayBeforeInput(payBefore = Date(formattedDate), cardId = Optional.present(cardId))
       viewModelScope.launch {
-        graphQlClientImpl.query(ExpensesByMonthQuery(input)).map { apolloResponse ->
+        graphQlClientImpl.query(
+          ExpensesByMonthQuery(input),
+          onError = { _state.emit(ExpensesByCardState(uiError = R.string.general_error)) }
+        ).map { apolloResponse ->
           validateData(apolloResponse.data?.expensesByMonth)
         }.collect { collectResult ->
           collectResult.successOrError(

@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.TokenService
 import com.avocado.expensescompose.data.model.MyResult
 import kotlinx.coroutines.flow.first
@@ -31,7 +32,8 @@ class TokenManagerRepository @Inject constructor(private val context: Context) :
       Timber.d("Username saved correctly")
       MyResult.Success(true)
     } catch (exception: IOException) {
-      MyResult.Error(false, exception.message, exception = exception)
+      Timber.e("Token user save error ${exception.printStackTrace()}")
+      MyResult.Error(false, R.string.token_user_save_error, exception = exception)
     }
   }
 
@@ -42,11 +44,11 @@ class TokenManagerRepository @Inject constructor(private val context: Context) :
       if (accessToken != null) {
         MyResult.Success(preferences[USER_NAME_KEY])
       } else {
-        MyResult.Error(null, "user name not found")
+        MyResult.Error(null, R.string.token_user_not_found)
       }
     } catch (e: Exception) {
-      e.printStackTrace()
-      MyResult.Error(null, e.message)
+      Timber.e("Token get user error ${e.printStackTrace()}")
+      MyResult.Error(null, R.string.token_user_error)
     }
   }
 
@@ -58,7 +60,8 @@ class TokenManagerRepository @Inject constructor(private val context: Context) :
       Timber.d("Access Token saved $value")
       MyResult.Success(true)
     } catch (exception: IOException) {
-      MyResult.Error(false, exception.message)
+      Timber.e("Error saving access token ${exception.printStackTrace()}")
+      MyResult.Error(false, R.string.token_user_save_error)
     }
 
 
@@ -68,11 +71,11 @@ class TokenManagerRepository @Inject constructor(private val context: Context) :
     if (accessToken != null) {
       MyResult.Success(preferences[JWT_ACCESS_KEY])
     } else {
-      MyResult.Error(null, "Access Token not found")
+      MyResult.Error(null, R.string.token_user_error)
     }
   } catch (e: Exception) {
-    e.printStackTrace()
-    MyResult.Error(null, e.message)
+    Timber.e("Error get access token ${e.printStackTrace()}")
+    MyResult.Error(null, R.string.token_user_error)
   }
 
   override suspend fun deleteAccessToken(): MyResult<Boolean> = try {
@@ -81,7 +84,8 @@ class TokenManagerRepository @Inject constructor(private val context: Context) :
     }
     MyResult.Success(true)
   } catch (exception: IOException) {
-    MyResult.Error(false, exception.message)
+    Timber.e("Error deleting access token ${exception.printStackTrace()}")
+    MyResult.Error(false, R.string.token_user_error)
   }
 
   override suspend fun saveRefreshToken(value: String): MyResult<Boolean> =
@@ -93,15 +97,16 @@ class TokenManagerRepository @Inject constructor(private val context: Context) :
       Timber.d("Refresh Token saved $value")
       MyResult.Success(true)
     } catch (exception: IOException) {
-      MyResult.Error(false, exception.message)
+      Timber.e("Error saving refresh token ${exception.printStackTrace()}")
+      MyResult.Error(false, R.string.token_user_error)
     }
 
   override suspend fun getRefreshToken(): MyResult<String?> = try {
     val preferences = context.dataStore.data.first()
     MyResult.Success(preferences[JWT_REFRESH_KEY])
   } catch (e: Exception) {
-    e.printStackTrace()
-    MyResult.Error(null, e.message)
+    Timber.e("Error getting refresh token ${e.printStackTrace()}")
+    MyResult.Error(null, R.string.token_user_error)
   }
 
   override suspend fun deleteRefreshToken(): MyResult<Boolean> = try {
@@ -110,7 +115,8 @@ class TokenManagerRepository @Inject constructor(private val context: Context) :
     }
     MyResult.Success(true)
   } catch (exception: IOException) {
-    MyResult.Error(false, exception.message)
+    Timber.e("Error deleting refresh token ${exception.printStackTrace()}")
+    MyResult.Error(false, R.string.token_user_error)
   }
 
 

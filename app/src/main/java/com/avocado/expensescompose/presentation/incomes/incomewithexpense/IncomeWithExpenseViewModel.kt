@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.avocado.DeleteExpenseMutation
 import com.avocado.DeleteIncomeByIdMutation
 import com.avocado.IncomeByIdWithExpensesListQuery
+import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.adapters.graphql.fragments.toExpense
 import com.avocado.expensescompose.data.adapters.graphql.fragments.toIncome
 import com.avocado.expensescompose.data.adapters.graphql.scalar.Date
@@ -44,7 +45,8 @@ data class IncomeWithExpenseState(
   val isDeleted: Boolean = false,
   val shouldDeleteIncome: Boolean = false,
   val shouldDeleteExpense: Boolean = false,
-  val expenseToDeleteId: String = ""
+  val expenseToDeleteId: String = "",
+  val uiError: Int = 0
 )
 
 @HiltViewModel
@@ -97,7 +99,10 @@ class IncomeWithExpenseViewModel @Inject constructor(
           )
       )
 
-      graphQlClientImpl.query(IncomeByIdWithExpensesListQuery(input = input))
+      graphQlClientImpl.query(
+        IncomeByIdWithExpensesListQuery(input = input),
+        onError = { _state.emit(IncomeWithExpenseState(uiError = R.string.general_error)) }
+      )
         .map { apolloResponse ->
           validateData(apolloResponse)
         }.collect { result ->

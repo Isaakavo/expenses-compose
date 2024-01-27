@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.avocado.CardByIdQuery
 import com.avocado.DeleteCardMutation
 import com.avocado.ExpensesTotalByCardIdQuery
+import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.adapters.graphql.fragments.toTotal
 import com.avocado.expensescompose.data.adapters.graphql.fragments.toTotalFortnight
 import com.avocado.expensescompose.data.adapters.graphql.utils.validateDataWithoutErrors
@@ -23,6 +24,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.zip
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 
@@ -43,7 +45,7 @@ data class CardsWithExpensesState(
   val cardBank: String = "",
   val cardAlias: String = "",
   val dataSelector: DataSelector = DataSelector.FORTNIGHT,
-  val uiError: String = "",
+  val uiError: Int? = 0,
   val isDeleted: Boolean = false
 )
 
@@ -93,23 +95,20 @@ class ExpensesTotalByCardViewModel @Inject constructor(private val graphQlClient
                 )
               },
               onError = { cardByIdError ->
-                Log.e(
-                  "ExpensesTotalByCardViewModel",
-                  cardByIdError.exception?.localizedMessage.orEmpty()
-                )
-                CardsWithExpensesState(uiError = cardByIdError.uiText.orEmpty())
+                Timber.e(cardByIdError.exception?.localizedMessage.orEmpty())
+                CardsWithExpensesState(uiError = cardByIdError.uiText)
               }
             )
           },
           onError = {
-            CardsWithExpensesState(uiError = it.uiText.orEmpty())
+            CardsWithExpensesState(uiError = it.uiText)
           }
         )
       }
         .catch { e ->
-          Log.e("ExpensesTotalByCardViewModel", "Error retrieving data ${e.localizedMessage}")
+          Timber.e("Error retrieving data " + e.printStackTrace())
           MyResult.Error(
-            uiText = "Error from network ${e.localizedMessage}",
+            uiText = R.string.general_network_error,
             exception = e,
             data = CardsWithExpensesState()
           )
@@ -122,14 +121,20 @@ class ExpensesTotalByCardViewModel @Inject constructor(private val graphQlClient
   }
 
   private suspend fun getCardById(cardId: String): Flow<MyResult<CardByIdQuery.Data>> {
-    return graphQlClientImpl.query(CardByIdQuery(cardId)).map { apolloResponse ->
+    return graphQlClientImpl.query(
+      CardByIdQuery(cardId),
+      onError = { _state.emit(CardsWithExpensesState(uiError = R.string.general_error)) }
+    ).map { apolloResponse ->
       validateDataWithoutErrors(apolloResponse)
     }
   }
 
   private suspend fun getExpensesByCardId(cardId: String):
       Flow<MyResult<ExpensesTotalByCardIdQuery.Data>> {
-    return graphQlClientImpl.query(ExpensesTotalByCardIdQuery(cardId)).map { apolloResponse ->
+    return graphQlClientImpl.query(
+      ExpensesTotalByCardIdQuery(cardId),
+      onError = { _state.emit(CardsWithExpensesState(uiError = R.string.general_error)) }
+    ).map { apolloResponse ->
       validateDataWithoutErrors(apolloResponse)
     }
   }
@@ -149,7 +154,7 @@ class ExpensesTotalByCardViewModel @Inject constructor(private val graphQlClient
                 _state.emit(
                   CardsWithExpensesState(
                     isDeleted = false,
-                    uiError = "Error al borrar la tarjeta"
+                    uiError = R.string.expenses_delete_card_error
                   )
                 )
               }
@@ -157,7 +162,7 @@ class ExpensesTotalByCardViewModel @Inject constructor(private val graphQlClient
           },
           onError = { error ->
             this.launch {
-              _state.emit(CardsWithExpensesState(uiError = error.uiText.orEmpty()))
+              _state.emit(CardsWithExpensesState(uiError = error.uiText))
             }
           }
         )
