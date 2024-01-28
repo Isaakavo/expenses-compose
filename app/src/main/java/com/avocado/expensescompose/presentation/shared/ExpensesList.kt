@@ -85,8 +85,15 @@ fun ExpensesList(
     modifier = Modifier
       .fillMaxWidth()
       .padding(end = 24.dp),
+    verticalAlignment = Alignment.CenterVertically,
     horizontalArrangement = Arrangement.End
   ) {
+    Text(
+      text = stringResource(id = R.string.expenses_list_total, filteredList.size),
+      modifier = Modifier.padding(end = 12.dp),
+      fontWeight = FontWeight.Bold,
+      fontSize = 14.sp
+    )
     ExpenseFilterMenu(onFilterSelect = { type, name ->
       filteredList = filterList(type, name, expenseList)
     })

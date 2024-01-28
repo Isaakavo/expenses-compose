@@ -12,6 +12,7 @@
     <string name="expenses_list_filter">Filter By</string>
     <string name="expenses_list_filter_category">Category</string>
     <string name="expenses_list_filter_reset">Reset</string>
+    <string name="expenses_list_total">%1d Expenses</string>
     <string name="expenses_list_card">Card</string>
     <string name="expenses_list_delete">Delete</string>
     <string name="expenses_list_edit">Edit</string>
