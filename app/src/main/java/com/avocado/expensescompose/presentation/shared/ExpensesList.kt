@@ -10,14 +10,26 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowDropDown
+import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,7 +49,24 @@ import com.avocado.expensescompose.data.adapters.formatMoney
 import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.presentation.util.formatDateDaysWithMonth
 import com.avocado.expensescompose.util.expenseList
+import com.avocado.type.Category
+import timber.log.Timber
 import java.time.LocalDateTime
+
+fun filterList(type: String, name: String, list: List<Expense>) = when (type) {
+  "CATEGORY" -> {
+    list.filter {
+      it.category.name == name
+    }
+  }
+
+  "RESET" -> {
+    list
+  }
+
+  else -> list
+}
+
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -46,6 +75,10 @@ fun ExpensesList(
   onEdit: (expenseId: String) -> Unit = {},
   onDelete: (expenseId: String) -> Unit = {}
 ) {
+  var filteredList by remember {
+    mutableStateOf(expenseList)
+  }
+
   Text(
     text = stringResource(R.string.expenses_list_transaction),
     modifier = Modifier
@@ -53,9 +86,19 @@ fun ExpensesList(
       .padding(start = 8.dp),
     textAlign = TextAlign.Start
   )
+  Row(
+    modifier = Modifier
+      .fillMaxWidth()
+      .padding(end = 24.dp),
+    horizontalArrangement = Arrangement.End
+  ) {
+    ExpenseFilterMenu(onFilterSelect = { type, name ->
+      filteredList = filterList(type, name, expenseList)
+    })
+  }
   LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-    itemsIndexed(expenseList, key = { _, item -> item.id }) { index, expense ->
-      ExpenseDateRow(payBefore = expense.payBefore, index = index, expenseList = expenseList)
+    itemsIndexed(filteredList, key = { _, item -> item.id }) { index, expense ->
+      ExpenseDateRow(payBefore = expense.payBefore, index = index, expenseList = filteredList)
       Row(modifier = Modifier.animateItemPlacement()) {
         ExpenseItem(
           expense = expense,
@@ -193,12 +236,57 @@ fun ExpenseDateRow(payBefore: LocalDateTime?, index: Int, expenseList: List<Expe
   }
 }
 
+@Composable
+fun ExpenseFilterMenu(onFilterSelect: (String, String) -> Unit) {
+  var expanded by remember { mutableStateOf(false) }
+  var categoryExpanded by remember { mutableStateOf(false) }
+
+  OutlinedButton(onClick = { expanded = !expanded }) {
+    Text(text = stringResource(id = R.string.expenses_list_filter), modifier = Modifier)
+    Icon(imageVector = Icons.Rounded.ArrowDropDown, contentDescription = "")
+  }
+
+  Box {
+    DropdownMenu(
+      expanded = expanded,
+      onDismissRequest = { expanded = !expanded }) {
+      DropdownMenuItem(
+        text = { Text(text = stringResource(id = R.string.expenses_list_filter)) },
+        onClick = {
+          expanded = !expanded
+          categoryExpanded = true
+        })
+      Divider()
+      DropdownMenuItem(
+        text = { Text(text = stringResource(R.string.expenses_list_filter_reset)) },
+        onClick = { onFilterSelect("RESET", "ALL") })
+    }
+    if (categoryExpanded) {
+      DropdownMenu(
+        expanded = categoryExpanded,
+        onDismissRequest = {
+          categoryExpanded = !categoryExpanded
+        },
+        modifier = Modifier.height(250.dp)
+      ) {
+        Category.values().forEach {
+          DropdownMenuItem(
+            text = { Text(text = it.name) },
+            onClick = { onFilterSelect("CATEGORY", it.name) })
+        }
+      }
+    }
+  }
+}
+
 @Preview
 @Composable
 fun ExpenseListPreview() {
-  Surface {
-    ExpensesList(
-      expenseList = expenseList
-    )
+  Surface(modifier = Modifier) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+      ExpensesList(
+        expenseList = expenseList
+      )
+    }
   }
 }
