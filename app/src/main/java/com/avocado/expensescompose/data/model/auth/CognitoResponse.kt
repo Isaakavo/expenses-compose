@@ -24,3 +24,10 @@ data class AuthenticationResult(
 )
 
 class ChallengeParameters
+
+data class AuthenticationResultException(
+  @SerializedName("__type")
+  val type: String,
+  @SerializedName("message")
+  val message: String
+)

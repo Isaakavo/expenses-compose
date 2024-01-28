@@ -5,9 +5,12 @@ import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.data.model.SimpleResource
 import com.avocado.expensescompose.data.model.auth.Auth
 import com.avocado.expensescompose.data.model.auth.AuthParameters
+import com.avocado.expensescompose.data.model.auth.AuthenticationResultException
 import com.avocado.expensescompose.data.model.auth.CognitoResponse
 import com.avocado.expensescompose.data.network.LoginJwtClient
 import com.avocado.expensescompose.presentation.util.Constants
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import okio.IOException
 import retrofit2.HttpException
 import timber.log.Timber
@@ -54,14 +57,26 @@ class AuthRepository @Inject constructor(
       Timber.e("Error getting token from AWS ${e.message}")
       MyResult.Error(uiText = R.string.general_error)
     } catch (e: HttpException) {
-      if (e.code() == 400) {
-        //TODO convert this to object and handle the error to return
-        // "Contraseña o email incorrectos"
-        val errorResponse = e.response()?.errorBody()?.string()
-        Timber.e("AWS error $errorResponse")
-        MyResult.Error<String>(uiText = R.string.general_error)
+      when (e.code()) {
+        400 -> {
+          val gson = Gson()
+          val errorResponse = gson.fromJson<AuthenticationResultException>(
+            e.response()?.errorBody()?.charStream(),
+            object : TypeToken<AuthenticationResultException>() {}.type
+          )
+
+          Timber.e("AWS error $errorResponse")
+          when (errorResponse.type) {
+            "NotAuthorizedException" -> MyResult.Error(uiText = R.string.login_incorrect_email_password)
+            else -> MyResult.Error(uiText = R.string.general_error)
+          }
+        }
+
+        else -> {
+          Timber.e("Error getting token from AWS ${e.message}")
+          MyResult.Error(uiText = R.string.general_error)
+        }
       }
-      MyResult.Error(uiText = R.string.general_error)
     }
 
   suspend fun getAccessToken(email: String, password: String): SimpleResource {
@@ -94,6 +109,7 @@ class AuthRepository @Inject constructor(
           return getTokenFromApi(email, password)
         }
       }
+      //Timber.e("Login error $")
       MyResult.Error(uiText = R.string.credentials_error)
     } catch (e: Exception) {
       Timber.e("Error retrieving credentials ${e.message}")

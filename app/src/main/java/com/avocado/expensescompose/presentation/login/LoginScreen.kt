@@ -99,7 +99,7 @@ fun LoginScreenContent(
           visualTransformation = if (shouldShowPassword) VisualTransformation.None else PasswordVisualTransformation()
         )
 
-        Button(onClick = { onEvent(LoginEvent.Login, "") }) {
+        Button(enabled = !isLoading, onClick = { onEvent(LoginEvent.Login, "") }) {
           Row(horizontalArrangement = Arrangement.SpaceBetween) {
             if (isLoading) {
               CircularProgressIndicator(
