@@ -11,19 +11,19 @@ import com.avocado.expensescompose.data.network.LoginJwtClient
 import com.avocado.expensescompose.presentation.util.Constants
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import javax.inject.Inject
 import okio.IOException
 import retrofit2.HttpException
 import timber.log.Timber
-import javax.inject.Inject
 
 class AuthRepository @Inject constructor(
-  private val awsApi: LoginJwtClient, private val tokenManagerRepository: TokenManagerRepository
+  private val awsApi: LoginJwtClient,
+  private val tokenManagerRepository: TokenManagerRepository
 ) {
 
   suspend fun saveUsername(username: String) = tokenManagerRepository.saveUsername(username)
 
   suspend fun getUsername() = tokenManagerRepository.getUsername()
-
 
   private suspend fun saveAccessToken(value: String): MyResult<Boolean> =
     tokenManagerRepository.saveAccessToken(
@@ -52,9 +52,11 @@ class AuthRepository @Inject constructor(
   private suspend fun getTokenFromApi(email: String, password: String): SimpleResource =
     try {
       val response = awsApi.getJwtToken(
-        base = Constants.AWS_PROVIDER, auth = Auth(
+        base = Constants.AWS_PROVIDER,
+        auth = Auth(
           authParameters = AuthParameters(
-            password = password, username = email
+            password = password,
+            username = email
           )
         )
       )
@@ -79,7 +81,9 @@ class AuthRepository @Inject constructor(
 
           Timber.e("AWS error $errorResponse")
           when (errorResponse.type) {
-            "NotAuthorizedException" -> MyResult.Error(uiText = R.string.login_incorrect_email_password)
+            "NotAuthorizedException" -> MyResult.Error(
+              uiText = R.string.login_incorrect_email_password
+            )
             else -> MyResult.Error(uiText = R.string.general_error)
           }
         }
@@ -121,7 +125,7 @@ class AuthRepository @Inject constructor(
           return getTokenFromApi(email, password)
         }
       }
-      //Timber.e("Login error $")
+      // Timber.e("Login error $")
       MyResult.Error(uiText = R.string.credentials_error)
     } catch (e: Exception) {
       Timber.e("Error retrieving credentials ${e.message}")

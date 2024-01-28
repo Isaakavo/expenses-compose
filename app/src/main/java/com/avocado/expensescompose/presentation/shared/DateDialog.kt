@@ -32,13 +32,17 @@ fun DateDialog(
   initialSelectedDate: Long? = null,
   onConfirm: (String) -> Unit,
   onDismiss: () -> Unit,
-  onSelectTextField: () -> Unit,
+  onSelectTextField: () -> Unit
 ) {
   val dateToDisplay = date.ifEmpty { LocalDateTime.now().formatDateWithYear() }
 
   val datePickerState = rememberDatePickerState(
-    initialSelectedDateMillis = if (initialSelectedDate == 0L) LocalDateTime.now()
-      .convertDateToMillis() else initialSelectedDate
+    initialSelectedDateMillis = if (initialSelectedDate == 0L) {
+      LocalDateTime.now()
+        .convertDateToMillis()
+    } else {
+      initialSelectedDate
+    }
   )
   Row(
     horizontalArrangement = Arrangement.Center,
@@ -69,10 +73,10 @@ fun DateDialog(
         Text(text = stringResource(id = R.string.dialog_accept))
       }
     }, dismissButton = {
-      TextButton(onClick = { onDismiss() }) {
-        Text(text = stringResource(id = R.string.dialog_cancel))
-      }
-    }) {
+        TextButton(onClick = { onDismiss() }) {
+          Text(text = stringResource(id = R.string.dialog_cancel))
+        }
+      }) {
       DatePicker(state = datePickerState)
     }
   }

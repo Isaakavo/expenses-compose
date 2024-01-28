@@ -9,22 +9,22 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 
-
 class Date(val date: LocalDateTime)
 
 val dateAdapter = object : Adapter<Date> {
-    override fun fromJson(reader: JsonReader, customScalarAdapters: CustomScalarAdapters): Date {
-        val instant = Instant.parse(reader.nextString())
-        val date: LocalDateTime = instant.atZone(ZoneId.of("UTC")).toLocalDateTime()
-        return Date(date)
-    }
+  override fun fromJson(reader: JsonReader, customScalarAdapters: CustomScalarAdapters): Date {
+    val instant = Instant.parse(reader.nextString())
+    val date: LocalDateTime = instant.atZone(ZoneId.of("UTC")).toLocalDateTime()
+    return Date(date)
+  }
 
-    override fun toJson(
-        writer: JsonWriter, customScalarAdapters: CustomScalarAdapters, value: Date
-    ) {
-        writer.value(value.date.toString())
-    }
-
+  override fun toJson(
+    writer: JsonWriter,
+    customScalarAdapters: CustomScalarAdapters,
+    value: Date
+  ) {
+    writer.value(value.date.toString())
+  }
 }
 
 fun String.adaptDateForInput() = Date(this.formatDateToISO() ?: LocalDateTime.now())

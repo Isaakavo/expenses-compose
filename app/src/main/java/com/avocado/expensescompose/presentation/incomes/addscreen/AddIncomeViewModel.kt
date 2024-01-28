@@ -17,13 +17,13 @@ import com.avocado.expensescompose.presentation.util.formatDateToISO
 import com.avocado.expensescompose.presentation.util.formatDateWithYear
 import com.avocado.type.UpdateIncomeInput
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.LocalDateTime
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDateTime
-import javax.inject.Inject
 
 sealed class AddIncomeEvent {
   object InsertIncome : AddIncomeEvent()
@@ -173,7 +173,6 @@ class AddIncomeViewModel @Inject constructor(
                 )
               )
             }
-
           },
           onError = {}
         )

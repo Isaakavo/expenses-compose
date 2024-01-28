@@ -69,17 +69,20 @@ import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.adapters.formatMoney
 import com.avocado.expensescompose.data.model.total.Total
 import com.avocado.expensescompose.domain.income.models.Income
+import com.avocado.expensescompose.presentation.incomes.homescreen.viewmodel.BackPress
+import com.avocado.expensescompose.presentation.incomes.homescreen.viewmodel.IncomeEvent
+import com.avocado.expensescompose.presentation.incomes.homescreen.viewmodel.IncomesViewModel
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.expensescompose.presentation.util.Operations
 import com.avocado.expensescompose.presentation.util.formatDateDaysWithMonth
 import com.avocado.expensescompose.presentation.util.formatDateOnlyMonth
 import com.avocado.expensescompose.presentation.util.validateOperation
+import java.time.LocalDateTime
+import java.util.Locale
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.time.LocalDateTime
-import java.util.Locale
 
 data class NavigationIncomeDetails(
   val paymentDate: LocalDateTime?
@@ -131,17 +134,23 @@ fun IncomeScreenContent(
         operation,
         onAdd = {
           scope.launch {
-            snackBarHostState.showSnackbar(context.resources.getString(R.string.income_add_successfully))
+            snackBarHostState.showSnackbar(
+              context.resources.getString(R.string.income_add_successfully)
+            )
           }
         },
         onUpdate = {
           scope.launch {
-            snackBarHostState.showSnackbar(context.resources.getString(R.string.income_update_successfully))
+            snackBarHostState.showSnackbar(
+              context.resources.getString(R.string.income_update_successfully)
+            )
           }
         },
         onDelete = {
           scope.launch {
-            snackBarHostState.showSnackbar(context.resources.getString(R.string.income_delete_successfully))
+            snackBarHostState.showSnackbar(
+              context.resources.getString(R.string.income_delete_successfully)
+            )
           }
         },
         onAlwaysExecute = {
@@ -192,16 +201,18 @@ fun IncomeScreenContent(
               if (isClosed) open() else close()
             }
           }
-        })
+        }
+      )
     }, snackbarHost = {
-      SnackbarHost(hostState = snackBarHostState)
-    }, floatingActionButton = {
-      FabAddButtons(onNavigateAddIncome = {
-        onNavigate(
-          NavigateEvent.NavigationAddIncomeScreen, null
-        )
-      }, onNavigateAddExpense = { onNavigate(NavigateEvent.NavigateAddExpenseScreen, null) })
-    }) { paddingValues ->
+        SnackbarHost(hostState = snackBarHostState)
+      }, floatingActionButton = {
+        FabAddButtons(onNavigateAddIncome = {
+          onNavigate(
+            NavigateEvent.NavigationAddIncomeScreen,
+            null
+          )
+        }, onNavigateAddExpense = { onNavigate(NavigateEvent.NavigateAddExpenseScreen, null) })
+      }) { paddingValues ->
       Surface(
         modifier = Modifier
           .fillMaxSize()
@@ -226,7 +237,7 @@ fun IncomeScreenContent(
         } else {
           if (incomesMap?.isNotEmpty() == true) {
             LazyColumn(
-              contentPadding = PaddingValues(start = 24.dp, end = 24.dp),
+              contentPadding = PaddingValues(start = 24.dp, end = 24.dp)
             ) {
               items(incomesMap.toList()) { year ->
                 YearRow(year = year.first)
@@ -237,11 +248,14 @@ fun IncomeScreenContent(
                       .fillMaxWidth()
                       .wrapContentHeight()
                       .padding(bottom = 22.dp, start = 12.dp, end = 12.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
                   ) {
                     Column(
                       modifier = Modifier.padding(
-                        start = 12.dp, end = 12.dp, top = 12.dp, bottom = 6.dp
+                        start = 12.dp,
+                        end = 12.dp,
+                        top = 12.dp,
+                        bottom = 6.dp
                       )
                     ) {
                       MonthRow(
@@ -308,13 +322,16 @@ fun IncomeItem(
   fortnight: String,
   onNavigate: (navigateEvent: NavigateEvent, income: NavigationIncomeDetails) -> Unit
 ) {
-  Column(modifier = Modifier.clickable {
-    onNavigate(
-      NavigateEvent.NavigateIncomeExpensesList, NavigationIncomeDetails(
-        paymentDate = items[0].paymentDate.date
+  Column(
+    modifier = Modifier.clickable {
+      onNavigate(
+        NavigateEvent.NavigateIncomeExpensesList,
+        NavigationIncomeDetails(
+          paymentDate = items[0].paymentDate.date
+        )
       )
-    )
-  }) {
+    }
+  ) {
     Text(text = stringResource(id = R.string.income_fortnight, fortnight))
     if (items.size == 1) {
       IncomeItemRow(item = items[0], false)
@@ -378,7 +395,8 @@ fun MonthRow(monthTotal: Double, incomeMonth: String) {
 
 @Composable
 fun FabAddButtons(
-  onNavigateAddIncome: () -> Unit = {}, onNavigateAddExpense: () -> Unit = {}
+  onNavigateAddIncome: () -> Unit = {},
+  onNavigateAddExpense: () -> Unit = {}
 ) {
   var expanded by remember {
     mutableStateOf(false)
@@ -393,12 +411,13 @@ fun FabAddButtons(
       .wrapContentHeight()
       .wrapContentWidth()
       .animateContentSize()
-      .padding(bottom = 8.dp, end = 4.dp), horizontalAlignment = Alignment.End
+      .padding(bottom = 8.dp, end = 4.dp),
+    horizontalAlignment = Alignment.End
   ) {
     if (expanded) {
       ExtendedFloatingActionButton(
         elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation(1.dp),
-        onClick = { onNavigateAddIncome() },
+        onClick = { onNavigateAddIncome() }
       ) {
         Icon(painterResource(id = R.drawable.round_account_balance_24), contentDescription = "")
         Text(text = stringResource(id = R.string.fab_add_income))
@@ -406,7 +425,7 @@ fun FabAddButtons(
       Spacer(modifier = Modifier.height(8.dp))
       ExtendedFloatingActionButton(
         elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation(1.dp),
-        onClick = { onNavigateAddExpense() },
+        onClick = { onNavigateAddExpense() }
       ) {
         Icon(painterResource(id = R.drawable.round_attach_money_24), contentDescription = "")
         Text(text = stringResource(id = R.string.fab_add_expense))
@@ -415,9 +434,10 @@ fun FabAddButtons(
 
     Spacer(modifier = Modifier.height(8.dp))
     Row(modifier = Modifier.wrapContentWidth(), horizontalArrangement = Arrangement.End) {
-      FloatingActionButton(elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation(
-        defaultElevation = 2.dp
-      ),
+      FloatingActionButton(
+        elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation(
+          defaultElevation = 2.dp
+        ),
         onClick = {
           expanded = !expanded
           scope.launch {
@@ -427,9 +447,12 @@ fun FabAddButtons(
               animateRotation(rotation, 0f, 800)
             }
           }
-        }) {
+        }
+      ) {
         Icon(
-          Icons.Rounded.Add, contentDescription = "", modifier = Modifier.rotate(rotation.value)
+          Icons.Rounded.Add,
+          contentDescription = "",
+          modifier = Modifier.rotate(rotation.value)
         )
       }
     }
@@ -443,13 +466,15 @@ fun getMonthTotal(totalByMonth: List<Total?>, month: String, year: String) =
   }?.total ?: 0.0
 
 suspend fun animateRotation(
-  rotation: Animatable<Float, AnimationVector1D>, target: Float, durationMillis: Int
+  rotation: Animatable<Float, AnimationVector1D>,
+  target: Float,
+  durationMillis: Int
 ) {
   rotation.animateTo(
-    targetValue = target, animationSpec = tween(durationMillis, easing = LinearEasing)
+    targetValue = target,
+    animationSpec = tween(durationMillis, easing = LinearEasing)
   )
 }
-
 
 @Preview
 @Composable
@@ -458,7 +483,6 @@ fun FABPrev() {
     FabAddButtons()
   }) {
     Surface(modifier = Modifier.padding(it)) {
-
     }
   }
 }

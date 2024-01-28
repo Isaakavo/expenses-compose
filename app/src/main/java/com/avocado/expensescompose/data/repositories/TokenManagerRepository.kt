@@ -9,10 +9,10 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.TokenService
 import com.avocado.expensescompose.data.model.MyResult
+import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 import okio.IOException
 import timber.log.Timber
-import javax.inject.Inject
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "auth")
 
@@ -76,7 +76,6 @@ class TokenManagerRepository @Inject constructor(private val context: Context) :
       MyResult.Error(false, R.string.token_user_save_error)
     }
 
-
   override suspend fun getAccessToken(): MyResult<String?> = try {
     val preferences = context.dataStore.data.first()
     val accessToken = preferences[JWT_REFRESH_KEY]
@@ -130,6 +129,4 @@ class TokenManagerRepository @Inject constructor(private val context: Context) :
     Timber.e("Error deleting refresh token ${exception.printStackTrace()}")
     MyResult.Error(false, R.string.token_user_error)
   }
-
-
 }

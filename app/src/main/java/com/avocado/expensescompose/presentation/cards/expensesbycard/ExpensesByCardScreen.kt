@@ -26,7 +26,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.adapters.formatMoney
 import com.avocado.expensescompose.data.model.expense.Expense
-import com.avocado.expensescompose.presentation.cards.expensestotalbycard.DataSelector
+import com.avocado.expensescompose.presentation.cards.expensesbycard.viewmodel.ExpensesByCardViewModel
+import com.avocado.expensescompose.presentation.cards.expensestotalbycard.viewmodel.DataSelector
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.shared.ExpensesList
 import com.avocado.expensescompose.presentation.topbar.AppBar
@@ -42,7 +43,6 @@ fun ExpensesByCardScreen(
   onPopBackStack: () -> Unit = {},
   onNavigate: (navigateEvent: NavigateEvent, param: String) -> Unit = { one, two -> }
 ) {
-
   val state by viewModel.state.collectAsStateWithLifecycle()
 
   LaunchedEffect(key1 = Unit) {
@@ -57,7 +57,6 @@ fun ExpensesByCardScreen(
         viewModel.getExpensesByMonth(payBefore = payBefore, cardId = cardId)
       }
     }
-
   }
 
   ExpensesByCardContent(
@@ -139,7 +138,8 @@ fun CardExpensesDetails(expensesTotal: Double, payBefore: String) {
       Row(
         modifier = Modifier
           .fillMaxWidth()
-          .padding(start = 8.dp), horizontalArrangement = Arrangement.Start
+          .padding(start = 8.dp),
+        horizontalArrangement = Arrangement.Start
       ) {
         Text(text = expensesTotal.formatMoney(), fontWeight = FontWeight.Bold, fontSize = 22.sp)
       }

@@ -7,9 +7,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
 @Composable
-fun ClickableText(text: String, modifier: Modifier,action: () -> Unit) {
+fun ClickableText(text: String, modifier: Modifier, action: () -> Unit) {
   Text(
     text = text,
-    modifier = modifier.wrapContentSize().clickable { action() },
+    modifier = modifier.wrapContentSize().clickable { action() }
   )
 }

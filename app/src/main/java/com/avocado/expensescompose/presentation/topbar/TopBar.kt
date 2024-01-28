@@ -52,7 +52,9 @@ fun AppBar(
 ) {
   TopAppBar(
     title = { Text(title, color = Color.White) },
-    colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+    colors = TopAppBarDefaults.smallTopAppBarColors(
+      containerColor = MaterialTheme.colorScheme.primaryContainer
+    ),
     navigationIcon = {
       IconButton(
         onClick = { onNavigationIconClick() }
@@ -139,7 +141,6 @@ fun ToolBarPreview() {
     }
   ) {
     Surface(modifier = Modifier.padding(it).fillMaxSize()) {
-
     }
   }
 }

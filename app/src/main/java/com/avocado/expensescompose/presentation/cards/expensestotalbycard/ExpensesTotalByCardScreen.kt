@@ -31,6 +31,9 @@ import com.avocado.expensescompose.data.adapters.adapt
 import com.avocado.expensescompose.data.adapters.formatMoney
 import com.avocado.expensescompose.data.model.total.Total
 import com.avocado.expensescompose.data.model.total.TotalFortnight
+import com.avocado.expensescompose.presentation.cards.expensestotalbycard.viewmodel.DataSelector
+import com.avocado.expensescompose.presentation.cards.expensestotalbycard.viewmodel.ExpensesTotalByCardEvent
+import com.avocado.expensescompose.presentation.cards.expensestotalbycard.viewmodel.ExpensesTotalByCardViewModel
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.expensescompose.presentation.topbar.MenuItems
@@ -44,7 +47,7 @@ fun ExpensesTotalByCardScreen(
   viewModel: ExpensesTotalByCardViewModel = hiltViewModel(),
   cardId: String,
   onPopBackStack: () -> Unit = {},
-  onNavigate: (navigateEvent: NavigateEvent, param: String) -> Unit,
+  onNavigate: (navigateEvent: NavigateEvent, param: String) -> Unit
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
   LaunchedEffect(key1 = Unit) {
@@ -87,17 +90,25 @@ fun CardWithExpenseContent(
   }
 
   Scaffold(topBar = {
-    AppBar(title = cardAlias.ifEmpty { cardBank },
+    AppBar(
+      title = cardAlias.ifEmpty { cardBank },
       dropDownMenuItems = listOf(
-        MenuItems(text = stringResource(id = R.string.appbar_expenses_cards_total_menu_item_1),
-          action = { onEvent(ExpensesTotalByCardEvent.FortnightData, "") }),
-        MenuItems(text = stringResource(id = R.string.appbar_expenses_cards_total_menu_item_2),
-          action = { onEvent(ExpensesTotalByCardEvent.MonthData, "") }),
-        MenuItems(text = stringResource(id = R.string.appbar_expenses_cards_total_menu_item_3),
+        MenuItems(
+          text = stringResource(id = R.string.appbar_expenses_cards_total_menu_item_1),
+          action = { onEvent(ExpensesTotalByCardEvent.FortnightData, "") }
+        ),
+        MenuItems(
+          text = stringResource(id = R.string.appbar_expenses_cards_total_menu_item_2),
+          action = { onEvent(ExpensesTotalByCardEvent.MonthData, "") }
+        ),
+        MenuItems(
+          text = stringResource(id = R.string.appbar_expenses_cards_total_menu_item_3),
           icon = Icons.Rounded.Delete,
-          action = { onEvent(ExpensesTotalByCardEvent.DeleteCard, cardId) })
+          action = { onEvent(ExpensesTotalByCardEvent.DeleteCard, cardId) }
+        )
       ),
-      onNavigationIconClick = { onPopBackStack() })
+      onNavigationIconClick = { onPopBackStack() }
+    )
   }) { paddingValues ->
     Surface(
       modifier = Modifier
@@ -153,14 +164,16 @@ fun TotalByFortnight(
 ) {
   LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
     items(totalByFortnight) { item ->
-      Card(modifier = Modifier
-        .fillMaxWidth()
-        .clickable {
-          onNavigate(
-            NavigateEvent.NavigateExpensesByCardScreen,
-            "${item.prepareDateForRequest()}/$cardId/$dataSelector"
-          )
-        }) {
+      Card(
+        modifier = Modifier
+          .fillMaxWidth()
+          .clickable {
+            onNavigate(
+              NavigateEvent.NavigateExpensesByCardScreen,
+              "${item.prepareDateForRequest()}/$cardId/$dataSelector"
+            )
+          }
+      ) {
         Column(modifier = Modifier.padding(12.dp)) {
           Row(modifier = Modifier.fillMaxWidth()) {
             Text(
@@ -168,10 +181,10 @@ fun TotalByFortnight(
               fontSize = 22.sp,
               fontWeight = FontWeight.Bold
             )
-
           }
           Row(
-            modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
           ) {
             if (item.fortnight != null) {
               Text(text = stringResource(item.fortnight.adapt()))
@@ -193,17 +206,20 @@ fun TotalByMonth(
 ) {
   LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
     items(totalByMonth) { item ->
-      Card(modifier = Modifier
-        .fillMaxWidth()
-        .clickable {
-          onNavigate(
-            NavigateEvent.NavigateExpensesByCardScreen,
-            "${item.date?.getLastDayOfMonth()}/$cardId/$dataSelector"
-          )
-        }) {
+      Card(
+        modifier = Modifier
+          .fillMaxWidth()
+          .clickable {
+            onNavigate(
+              NavigateEvent.NavigateExpensesByCardScreen,
+              "${item.date?.getLastDayOfMonth()}/$cardId/$dataSelector"
+            )
+          }
+      ) {
         Column(modifier = Modifier.padding(12.dp)) {
           Row(
-            modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
           ) {
             Text(
               text = item.date?.formatDateMonthWithYear() ?: "",

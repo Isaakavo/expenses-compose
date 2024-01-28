@@ -17,14 +17,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.avocado.expensescompose.R
 
-//TODO improve code to make more reusable and with parameters to pass the ui error from other sources
+// TODO improve code to make more reusable and with parameters to pass the ui error from other sources
 @Composable
 fun GenericErrorScreen() {
   Card(
     modifier = Modifier
       .padding(16.dp)
       .wrapContentHeight(),
-    shape = RoundedCornerShape(16.dp),
+    shape = RoundedCornerShape(16.dp)
   ) {
     Column(
       modifier = Modifier

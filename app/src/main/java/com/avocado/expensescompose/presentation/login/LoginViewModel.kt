@@ -5,44 +5,24 @@ import androidx.lifecycle.viewModelScope
 import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.domain.login.usecase.LoginUseCase
+import com.avocado.expensescompose.presentation.login.viewmodel.LoginViewModelEvents
+import com.avocado.expensescompose.presentation.login.viewmodel.LoginViewModelState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import javax.inject.Inject
-
-sealed class LoginEvent {
-  object UpdateUsername : LoginEvent()
-  object UpdatePassword : LoginEvent()
-  object ToggleViewPassword : LoginEvent()
-  object Login : LoginEvent()
-  object SetIsSuccess : LoginEvent()
-  object ChangeUser : LoginEvent()
-}
-
-// TODO add remember password logic
-// Add a internal database so I can store the password there, and every time the user clicks in
-// login, the code retrieve the hashed password and use it to send the request to aws
-data class LoginUiState(
-  val username: String = "",
-  val password: String = "",
-  val isLoading: Boolean = false,
-  val shouldShowPassword: Boolean = false,
-  val isQuickLogin: Boolean = false,
-  var userMessage: Int? = null,
-  var isSuccess: Boolean = false
-)
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
   private val loginUseCase: LoginUseCase
 ) : ViewModel() {
 
-  private val _uiState = MutableStateFlow(LoginUiState())
-  val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
+  private val _uiState = MutableStateFlow(LoginViewModelState())
+  val uiState: StateFlow<LoginViewModelState> = _uiState.asStateFlow()
 
   init {
     getUsername()
@@ -60,27 +40,27 @@ class LoginViewModel @Inject constructor(
     }
   }
 
-  fun onEvent(event: LoginEvent, value: String) {
+  fun onEvent(event: LoginViewModelEvents, value: String) {
     when (event) {
-      LoginEvent.ToggleViewPassword -> _uiState.update {
+      LoginViewModelEvents.ToggleViewPassword -> _uiState.update {
         it.copy(shouldShowPassword = !it.shouldShowPassword)
       }
 
-      LoginEvent.UpdatePassword -> _uiState.update {
+      LoginViewModelEvents.UpdatePassword -> _uiState.update {
         it.copy(password = value)
       }
 
-      LoginEvent.UpdateUsername -> _uiState.update {
+      LoginViewModelEvents.UpdateUsername -> _uiState.update {
         it.copy(username = value)
       }
 
-      LoginEvent.Login -> saveUsername()
+      LoginViewModelEvents.Login -> saveUsername()
 
-      LoginEvent.SetIsSuccess -> _uiState.update {
+      LoginViewModelEvents.SetIsSuccess -> _uiState.update {
         it.copy(isSuccess = false)
       }
 
-      LoginEvent.ChangeUser -> {
+      LoginViewModelEvents.ChangeUser -> {
         viewModelScope.launch {
           val result = loginUseCase.resetLoginCredentials()
           if (result is MyResult.Success) {
@@ -91,7 +71,7 @@ class LoginViewModel @Inject constructor(
     }
   }
 
-  //TODO refactor this
+  // TODO refactor this
   fun login() {
     viewModelScope.launch {
       _uiState.update {
@@ -129,7 +109,6 @@ class LoginViewModel @Inject constructor(
 
         else -> {}
       }
-
     }
   }
 
@@ -138,7 +117,9 @@ class LoginViewModel @Inject constructor(
       when (val isSaved = loginUseCase.saveUsername(_uiState.value.username)) {
         is MyResult.Error -> {
           Timber
-            .e("Error trying to save the username in data storage: " + isSaved.exception?.stackTraceToString())
+            .e(
+              "Error trying to save the username in data storage: " + isSaved.exception?.stackTraceToString()
+            )
         }
 
         is MyResult.Success -> {

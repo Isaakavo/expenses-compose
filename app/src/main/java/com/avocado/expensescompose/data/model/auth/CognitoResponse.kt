@@ -2,7 +2,6 @@ package com.avocado.expensescompose.data.model.auth
 
 import com.google.gson.annotations.SerializedName
 
-
 data class CognitoResponse(
   @SerializedName("AuthenticationResult")
   val authenticationResult: AuthenticationResult,

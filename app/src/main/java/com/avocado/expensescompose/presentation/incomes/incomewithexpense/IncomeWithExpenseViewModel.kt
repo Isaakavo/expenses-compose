@@ -18,14 +18,14 @@ import com.avocado.expensescompose.domain.income.models.Income
 import com.avocado.expensescompose.presentation.util.formatDateForRequest
 import com.avocado.type.PayBeforeInput
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.LocalDateTime
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.time.LocalDateTime
-import javax.inject.Inject
 
 sealed class IncomeWithExpenseEvent {
   object DeleteIncome : IncomeWithExpenseEvent()
@@ -183,7 +183,6 @@ class IncomeWithExpenseViewModel @Inject constructor(
               Timber.d(it.exception)
             }
           )
-
         }
     }
   }

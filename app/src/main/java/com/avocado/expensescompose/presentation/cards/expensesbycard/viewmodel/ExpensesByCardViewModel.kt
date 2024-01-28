@@ -1,4 +1,4 @@
-package com.avocado.expensescompose.presentation.cards.expensesbycard
+package com.avocado.expensescompose.presentation.cards.expensesbycard.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,31 +10,21 @@ import com.avocado.expensescompose.data.adapters.graphql.fragments.toExpense
 import com.avocado.expensescompose.data.adapters.graphql.scalar.Date
 import com.avocado.expensescompose.data.adapters.graphql.utils.validateData
 import com.avocado.expensescompose.data.apolloclients.GraphQlClientImpl
-import com.avocado.expensescompose.data.model.card.Card
-import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.data.model.successOrError
 import com.avocado.expensescompose.presentation.util.formatDateForRequestPayBefore
 import com.avocado.type.PayBeforeInput
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-
-data class ExpensesByCardState(
-  val expensesList: List<Expense> = emptyList(),
-  val expenseTotal: Double = 0.0,
-  val isLoading: Boolean = false,
-  val card: Card? = null,
-  val uiError: Int = 0
-)
 
 @HiltViewModel
 class ExpensesByCardViewModel @Inject constructor(private val graphQlClientImpl: GraphQlClientImpl) :
   ViewModel() {
-  private val _state = MutableStateFlow(ExpensesByCardState())
+  private val _state = MutableStateFlow(ExpensesByCardViewModelState())
   val state = _state.asStateFlow()
 
   fun getExpensesByFortnight(payBefore: String, cardId: String) {
@@ -57,7 +47,7 @@ class ExpensesByCardViewModel @Inject constructor(private val graphQlClientImpl:
             val card = expensesList.getOrNull(0)
             this.launch {
               _state.emit(
-                ExpensesByCardState(
+                ExpensesByCardViewModelState(
                   expensesList = expensesList,
                   expenseTotal = expenseTotal,
                   card = card?.card,
@@ -65,7 +55,7 @@ class ExpensesByCardViewModel @Inject constructor(private val graphQlClientImpl:
                 )
               )
             }
-          }, onError = { error -> ExpensesByCardState() })
+          }, onError = { error -> ExpensesByCardViewModelState() })
         }
       }
     }
@@ -79,7 +69,7 @@ class ExpensesByCardViewModel @Inject constructor(private val graphQlClientImpl:
       viewModelScope.launch {
         graphQlClientImpl.query(
           ExpensesByMonthQuery(input),
-          onError = { _state.emit(ExpensesByCardState(uiError = R.string.general_error)) }
+          onError = { _state.emit(ExpensesByCardViewModelState(uiError = R.string.general_error)) }
         ).map { apolloResponse ->
           validateData(apolloResponse.data?.expensesByMonth)
         }.collect { collectResult ->
@@ -92,7 +82,7 @@ class ExpensesByCardViewModel @Inject constructor(private val graphQlClientImpl:
               val card = expensesList.getOrNull(0)
               this.launch {
                 _state.emit(
-                  ExpensesByCardState(
+                  ExpensesByCardViewModelState(
                     expensesList = expensesList,
                     expenseTotal = expenseTotal,
                     card = card?.card,
@@ -100,7 +90,8 @@ class ExpensesByCardViewModel @Inject constructor(private val graphQlClientImpl:
                   )
                 )
               }
-            }, onError = {}
+            },
+            onError = {}
           )
         }
       }

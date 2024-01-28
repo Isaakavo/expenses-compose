@@ -16,13 +16,12 @@ import com.avocado.expensescompose.domain.income.models.Income
 import com.avocado.expensescompose.domain.income.models.Incomes
 import com.avocado.expensescompose.domain.income.models.PaymentDate
 import com.avocado.type.CreateIncomeInput
-import timber.log.Timber
 import java.time.LocalDateTime
+import timber.log.Timber
 
 class ApolloIncomesClient(private val apolloClient: ApolloClient) : IncomesClient {
   override suspend fun getIncomesByMonth(date: String): List<Income> =
     listOf(Income(paymentDate = PaymentDate(date = null)))
-
 
   override suspend fun getAllIncomes(): MyResult<Incomes> {
     try {
@@ -44,12 +43,11 @@ class ApolloIncomesClient(private val apolloClient: ApolloClient) : IncomesClien
     } catch (e: ApolloException) {
       return MyResult.Error(uiText = R.string.general_error)
     }
-
   }
   override suspend fun insertIncome(
     total: Double,
     paymentDate: LocalDateTime,
-    comment: String,
+    comment: String
   ): MyResult<Income?> {
     try {
       val input = CreateIncomeInput(

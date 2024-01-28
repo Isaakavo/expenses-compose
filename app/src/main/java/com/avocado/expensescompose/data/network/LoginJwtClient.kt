@@ -2,9 +2,9 @@ package com.avocado.expensescompose.data.network
 
 import com.avocado.expensescompose.data.model.auth.Auth
 import com.avocado.expensescompose.data.model.auth.CognitoResponse
+import javax.inject.Singleton
 import retrofit2.http.Body
 import retrofit2.http.Headers
-import javax.inject.Singleton
 import retrofit2.http.POST
 import retrofit2.http.Url
 

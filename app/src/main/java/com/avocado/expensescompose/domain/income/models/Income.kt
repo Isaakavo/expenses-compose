@@ -1,6 +1,5 @@
 package com.avocado.expensescompose.domain.income.models
 
-
 import java.time.LocalDateTime
 
 data class Income(

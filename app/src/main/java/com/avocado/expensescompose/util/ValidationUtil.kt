@@ -9,10 +9,10 @@ object ValidationUtil {
   fun validateEmail(email: String): AuthError? {
     val trimmedEmail = email.trim()
 
-    if(!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+    if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
       return AuthError.InvalidEmail
     }
-    if(trimmedEmail.isBlank()) {
+    if (trimmedEmail.isBlank()) {
       return AuthError.FieldEmpty
     }
     return null
@@ -21,13 +21,13 @@ object ValidationUtil {
   fun validatePassword(password: String): AuthError? {
     val capitalLettersInPassword = password.any { it.isUpperCase() }
     val numberInPassword = password.any { it.isDigit() }
-    if(!capitalLettersInPassword || !numberInPassword) {
+    if (!capitalLettersInPassword || !numberInPassword) {
       return AuthError.InvalidPassword
     }
-    if(password.length < Constants.MIN_PASSWORD_LENGTH) {
+    if (password.length < Constants.MIN_PASSWORD_LENGTH) {
       return AuthError.InputTooShort
     }
-    if(password.isBlank()) {
+    if (password.isBlank()) {
       return AuthError.FieldEmpty
     }
     return null

@@ -9,10 +9,10 @@ import com.avocado.expensescompose.data.model.auth.Auth
 import com.avocado.expensescompose.data.model.auth.AuthParameters
 import com.avocado.expensescompose.data.repositories.AuthRepository
 import com.avocado.expensescompose.data.repositories.TokenManagerRepository
+import javax.inject.Inject
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import timber.log.Timber
-import javax.inject.Inject
 
 class AuthorizationInterceptor @Inject constructor(
   private val authClient: AuthRepository,
@@ -32,7 +32,6 @@ class AuthorizationInterceptor @Inject constructor(
     }
   }
 
-
   private suspend fun validateJwtIsNotNullOrEmpty(
     jwt: String?,
     request: HttpRequest,
@@ -47,7 +46,8 @@ class AuthorizationInterceptor @Inject constructor(
   }
 
   override suspend fun intercept(
-    request: HttpRequest, chain: HttpInterceptorChain
+    request: HttpRequest,
+    chain: HttpInterceptorChain
   ): HttpResponse {
     try {
       // Extract the current access token

@@ -123,7 +123,11 @@ fun AddExpenseScreenContent(
   LaunchedEffect(key1 = snackBarHostState) {
     if (expenseAdded || expenseAddedError) {
       scope.launch {
-        snackBarHostState.showSnackbar(context.resources.getString(if (expenseAdded) R.string.add_expense_successfully else R.string.add_expense_error))
+        snackBarHostState.showSnackbar(
+          context.resources.getString(
+            if (expenseAdded) R.string.add_expense_successfully else R.string.add_expense_error
+          )
+        )
       }
     }
   }
@@ -134,12 +138,14 @@ fun AddExpenseScreenContent(
         title = stringResource(id = R.string.add_expense_add_expense),
         buttonText = buttonText,
         onActionButtonClick = {
-          if (expenseId.isEmpty())
+          if (expenseId.isEmpty()) {
             onEvent(AddExpenseEvent.AddExpense, null)
-          else onEvent(
-            AddExpenseEvent.UpdateExpense,
-            expenseId
-          )
+          } else {
+            onEvent(
+              AddExpenseEvent.UpdateExpense,
+              expenseId
+            )
+          }
         },
         onNavigationIconClick = { onPopBackStack() }
       )
@@ -163,7 +169,7 @@ fun AddExpenseScreenContent(
             .verticalScroll(state = rememberScrollState()),
           verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-          if (!loading && !loadingCard)
+          if (!loading && !loadingCard) {
             DateDialog(
               date = date,
               initialSelectedDate = initialSelectedDate,
@@ -174,6 +180,7 @@ fun AddExpenseScreenContent(
               onSelectTextField = { onEvent(AddExpenseEvent.DateDialogOpen, null) },
               modifier = Modifier.padding(start = 8.dp)
             )
+          }
 
           AddExpenseRow {
             Icon(
@@ -247,7 +254,8 @@ fun AddExpenseScreenContent(
               textFieldLabel = stringResource(id = R.string.add_expense_category),
               textFieldValue = categories.name,
               onOpenEvent = { onEvent(AddExpenseEvent.CategoryListOpen, null) },
-              onCloseEvent = { onEvent(AddExpenseEvent.CategoryListClose, null) }) {
+              onCloseEvent = { onEvent(AddExpenseEvent.CategoryListClose, null) }
+            ) {
               Category.values().map {
                 Timber.d(it.name)
                 DropdownMenuItem(
@@ -282,12 +290,14 @@ fun AddExpenseScreenContent(
               keyboardActions = KeyboardActions(
                 onNext = { focusRequester.requestFocus() },
                 onDone = {
-                  if (expenseId.isEmpty())
+                  if (expenseId.isEmpty()) {
                     onEvent(AddExpenseEvent.AddExpense, null)
-                  else onEvent(
-                    AddExpenseEvent.UpdateExpense,
-                    expenseId
-                  )
+                  } else {
+                    onEvent(
+                      AddExpenseEvent.UpdateExpense,
+                      expenseId
+                    )
+                  }
                 }
               )
             )
@@ -337,7 +347,7 @@ fun DropDownMenu(
       expanded = if (dropDownMenuEnabled) false else expanded,
       onDismissRequest = {
         onCloseEvent()
-      },
+      }
     ) {
       menuItems()
     }
@@ -355,8 +365,8 @@ fun AddExpenseRow(content: @Composable () -> Unit) {
   }
 }
 
-//@Preview
-//@Composable
-//fun AddExpenseScreenContentPreview() {
+// @Preview
+// @Composable
+// fun AddExpenseScreenContentPreview() {
 //  AddExpenseScreenContent(tags = emptyList(), onEvent = (AddExpenseEvent.SelectTag, "") -> Unit)
-//}
+// }

@@ -63,7 +63,6 @@ fun filterList(type: String, name: String, list: List<Expense>) = when (type) {
   else -> list
 }
 
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ExpensesList(
@@ -130,12 +129,16 @@ fun ExpenseItem(
 ) {
   var expanded by remember { mutableStateOf(false) }
   val expandedTextFont = if (!expanded) FontWeight.Normal else FontWeight.Bold
-  val expandedPadding = if (!expanded) Modifier.padding(
-    start = 8.dp,
-    end = 8.dp,
-    top = 4.dp,
-    bottom = 4.dp
-  ) else Modifier.padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 8.dp)
+  val expandedPadding = if (!expanded) {
+    Modifier.padding(
+      start = 8.dp,
+      end = 8.dp,
+      top = 4.dp,
+      bottom = 4.dp
+    )
+  } else {
+    Modifier.padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 8.dp)
+  }
   Box(
     modifier = Modifier
       .background(color = MaterialTheme.colorScheme.surfaceVariant)
@@ -265,20 +268,23 @@ fun ExpenseFilterMenu(onFilterSelect: (String, String) -> Unit) {
   Box {
     DropdownMenu(
       expanded = expanded,
-      onDismissRequest = { expanded = !expanded }) {
+      onDismissRequest = { expanded = !expanded }
+    ) {
       DropdownMenuItem(
         text = { Text(text = stringResource(id = R.string.expenses_list_filter_category)) },
         onClick = {
           expanded = !expanded
           categoryExpanded = true
-        })
+        }
+      )
       Divider()
       DropdownMenuItem(
         text = { Text(text = stringResource(R.string.expenses_list_filter_reset)) },
         onClick = {
           expanded = false
           onFilterSelect("RESET", "ALL")
-        })
+        }
+      )
     }
 
     DropdownMenu(
@@ -299,7 +305,8 @@ fun ExpenseFilterMenu(onFilterSelect: (String, String) -> Unit) {
             onClick = {
               categoryExpanded = false
               onFilterSelect("CATEGORY", category.name)
-            })
+            }
+          )
         }
       }
     }

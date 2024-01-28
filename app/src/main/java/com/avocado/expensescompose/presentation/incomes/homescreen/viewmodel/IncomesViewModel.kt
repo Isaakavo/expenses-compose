@@ -1,4 +1,4 @@
-package com.avocado.expensescompose.presentation.incomes.homescreen
+package com.avocado.expensescompose.presentation.incomes.homescreen.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,52 +9,25 @@ import com.avocado.expensescompose.data.adapters.graphql.fragments.toTotal
 import com.avocado.expensescompose.data.apolloclients.GraphQlClientImpl
 import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.data.model.successOrError
-import com.avocado.expensescompose.data.model.total.Total
 import com.avocado.expensescompose.domain.income.models.Income
 import com.avocado.expensescompose.domain.income.models.Incomes
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-
-sealed class BackPress {
-  object Idle : BackPress()
-  object InitialTouch : BackPress()
-}
-
-sealed class IncomeEvent {
-  //  object FetchQuery : IncomeEvent()
-  object BackPressInitialTouch : IncomeEvent()
-  object BackPressIdle : IncomeEvent()
-  object CloseToast : IncomeEvent()
-  object OpenToast : IncomeEvent()
-  object FetchIncomes : IncomeEvent()
-}
-
-data class IncomeState(
-  val incomesMap: Map<String, MutableMap<String, MutableMap<String, MutableList<Income>?>>>? = null,
-  val totalByMonth: List<Total?> = emptyList(),
-  val showAddButtons: Boolean = false,
-  val backPressState: BackPress = BackPress.Idle,
-  val showToast: Boolean = false,
-  val isLoading: Boolean = false,
-  val uiError: Int = 0,
-  val errorMessage: Int? = 0
-)
 
 @HiltViewModel
 class IncomesViewModel @Inject constructor(
   private val graphQlClientImpl: GraphQlClientImpl
 ) : ViewModel() {
-  private val _state = MutableStateFlow(IncomeState())
+  private val _state = MutableStateFlow(IncomesViewModelState())
   val state = _state.asStateFlow()
 
   fun onEvent(incomeEvent: IncomeEvent) {
     when (incomeEvent) {
-
       is IncomeEvent.BackPressInitialTouch -> {
         _state.update {
           it.copy(backPressState = BackPress.InitialTouch, showToast = true)
@@ -105,7 +78,8 @@ class IncomesViewModel @Inject constructor(
           val incomeFortnight = income.paymentDate.fortnight.translate()
           val incomeArr = incomeMonths[incomeFortnight]
           incomeArr?.add(income) ?: incomeMonths.put(
-            incomeFortnight, mutableListOf(income)
+            incomeFortnight,
+            mutableListOf(income)
           )
           monthMap[month] = incomeMonths
           yearMap[year] = monthMap
@@ -134,7 +108,12 @@ class IncomesViewModel @Inject constructor(
     _state.update { it.copy(isLoading = true) }
     graphQlClientImpl.query(
       HomeScreenAllIncomesQuery(),
-      onError = { _state.emit(IncomeState(isLoading = false, uiError = R.string.general_error)) })
+      onError = {
+        _state.emit(
+          IncomesViewModelState(isLoading = false, uiError = R.string.general_error)
+        )
+      }
+    )
       .map {
         val responseIncome = it.data
         if (responseIncome != null) {
@@ -173,7 +152,8 @@ class IncomesViewModel @Inject constructor(
                 errorMessage = error.uiText
               )
             }
-          })
+          }
+        )
       }
   }
 }

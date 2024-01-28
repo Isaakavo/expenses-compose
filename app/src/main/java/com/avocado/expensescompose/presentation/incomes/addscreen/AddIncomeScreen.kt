@@ -37,7 +37,7 @@ fun AddIncomeScreen(
   incomeId: String = "",
   viewModel: AddIncomeViewModel = hiltViewModel(),
   onPopBackStack: () -> Unit = {},
-  onNavigate: (navigateEvent: NavigateEvent, shouldRefresh: String) -> Unit,
+  onNavigate: (navigateEvent: NavigateEvent, shouldRefresh: String) -> Unit
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -61,7 +61,6 @@ fun AddIncomeScreen(
     onNavigate = onNavigate,
     onEvent = viewModel::onEvent
   )
-
 }
 
 @Composable

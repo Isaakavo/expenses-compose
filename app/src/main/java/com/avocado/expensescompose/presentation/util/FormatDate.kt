@@ -2,7 +2,6 @@ package com.avocado.expensescompose.presentation.util
 
 import com.avocado.expensescompose.data.model.total.TotalFortnight
 import com.avocado.type.Fortnight
-import timber.log.Timber
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -11,6 +10,7 @@ import java.time.YearMonth
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import timber.log.Timber
 
 fun LocalDateTime.formatDateWithYear(): String {
   val format = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.getDefault())
@@ -106,7 +106,6 @@ fun String.formatDateForRequestPayBefore(): LocalDateTime? = try {
   Timber.d("Error al convertir la cadena a LocalDateTime: " + e.message)
   null
 }
-
 
 fun Long.formatDateFromMillis(): String = try {
   val currentTime = LocalTime.now().hour.toLong()

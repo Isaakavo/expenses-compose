@@ -75,5 +75,5 @@ val expenseList = listOf(
     createdAt = LocalDateTime.now(),
     comment = "",
     id = "5"
-  ),
+  )
 )

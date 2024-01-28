@@ -14,12 +14,12 @@ import com.avocado.expensescompose.data.model.card.Card
 import com.avocado.expensescompose.data.model.successOrError
 import com.avocado.type.CreateCardInput
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 sealed class CardsScreenEvents {
   object OpenAddCardDialog : CardsScreenEvents()
@@ -56,7 +56,6 @@ class CardsScreenViewModel @Inject constructor(private val graphQlClient: GraphQ
 
   fun onEvent(events: CardsScreenEvents, inputValue: String = "") {
     when (events) {
-
       CardsScreenEvents.CloseAddCardDialog -> {
         _state.update { it.copy(openAddCardDialog = false) }
       }
@@ -154,7 +153,11 @@ class CardsScreenViewModel @Inject constructor(private val graphQlClient: GraphQ
     viewModelScope.launch {
       graphQlClient.query(
         AllCardsQuery(),
-        onError = { _state.emit(CardsScreenState(uiError = R.string.cards_add_card_retrieve_card_error)) }
+        onError = {
+          _state.emit(
+            CardsScreenState(uiError = R.string.cards_add_card_retrieve_card_error)
+          )
+        }
       ).map { apolloResponse ->
         validateDataWithoutErrors(apolloResponse)
       }

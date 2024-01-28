@@ -26,6 +26,8 @@ import com.avocado.type.Category
 import com.avocado.type.CreateExpenseInput
 import com.avocado.type.UpdateExpenseInput
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.LocalDateTime
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
@@ -33,8 +35,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.time.LocalDateTime
-import javax.inject.Inject
 
 sealed class AddExpenseEvent {
   object SelectCard : AddExpenseEvent()
@@ -121,7 +121,6 @@ class AddExpenseViewModel @Inject constructor(
         updateExpenseById(params as String)
       }
 
-
       AddExpenseEvent.DateDialogOpen -> {
         _state.update { it.copy(openDateDialog = true) }
       }
@@ -156,7 +155,7 @@ class AddExpenseViewModel @Inject constructor(
         payBefore = _state.value.date.adaptDateForInput(),
         total = _state.value.total.toDouble(),
         cardId = Optional.present(_state.value.selectedCard?.id),
-        category = _state.value.category,
+        category = _state.value.category
       )
       graphQlClientImpl.mutate(CreateExpenseMutation(input)).map { apolloResponse ->
         validateData(apolloResponse.data?.createExpense)
@@ -197,7 +196,8 @@ class AddExpenseViewModel @Inject constructor(
       _state.update { it.copy(loadingCard = true) }
       graphQlClientImpl.query(
         AllCardsQuery(),
-        onError = { _state.emit(AddExpensesState(uiError = R.string.general_error)) })
+        onError = { _state.emit(AddExpensesState(uiError = R.string.general_error)) }
+      )
         .map { apolloResponse ->
           try {
             val cardsList = apolloResponse.data?.cardList

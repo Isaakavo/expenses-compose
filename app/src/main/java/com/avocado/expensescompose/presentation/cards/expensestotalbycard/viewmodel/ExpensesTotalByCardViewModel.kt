@@ -1,4 +1,4 @@
-package com.avocado.expensescompose.presentation.cards.expensestotalbycard
+package com.avocado.expensescompose.presentation.cards.expensestotalbycard.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,9 +12,8 @@ import com.avocado.expensescompose.data.adapters.graphql.utils.validateDataWitho
 import com.avocado.expensescompose.data.apolloclients.GraphQlClientImpl
 import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.data.model.successOrError
-import com.avocado.expensescompose.data.model.total.Total
-import com.avocado.expensescompose.data.model.total.TotalFortnight
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,40 +23,18 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.zip
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import javax.inject.Inject
-
-
-sealed class ExpensesTotalByCardEvent {
-  object MonthData : ExpensesTotalByCardEvent()
-  object FortnightData : ExpensesTotalByCardEvent()
-  object DeleteCard : ExpensesTotalByCardEvent()
-}
-
-enum class DataSelector {
-  FORTNIGHT,
-  MONTH
-}
-
-data class CardsWithExpensesState(
-  val totalByMonthList: List<Total> = emptyList(),
-  val totalByFortnight: List<TotalFortnight> = emptyList(),
-  val cardBank: String = "",
-  val cardAlias: String = "",
-  val dataSelector: DataSelector = DataSelector.FORTNIGHT,
-  val uiError: Int? = 0,
-  val isDeleted: Boolean = false
-)
 
 @HiltViewModel
-class ExpensesTotalByCardViewModel @Inject constructor(private val graphQlClientImpl: GraphQlClientImpl) :
+class ExpensesTotalByCardViewModel @Inject constructor(
+  private val graphQlClientImpl: GraphQlClientImpl
+) :
   ViewModel() {
 
-  private val _state = MutableStateFlow(CardsWithExpensesState())
+  private val _state = MutableStateFlow(ExpensesTotalByCardViewModelState())
   val state = _state.asStateFlow()
 
   fun onEvent(event: ExpensesTotalByCardEvent, param: String = "") {
     when (event) {
-
       ExpensesTotalByCardEvent.FortnightData -> {
         _state.update { it.copy(dataSelector = DataSelector.FORTNIGHT) }
       }
@@ -85,7 +62,7 @@ class ExpensesTotalByCardViewModel @Inject constructor(private val graphQlClient
                 .orEmpty()
             card.successOrError(
               onSuccess = { cardById ->
-                CardsWithExpensesState(
+                ExpensesTotalByCardViewModelState(
                   totalByMonthList = totalByMonth,
                   totalByFortnight = totalByyFortnight,
                   cardBank = cardById.data.cardById?.bank.orEmpty(),
@@ -95,12 +72,12 @@ class ExpensesTotalByCardViewModel @Inject constructor(private val graphQlClient
               },
               onError = { cardByIdError ->
                 Timber.e(cardByIdError.exception?.localizedMessage.orEmpty())
-                CardsWithExpensesState(uiError = cardByIdError.uiText)
+                ExpensesTotalByCardViewModelState(uiError = cardByIdError.uiText)
               }
             )
           },
           onError = {
-            CardsWithExpensesState(uiError = it.uiText)
+            ExpensesTotalByCardViewModelState(uiError = it.uiText)
           }
         )
       }
@@ -109,30 +86,29 @@ class ExpensesTotalByCardViewModel @Inject constructor(private val graphQlClient
           MyResult.Error(
             uiText = R.string.general_network_error,
             exception = e,
-            data = CardsWithExpensesState()
+            data = ExpensesTotalByCardViewModelState()
           )
         }
         .collect {
           _state.emit(it)
         }
     }
-
   }
 
   private suspend fun getCardById(cardId: String): Flow<MyResult<CardByIdQuery.Data>> {
     return graphQlClientImpl.query(
       CardByIdQuery(cardId),
-      onError = { _state.emit(CardsWithExpensesState(uiError = R.string.general_error)) }
+      onError = { _state.emit(ExpensesTotalByCardViewModelState(uiError = R.string.general_error)) }
     ).map { apolloResponse ->
       validateDataWithoutErrors(apolloResponse)
     }
   }
 
   private suspend fun getExpensesByCardId(cardId: String):
-      Flow<MyResult<ExpensesTotalByCardIdQuery.Data>> {
+    Flow<MyResult<ExpensesTotalByCardIdQuery.Data>> {
     return graphQlClientImpl.query(
       ExpensesTotalByCardIdQuery(cardId),
-      onError = { _state.emit(CardsWithExpensesState(uiError = R.string.general_error)) }
+      onError = { _state.emit(ExpensesTotalByCardViewModelState(uiError = R.string.general_error)) }
     ).map { apolloResponse ->
       validateDataWithoutErrors(apolloResponse)
     }
@@ -148,10 +124,10 @@ class ExpensesTotalByCardViewModel @Inject constructor(private val graphQlClient
             val isDeleted = data.data.deleteCard
             this.launch {
               if (isDeleted) {
-                _state.emit(CardsWithExpensesState(isDeleted = true))
+                _state.emit(ExpensesTotalByCardViewModelState(isDeleted = true))
               } else {
                 _state.emit(
-                  CardsWithExpensesState(
+                  ExpensesTotalByCardViewModelState(
                     isDeleted = false,
                     uiError = R.string.expenses_delete_card_error
                   )
@@ -161,7 +137,7 @@ class ExpensesTotalByCardViewModel @Inject constructor(private val graphQlClient
           },
           onError = { error ->
             this.launch {
-              _state.emit(CardsWithExpensesState(uiError = error.uiText))
+              _state.emit(ExpensesTotalByCardViewModelState(uiError = error.uiText))
             }
           }
         )

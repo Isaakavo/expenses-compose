@@ -6,9 +6,9 @@ import com.avocado.expensescompose.presentation.util.AuthError
 import javax.inject.Inject
 
 class LoginUseCase @Inject constructor(
-  private val authRepository: AuthRepository,
+  private val authRepository: AuthRepository
 
-  ) {
+) {
 
   suspend operator fun invoke(email: String, password: String): LoginResult {
     val emailError = if (email.isBlank()) AuthError.FieldEmpty else null
@@ -28,6 +28,4 @@ class LoginUseCase @Inject constructor(
   suspend fun getUsernameFromStorage() = authRepository.getUsername()
 
   suspend fun resetLoginCredentials() = authRepository.resetTokens()
-
-
 }

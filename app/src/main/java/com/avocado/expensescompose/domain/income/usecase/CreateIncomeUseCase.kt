@@ -11,7 +11,7 @@ class CreateIncomeUseCase(
   suspend operator fun invoke(
     total: Double,
     paymentDate: LocalDateTime,
-    comment: String,
+    comment: String
   ): MyResult<Income?> {
     return incomesClient.insertIncome(total, paymentDate, comment.trim())
   }

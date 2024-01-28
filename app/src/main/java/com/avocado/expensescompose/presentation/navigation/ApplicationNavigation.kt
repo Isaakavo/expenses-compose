@@ -17,8 +17,8 @@ import androidx.navigation.navArgument
 import com.avocado.expensescompose.presentation.RoutesConstants
 import com.avocado.expensescompose.presentation.cards.cardsscreen.CardsScreen
 import com.avocado.expensescompose.presentation.cards.expensesbycard.ExpensesByCardScreen
-import com.avocado.expensescompose.presentation.cards.expensestotalbycard.DataSelector
 import com.avocado.expensescompose.presentation.cards.expensestotalbycard.ExpensesTotalByCardScreen
+import com.avocado.expensescompose.presentation.cards.expensestotalbycard.viewmodel.DataSelector
 import com.avocado.expensescompose.presentation.expenses.addexpense.AddExpenseScreen
 import com.avocado.expensescompose.presentation.incomes.addscreen.AddIncomeScreen
 import com.avocado.expensescompose.presentation.incomes.homescreen.IncomesScreen
@@ -40,9 +40,7 @@ sealed class NavigateEvent {
 }
 
 private fun <T> navigate(navigateEvent: NavigateEvent, navController: NavController, param: T) {
-
   when (navigateEvent) {
-
     NavigateEvent.NavigateLogin -> {
       navController.navigate(RoutesConstants.LOGIN_SCREEN) {
         popUpTo(navController.graph.id) {
@@ -52,19 +50,19 @@ private fun <T> navigate(navigateEvent: NavigateEvent, navController: NavControl
     }
 
     NavigateEvent.NavigateIncomeOverview -> {
-      navController.navigate("${RoutesConstants.INCOME_OVERVIEW}/${param}")
+      navController.navigate("${RoutesConstants.INCOME_OVERVIEW}/$param")
     }
 
     NavigateEvent.NavigateIncomeExpensesList -> {
       navController.navigate(
-        "${RoutesConstants.INCOME_EXPENSES_LIST}/${param}"
+        "${RoutesConstants.INCOME_EXPENSES_LIST}/$param"
       )
     }
 
     NavigateEvent.NavigationAddIncomeScreen -> {
       navController.navigate(RoutesConstants.INCOME_ADD) {
         launchSingleTop = true
-        popUpTo("${RoutesConstants.INCOME_OVERVIEW}/${param}") {
+        popUpTo("${RoutesConstants.INCOME_OVERVIEW}/$param") {
           inclusive = true
         }
       }
@@ -73,20 +71,20 @@ private fun <T> navigate(navigateEvent: NavigateEvent, navController: NavControl
     NavigateEvent.NavigationEditIncomeScreen -> {
       navController.navigate("${RoutesConstants.INCOME_ADD}/$param") {
         launchSingleTop = true
-        popUpTo("${RoutesConstants.INCOME_OVERVIEW}/${param}") {
+        popUpTo("${RoutesConstants.INCOME_OVERVIEW}/$param") {
           inclusive = true
         }
       }
     }
 
     NavigateEvent.NavigateCardsScreen -> {
-      navController.navigate("${RoutesConstants.CARDS_SCREEN}/${param}")
+      navController.navigate("${RoutesConstants.CARDS_SCREEN}/$param")
     }
 
     NavigateEvent.NavigateCardsWithExpenseScreen -> {
-      navController.navigate("${RoutesConstants.CARDS_EXPENSE_SCREEN}/${param}") {
+      navController.navigate("${RoutesConstants.CARDS_EXPENSE_SCREEN}/$param") {
         launchSingleTop = true
-        popUpTo("${RoutesConstants.CARDS_SCREEN}/${param}") {
+        popUpTo("${RoutesConstants.CARDS_SCREEN}/$param") {
           inclusive = true
         }
       }
@@ -115,7 +113,8 @@ fun ExpensesApplication() {
     enterTransition = {
       fadeIn(
         animationSpec = tween(
-          300, easing = LinearEasing
+          300,
+          easing = LinearEasing
         )
       ) + slideIntoContainer(
         animationSpec = tween(350, easing = EaseIn),
@@ -125,7 +124,8 @@ fun ExpensesApplication() {
     exitTransition = {
       fadeOut(
         animationSpec = tween(
-          300, easing = LinearEasing
+          300,
+          easing = LinearEasing
         )
       ) + slideOutOfContainer(
         animationSpec = tween(350, easing = EaseOut),
@@ -133,7 +133,6 @@ fun ExpensesApplication() {
       )
     }
   ) {
-
     // Login Screen
     composable(RoutesConstants.LOGIN_SCREEN) {
       LoginScreen(
@@ -168,7 +167,8 @@ fun ExpensesApplication() {
     composable(
       "${RoutesConstants.INCOME_EXPENSES_LIST}/{paymentDate}",
       arguments = listOf(
-        navArgument("paymentDate") { type = NavType.StringType })
+        navArgument("paymentDate") { type = NavType.StringType }
+      )
     ) { navBackStackEntry ->
       val paymentDate = navBackStackEntry.arguments?.getString("paymentDate") ?: ""
       IncomeExpensesScreen(
@@ -191,7 +191,8 @@ fun ExpensesApplication() {
         onPopBackStack = { navController.popBackStack() },
         onNavigate = { navigateEvent, operation ->
           navigate(navigateEvent, navController, operation)
-        })
+        }
+      )
     }
 
     // Edit Income Screen
@@ -254,10 +255,12 @@ fun ExpensesApplication() {
     // Card Expense Screen
     composable(
       "${RoutesConstants.CARDS_EXPENSE_SCREEN}/{cardId}",
-      arguments = listOf(navArgument("cardId") {
-        type =
-          NavType.StringType
-      })
+      arguments = listOf(
+        navArgument("cardId") {
+          type =
+            NavType.StringType
+        }
+      )
     ) { navBackStackEntry ->
       val cardId = navBackStackEntry.arguments?.getString("cardId") ?: ""
       ExpensesTotalByCardScreen(
@@ -265,7 +268,8 @@ fun ExpensesApplication() {
         onPopBackStack = { navController.popBackStack() },
         onNavigate = { event, param ->
           navigate(event, navController, param)
-        })
+        }
+      )
     }
 
     // Expenses by card Screen

@@ -4,7 +4,7 @@ enum class Fortnight {
   FIRST,
   SECOND;
 
-  fun translate(): String = when(this) {
+  fun translate(): String = when (this) {
     FIRST -> "Primera"
     SECOND -> "Segunda"
   }

@@ -4,10 +4,10 @@ import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.api.ApolloResponse
 import com.apollographql.apollo3.api.Mutation
 import com.apollographql.apollo3.api.Query
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import timber.log.Timber
-import javax.inject.Inject
 
 interface GraphQlClient {
   suspend fun <D : Query.Data> query(
