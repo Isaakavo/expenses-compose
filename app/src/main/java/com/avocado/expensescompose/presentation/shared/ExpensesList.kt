@@ -256,19 +256,18 @@ fun ExpenseFilterMenu(onFilterSelect: (String, String) -> Unit) {
         text = { Text(text = stringResource(R.string.expenses_list_filter_reset)) },
         onClick = { onFilterSelect("RESET", "ALL") })
     }
-    if (categoryExpanded) {
-      DropdownMenu(
-        expanded = categoryExpanded,
-        onDismissRequest = {
-          categoryExpanded = !categoryExpanded
-        },
-        modifier = Modifier.height(250.dp)
-      ) {
-        Category.values().forEach {
-          DropdownMenuItem(
-            text = { Text(text = it.name) },
-            onClick = { onFilterSelect("CATEGORY", it.name) })
-        }
+
+    DropdownMenu(
+      expanded = categoryExpanded,
+      onDismissRequest = {
+        categoryExpanded = !categoryExpanded
+      },
+      modifier = Modifier.height(250.dp)
+    ) {
+      Category.values().forEach {
+        DropdownMenuItem(
+          text = { Text(text = it.name) },
+          onClick = { onFilterSelect("CATEGORY", it.name) })
       }
     }
   }
