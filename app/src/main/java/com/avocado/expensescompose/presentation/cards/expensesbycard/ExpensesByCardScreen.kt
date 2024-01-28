@@ -8,12 +8,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -62,6 +64,7 @@ fun ExpensesByCardScreen(
     expensesList = state.expensesList,
     expensesTotal = state.expenseTotal,
     payBefore = payBefore,
+    isLoading = state.isLoading,
     onPopBackStack = onPopBackStack,
     onNavigate = onNavigate
   )
@@ -72,6 +75,7 @@ fun ExpensesByCardContent(
   expensesList: List<Expense>,
   expensesTotal: Double,
   payBefore: String,
+  isLoading: Boolean,
   onPopBackStack: () -> Unit,
   onNavigate: (navigateEvent: NavigateEvent, param: String) -> Unit = {one, two -> }
 ) {
@@ -85,17 +89,27 @@ fun ExpensesByCardContent(
         .padding(paddingValues)
         .fillMaxSize()
     ) {
-      Column(
-        modifier = Modifier
-          .fillMaxSize()
-          .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(22.dp)
-      ) {
-        CardExpensesDetails(expensesTotal = expensesTotal, payBefore = payBefore)
-        ExpensesList(
-          expenseList = expensesList,
-          onEdit = { onNavigate(NavigateEvent.NavigateEditExpenseScreen, it) }
+      if (isLoading) {
+        Column(
+          modifier = Modifier.padding(paddingValues),
+          verticalArrangement = Arrangement.Center,
+          horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+          CircularProgressIndicator(strokeWidth = 6.dp)
+        }
+      } else {
+        Column(
+          modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 12.dp),
+          verticalArrangement = Arrangement.spacedBy(22.dp)
+        ) {
+          CardExpensesDetails(expensesTotal = expensesTotal, payBefore = payBefore)
+          ExpensesList(
+            expenseList = expensesList,
+            onEdit = { onNavigate(NavigateEvent.NavigateEditExpenseScreen, it) }
           )
+        }
       }
     }
   }

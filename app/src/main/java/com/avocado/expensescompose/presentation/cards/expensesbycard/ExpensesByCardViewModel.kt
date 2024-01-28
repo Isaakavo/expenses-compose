@@ -19,12 +19,14 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class ExpensesByCardState(
   val expensesList: List<Expense> = emptyList(),
   val expenseTotal: Double = 0.0,
+  val isLoading: Boolean = false,
   val card: Card? = null,
   val uiError: Int = 0
 )
@@ -36,6 +38,7 @@ class ExpensesByCardViewModel @Inject constructor(private val graphQlClientImpl:
   val state = _state.asStateFlow()
 
   fun getExpensesByFortnight(payBefore: String, cardId: String) {
+    _state.update { it.copy(isLoading = true) }
     val formattedDate = payBefore.formatDateForRequestPayBefore()
     if (formattedDate != null) {
       val input = PayBeforeInput(payBefore = Date(formattedDate), cardId = Optional.present(cardId))
@@ -55,7 +58,8 @@ class ExpensesByCardViewModel @Inject constructor(private val graphQlClientImpl:
               _state.emit(
                 ExpensesByCardState(
                   expensesList = expensesList,
-                  expenseTotal = expenseTotal
+                  expenseTotal = expenseTotal,
+                  isLoading = false
                 )
               )
             }
@@ -66,6 +70,7 @@ class ExpensesByCardViewModel @Inject constructor(private val graphQlClientImpl:
   }
 
   fun getExpensesByMonth(payBefore: String, cardId: String) {
+    _state.update { it.copy(isLoading = true) }
     val formattedDate = payBefore.formatDateForRequestPayBefore()
     if (formattedDate != null) {
       val input = PayBeforeInput(payBefore = Date(formattedDate), cardId = Optional.present(cardId))
@@ -86,7 +91,8 @@ class ExpensesByCardViewModel @Inject constructor(private val graphQlClientImpl:
                 _state.emit(
                   ExpensesByCardState(
                     expensesList = expensesList,
-                    expenseTotal = expenseTotal
+                    expenseTotal = expenseTotal,
+                    isLoading = false
                   )
                 )
               }

@@ -79,7 +79,7 @@ class LoginViewModel @Inject constructor(
         password = uiState.value.password.trim()
       )
 
-      if (loginResult.emailError != null) {
+        if (loginResult.emailError != null) {
         _uiState.update {
           it.copy(userMessage = R.string.login_incorrect_email)
         }
