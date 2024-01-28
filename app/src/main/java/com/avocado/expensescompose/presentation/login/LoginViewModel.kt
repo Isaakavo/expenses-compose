@@ -20,6 +20,7 @@ sealed class LoginEvent {
   object ToggleViewPassword : LoginEvent()
   object Login : LoginEvent()
   object SetIsSuccess : LoginEvent()
+  object ChangeUser : LoginEvent()
 }
 
 // TODO add remember password logic
@@ -30,6 +31,7 @@ data class LoginUiState(
   val password: String = "",
   val isLoading: Boolean = false,
   val shouldShowPassword: Boolean = false,
+  val isQuickLogin: Boolean = false,
   var userMessage: Int? = null,
   var isSuccess: Boolean = false
 )
@@ -44,6 +46,18 @@ class LoginViewModel @Inject constructor(
 
   init {
     getUsername()
+    refreshTokenExist()
+  }
+
+  private fun refreshTokenExist() {
+    viewModelScope.launch {
+      val result = loginUseCase.getRefreshToken()
+      if (result is MyResult.Success && result.data != null) {
+        _uiState.update {
+          it.copy(isQuickLogin = true, password = "Fake value for now")
+        }
+      }
+    }
   }
 
   fun onEvent(event: LoginEvent, value: String) {
@@ -65,6 +79,15 @@ class LoginViewModel @Inject constructor(
       LoginEvent.SetIsSuccess -> _uiState.update {
         it.copy(isSuccess = false)
       }
+
+      LoginEvent.ChangeUser -> {
+        viewModelScope.launch {
+          val result = loginUseCase.resetLoginCredentials()
+          if (result is MyResult.Success) {
+            _uiState.update { it.copy(password = "", isQuickLogin = false, username = "") }
+          }
+        }
+      }
     }
   }
 
@@ -79,7 +102,7 @@ class LoginViewModel @Inject constructor(
         password = uiState.value.password.trim()
       )
 
-        if (loginResult.emailError != null) {
+      if (loginResult.emailError != null) {
         _uiState.update {
           it.copy(userMessage = R.string.login_incorrect_email)
         }

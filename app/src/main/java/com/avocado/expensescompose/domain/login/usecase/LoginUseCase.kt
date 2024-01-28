@@ -21,8 +21,13 @@ class LoginUseCase @Inject constructor(
     return LoginResult(result = authRepository.getAccessToken(email, password))
   }
 
+  suspend fun getRefreshToken() = authRepository.getRefreshToken()
+
   suspend fun saveUsername(username: String) = authRepository.saveUsername(username)
 
   suspend fun getUsernameFromStorage() = authRepository.getUsername()
+
+  suspend fun resetLoginCredentials() = authRepository.resetTokens()
+
 
 }

@@ -28,6 +28,7 @@
     <string name="login_incorrect_email">Incorrect email</string>
     <string name="login_incorrect_password">Incorrect password</string>
     <string name="login_incorrect_email_password">Incorrect username or password.</string>
+    <string name="login_change_user">Change user</string>
     <string name="add_income_add">Add Income</string>
     <string name="add_income_save">Save</string>
     <string name="add_income_total">Total</string>

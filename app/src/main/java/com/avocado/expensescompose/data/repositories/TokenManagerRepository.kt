@@ -52,6 +52,18 @@ class TokenManagerRepository @Inject constructor(private val context: Context) :
     }
   }
 
+  suspend fun deleteUsername(): MyResult<Boolean> {
+    return try {
+      context.dataStore.edit { preferences ->
+        preferences.remove(USER_NAME_KEY)
+      }
+      MyResult.Success(true)
+    } catch (exception: IOException) {
+      Timber.e("Error deleting access token ${exception.printStackTrace()}")
+      MyResult.Error(false, R.string.token_user_error)
+    }
+  }
+
   override suspend fun saveAccessToken(value: String): MyResult<Boolean> =
     try {
       context.dataStore.edit { preferences ->

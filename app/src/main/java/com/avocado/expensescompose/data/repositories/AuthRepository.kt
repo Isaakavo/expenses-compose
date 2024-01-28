@@ -34,8 +34,20 @@ class AuthRepository @Inject constructor(
     tokenManagerRepository.saveRefreshToken(value)
 
   private suspend fun getAccessToken(): MyResult<String?> = tokenManagerRepository.getAccessToken()
-  private suspend fun getRefreshToken(): MyResult<String?> =
+  suspend fun getRefreshToken(): MyResult<String?> =
     tokenManagerRepository.getRefreshToken()
+
+  suspend fun resetTokens(): MyResult<Boolean> {
+    val refresh = tokenManagerRepository.deleteRefreshToken()
+    val access = tokenManagerRepository.deleteAccessToken()
+    val email = tokenManagerRepository.deleteUsername()
+
+    if (refresh is MyResult.Success && access is MyResult.Success && email is MyResult.Success) {
+      return MyResult.Success(true)
+    }
+
+    return MyResult.Error(false)
+  }
 
   private suspend fun getTokenFromApi(email: String, password: String): SimpleResource =
     try {
