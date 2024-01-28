@@ -1,6 +1,7 @@
 package com.avocado.expensescompose.presentation.util
 
 import android.util.Log
+import timber.log.Timber
 
 enum class Operations {
   UPDATE,
@@ -46,6 +47,6 @@ fun validateOperation(
       onAlwaysExecute()
     }
 
-    Operations.NONE -> Log.i("Operations", "None operation")
+    Operations.NONE -> Timber.i("None operation")
   }
 }

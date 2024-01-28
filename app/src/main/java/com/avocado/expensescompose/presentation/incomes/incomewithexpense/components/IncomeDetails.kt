@@ -16,7 +16,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.adapters.formatMoney
-import com.avocado.expensescompose.presentation.incomes.incomewithexpense.DateRow
 
 @Composable
 fun IncomeDetails(incomesTotal: Double, remaining: Double, expended: Double, month: String) {

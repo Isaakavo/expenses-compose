@@ -29,7 +29,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.avocado.expensescompose.R
-import com.avocado.expensescompose.presentation.login.LoginEvent
+import com.avocado.expensescompose.presentation.login.viewmodel.LoginViewModelEvents
 
 @Composable
 fun LoginScreenContent(
@@ -39,7 +39,7 @@ fun LoginScreenContent(
   shouldShowPassword: Boolean,
   isQuickLogin: Boolean,
   isLoading: Boolean,
-  onEvent: (event: LoginEvent, value: String) -> Unit
+  onEvent: (event: LoginViewModelEvents, value: String) -> Unit
 ) {
   Surface {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -51,17 +51,17 @@ fun LoginScreenContent(
         Text(text = stringResource(id = R.string.login_login), modifier = Modifier)
         OutlinedTextField(
           value = username,
-          onValueChange = { onEvent(LoginEvent.UpdateUsername, it) },
+          onValueChange = { onEvent(LoginViewModelEvents.UpdateUsername, it) },
           placeholder = { Text(text = stringResource(id = R.string.login_user)) }
         )
         OutlinedTextField(
           value = password,
-          onValueChange = { onEvent(LoginEvent.UpdatePassword, it) },
+          onValueChange = { onEvent(LoginViewModelEvents.UpdatePassword, it) },
           placeholder = { Text(text = stringResource(id = R.string.login_password)) },
           keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
           enabled = !isQuickLogin,
           trailingIcon = {
-            IconButton(onClick = { onEvent(LoginEvent.ToggleViewPassword, "") }) {
+            IconButton(onClick = { onEvent(LoginViewModelEvents.ToggleViewPassword, "") }) {
               if (shouldShowPassword) {
                 Icon(
                   painter = painterResource(id = R.drawable.baseline_visibility_24),
@@ -78,7 +78,7 @@ fun LoginScreenContent(
           visualTransformation = if (shouldShowPassword) VisualTransformation.None else PasswordVisualTransformation()
         )
 
-        Button(enabled = !isLoading || !isQuickLogin, onClick = { onEvent(LoginEvent.Login, "") }) {
+        Button(enabled = !isLoading || !isQuickLogin, onClick = { onEvent(LoginViewModelEvents.Login, "") }) {
           Row(horizontalArrangement = Arrangement.SpaceBetween) {
             if (isLoading) {
               CircularProgressIndicator(
@@ -99,7 +99,7 @@ fun LoginScreenContent(
 
         if (isQuickLogin) {
           Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-            TextButton(onClick = { onEvent(LoginEvent.ChangeUser, "") }) {
+            TextButton(onClick = { onEvent(LoginViewModelEvents.ChangeUser, "") }) {
               Text(text = stringResource(id = R.string.login_change_user), fontSize = 14.sp)
             }
           }
