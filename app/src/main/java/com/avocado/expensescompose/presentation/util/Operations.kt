@@ -1,6 +1,5 @@
 package com.avocado.expensescompose.presentation.util
 
-import android.util.Log
 import timber.log.Timber
 
 enum class Operations {
