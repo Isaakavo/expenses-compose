@@ -261,7 +261,10 @@ fun ExpenseFilterMenu(onFilterSelect: (String, String) -> Unit) {
       Divider()
       DropdownMenuItem(
         text = { Text(text = stringResource(R.string.expenses_list_filter_reset)) },
-        onClick = { onFilterSelect("RESET", "ALL") })
+        onClick = {
+          expanded = false
+          onFilterSelect("RESET", "ALL")
+        })
     }
 
     DropdownMenu(
@@ -274,7 +277,10 @@ fun ExpenseFilterMenu(onFilterSelect: (String, String) -> Unit) {
       Category.values().forEach {
         DropdownMenuItem(
           text = { Text(text = it.name) },
-          onClick = { onFilterSelect("CATEGORY", it.name) })
+          onClick = {
+            categoryExpanded = false
+            onFilterSelect("CATEGORY", it.name)
+          })
       }
     }
   }
