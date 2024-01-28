@@ -5,7 +5,7 @@ import com.avocado.type.Category
 
 fun Category.adapt(): Int = when (this) {
   Category.SAVINGS -> R.string.category_savings
-  Category.COMMUNICATION -> R.string.category_bills
+  Category.COMMUNICATION -> R.string.category_communication
   Category.BILLS -> R.string.category_bills
   Category.FOOD -> R.string.category_food
   Category.CAR -> R.string.category_car

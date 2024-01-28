@@ -75,23 +75,32 @@ fun ExpensesList(
     mutableStateOf(expenseList)
   }
 
-  Text(
-    text = stringResource(R.string.expenses_list_transaction),
-    modifier = Modifier
-      .fillMaxWidth()
-      .padding(start = 8.dp),
-    textAlign = TextAlign.Start
-  )
+  val totalFiltered = filteredList.reduceOrNull { acc, item ->
+    Expense(
+      id = item.id,
+      category = item.category,
+      concept = item.concept,
+      total = acc.total + item.total
+    )
+  }
+
   Row(
     modifier = Modifier
       .fillMaxWidth()
       .padding(end = 24.dp),
     verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.End
+    horizontalArrangement = Arrangement.SpaceBetween
   ) {
     Text(
-      text = stringResource(id = R.string.expenses_list_total, filteredList.size),
-      modifier = Modifier.padding(end = 12.dp),
+      text = stringResource(
+        R.string.expenses_list_transaction,
+        filteredList.size,
+        totalFiltered?.total?.formatMoney() ?: "0.0"
+      ),
+      modifier = Modifier
+        .padding(start = 8.dp)
+        .weight(0.5f),
+      textAlign = TextAlign.Start,
       fontWeight = FontWeight.Bold,
       fontSize = 14.sp
     )
