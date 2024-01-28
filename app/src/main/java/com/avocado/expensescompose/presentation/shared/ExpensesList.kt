@@ -41,6 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.avocado.expensescompose.R
+import com.avocado.expensescompose.data.adapters.adapt
 import com.avocado.expensescompose.data.adapters.formatMoney
 import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.presentation.util.formatDateDaysWithMonth
@@ -173,7 +174,9 @@ fun ExpenseItem(
       ) {
         val fontSize = if (expanded) 18.sp else 14.sp
 
-        Text(text = expense.category.name, fontSize = fontSize)
+        expense.category.adapt().takeIf { it != 0 }?.let {
+          Text(text = stringResource(id = it), fontSize = fontSize)
+        }
 
         if (expanded) {
           val cardInfo = expense.card?.alias ?: expense.card?.bank

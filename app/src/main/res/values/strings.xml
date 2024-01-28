@@ -85,4 +85,21 @@
     <string name="expenses_delete_card_error">Error deleting the card. 😓</string>
     <string name="first_fortnight">First Fortnight</string>
     <string name="second_fortnight">Second Fortnight</string>
+    <string name="category_communication">Communication</string>
+    <string name="category_bills">Bills</string>
+    <string name="category_food">Food</string>
+    <string name="category_car">Car</string>
+    <string name="category_clothes">Clothes</string>
+    <string name="category_savings">Savings</string>
+    <string name="category_eating_out">Eating Out</string>
+    <string name="category_entertainment">Entertainment</string>
+    <string name="category_gifts">Gifts</string>
+    <string name="category_hang_out">Hang Out</string>
+    <string name="category_health">Health</string>
+    <string name="category_house">House</string>
+    <string name="category_insurance">Insurance</string>
+    <string name="category_pets">Pets</string>
+    <string name="category_sports">Sports</string>
+    <string name="category_super_market">Super Market</string>
+    <string name="category_transport">Transport</string>
 </resources>
