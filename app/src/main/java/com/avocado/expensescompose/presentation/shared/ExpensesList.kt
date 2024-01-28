@@ -250,6 +250,8 @@ fun ExpenseDateRow(payBefore: LocalDateTime?, index: Int, expenseList: List<Expe
   }
 }
 
+// Adding client side logic to handle filters to avoid charge the server, I might move this to
+// server side in a future
 @Composable
 fun ExpenseFilterMenu(onFilterSelect: (String, String) -> Unit) {
   var expanded by remember { mutableStateOf(false) }
