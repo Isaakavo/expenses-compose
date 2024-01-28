@@ -88,13 +88,15 @@ fun CardWithExpenseContent(
 
   Scaffold(topBar = {
     AppBar(title = cardAlias.ifEmpty { cardBank },
-      dropDownMenuItems = listOf(MenuItems(text = stringResource(id = R.string.appbar_expenses_cards_total_menu_item_1),
-        action = { onEvent(ExpensesTotalByCardEvent.FortnightData, "") }),
+      dropDownMenuItems = listOf(
+        MenuItems(text = stringResource(id = R.string.appbar_expenses_cards_total_menu_item_1),
+          action = { onEvent(ExpensesTotalByCardEvent.FortnightData, "") }),
         MenuItems(text = stringResource(id = R.string.appbar_expenses_cards_total_menu_item_2),
           action = { onEvent(ExpensesTotalByCardEvent.MonthData, "") }),
         MenuItems(text = stringResource(id = R.string.appbar_expenses_cards_total_menu_item_3),
           icon = Icons.Rounded.Delete,
-          action = { onEvent(ExpensesTotalByCardEvent.DeleteCard, cardId) })),
+          action = { onEvent(ExpensesTotalByCardEvent.DeleteCard, cardId) })
+      ),
       onNavigationIconClick = { onPopBackStack() })
   }) { paddingValues ->
     Surface(
@@ -171,7 +173,9 @@ fun TotalByFortnight(
           Row(
             modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
           ) {
-            Text(text = item.fortnight?.adapt().orEmpty())
+            if (item.fortnight != null) {
+              Text(text = stringResource(item.fortnight.adapt()))
+            }
             Text(text = item.total?.formatMoney().orEmpty())
           }
         }

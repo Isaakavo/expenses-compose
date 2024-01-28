@@ -78,4 +78,6 @@
     <string name="cards_add_card_error">Unable to add the card. Please try again.</string>
     <string name="cards_add_card_retrieve_card_error">Something went wrong trying to retrieve your card information. 😓</string>
     <string name="expenses_delete_card_error">Error deleting the card. 😓</string>
+    <string name="first_fortnight">First Fortnight</string>
+    <string name="second_fortnight">Second Fortnight</string>
 </resources>
