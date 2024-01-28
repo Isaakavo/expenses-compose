@@ -30,7 +30,7 @@ import com.avocado.expensescompose.presentation.cards.expensestotalbycard.DataSe
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.shared.ExpensesList
 import com.avocado.expensescompose.presentation.topbar.AppBar
-import com.avocado.expensescompose.presentation.util.formatDateOnlyMonth
+import com.avocado.expensescompose.presentation.util.formatDateMonthWithYear
 import timber.log.Timber
 
 @Composable
@@ -40,7 +40,7 @@ fun ExpensesByCardScreen(
   dataSelector: DataSelector,
   payBefore: String,
   onPopBackStack: () -> Unit = {},
-  onNavigate: (navigateEvent: NavigateEvent, param: String) -> Unit = {one, two -> }
+  onNavigate: (navigateEvent: NavigateEvent, param: String) -> Unit = { one, two -> }
 ) {
 
   val state by viewModel.state.collectAsStateWithLifecycle()
@@ -63,6 +63,8 @@ fun ExpensesByCardScreen(
   ExpensesByCardContent(
     expensesList = state.expensesList,
     expensesTotal = state.expenseTotal,
+    cardAlias = state.card?.alias ?: "",
+    cardBank = state.card?.bank ?: stringResource(id = R.string.appbar_expenses_cards_title),
     payBefore = payBefore,
     isLoading = state.isLoading,
     onPopBackStack = onPopBackStack,
@@ -74,14 +76,16 @@ fun ExpensesByCardScreen(
 fun ExpensesByCardContent(
   expensesList: List<Expense>,
   expensesTotal: Double,
+  cardAlias: String,
+  cardBank: String,
   payBefore: String,
   isLoading: Boolean,
   onPopBackStack: () -> Unit,
-  onNavigate: (navigateEvent: NavigateEvent, param: String) -> Unit = {one, two -> }
+  onNavigate: (navigateEvent: NavigateEvent, param: String) -> Unit = { one, two -> }
 ) {
   Scaffold(
     topBar = {
-      AppBar(title = stringResource(id = R.string.appbar_expenses_cards_title), onNavigationIconClick = { onPopBackStack() })
+      AppBar(title = "$cardAlias $cardBank", onNavigationIconClick = { onPopBackStack() })
     }
   ) { paddingValues ->
     Surface(
@@ -127,7 +131,7 @@ fun CardExpensesDetails(expensesTotal: Double, payBefore: String) {
           .fillMaxWidth()
       ) {
         Text(
-          text = payBefore.formatDateOnlyMonth(),
+          text = payBefore.formatDateMonthWithYear(),
           fontSize = 18.sp,
           fontWeight = FontWeight.Normal
         )

@@ -54,11 +54,13 @@ class ExpensesByCardViewModel @Inject constructor(private val graphQlClientImpl:
             val expensesList =
               data?.expenses?.mapNotNull { it?.expenseFragment?.toExpense() }.orEmpty()
             val expenseTotal = data?.expensesTotal ?: 0.0
+            val card = expensesList.getOrNull(0)
             this.launch {
               _state.emit(
                 ExpensesByCardState(
                   expensesList = expensesList,
                   expenseTotal = expenseTotal,
+                  card = card?.card,
                   isLoading = false
                 )
               )
@@ -87,11 +89,13 @@ class ExpensesByCardViewModel @Inject constructor(private val graphQlClientImpl:
               val expensesList =
                 data?.expenses?.mapNotNull { it?.expenseFragment?.toExpense() }.orEmpty()
               val expenseTotal = data?.expensesTotal ?: 0.0
+              val card = expensesList.getOrNull(0)
               this.launch {
                 _state.emit(
                   ExpensesByCardState(
                     expensesList = expensesList,
                     expenseTotal = expenseTotal,
+                    card = card?.card,
                     isLoading = false
                   )
                 )
