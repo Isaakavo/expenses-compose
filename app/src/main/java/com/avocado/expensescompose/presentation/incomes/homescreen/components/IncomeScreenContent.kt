@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
@@ -109,37 +110,39 @@ fun IncomeScreenContent(
     }
   }
 
-  ModalNavigationDrawer(drawerState = drawerState, drawerContent = {
-    ModalDrawerSheet {
-      Row(modifier = Modifier.padding(start = 16.dp, top = 12.dp, bottom = 24.dp)) {
-        Text(text = "Expenses App", style = MaterialTheme.typography.bodyLarge)
-      }
-      Divider(thickness = 1.dp)
-      Row(
-        modifier = Modifier
-          .padding(start = 12.dp, end = 12.dp, top = 6.dp)
-          .fillMaxWidth()
-      ) {
-        FilledTonalButton(
-          onClick = {
-            onNavigateCardsScreen(
-              NavigateEvent.NavigateCardsScreen,
-              Operations.NONE.name
-            )
-          },
-          contentPadding = PaddingValues(start = 24.dp)
+  ModalNavigationDrawer(
+    drawerState = drawerState,
+    drawerContent = {
+      ModalDrawerSheet(modifier = Modifier.requiredWidth(200.dp)) {
+        Row(modifier = Modifier.padding(start = 16.dp, top = 12.dp, bottom = 24.dp)) {
+          Text(text = "Expenses App", style = MaterialTheme.typography.bodyLarge)
+        }
+        Divider(thickness = 1.dp)
+        Row(
+          modifier = Modifier
+            .padding(start = 12.dp, end = 12.dp, top = 6.dp)
         ) {
-          Icon(
-            painter = painterResource(id = R.drawable.baseline_credit_card_24),
-            contentDescription = ""
-          )
-          Spacer(modifier = Modifier.width(10.dp))
-          Text(text = stringResource(id = R.string.income_card), textAlign = TextAlign.Start)
-          Spacer(modifier = Modifier.weight(1f))
+          FilledTonalButton(
+            onClick = {
+              onNavigateCardsScreen(
+                NavigateEvent.NavigateCardsScreen,
+                Operations.NONE.name
+              )
+            },
+            contentPadding = PaddingValues(start = 24.dp)
+          ) {
+            Icon(
+              painter = painterResource(id = R.drawable.baseline_credit_card_24),
+              contentDescription = ""
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(text = stringResource(id = R.string.income_card), textAlign = TextAlign.Start)
+            Spacer(modifier = Modifier.weight(1f))
+          }
         }
       }
     }
-  }) {
+  ) {
     Scaffold(topBar = {
       AppBar(
         title = stringResource(id = R.string.income_income),
