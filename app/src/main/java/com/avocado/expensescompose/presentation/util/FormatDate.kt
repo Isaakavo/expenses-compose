@@ -1,5 +1,6 @@
 package com.avocado.expensescompose.presentation.util
 
+import com.avocado.expensescompose.data.model.total.Total
 import com.avocado.expensescompose.data.model.total.TotalFortnight
 import com.avocado.type.Fortnight
 import java.time.Instant
@@ -117,3 +118,9 @@ fun Long.formatDateFromMillis(): String = try {
   Timber.d("Error al convertir la cadena a LocalDateTime: " + e.message)
   ""
 }
+
+fun getMonthTotal(totalByMonth: List<Total?>, month: String, year: String) =
+  totalByMonth.find { totalByMont ->
+    totalByMont?.date?.formatDateOnlyMonth()
+      ?.uppercase(Locale.ROOT) == month && totalByMont.year == year
+  }?.total ?: 0.0
