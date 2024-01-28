@@ -256,7 +256,7 @@ fun ExpenseFilterMenu(onFilterSelect: (String, String) -> Unit) {
       expanded = expanded,
       onDismissRequest = { expanded = !expanded }) {
       DropdownMenuItem(
-        text = { Text(text = stringResource(id = R.string.expenses_list_filter)) },
+        text = { Text(text = stringResource(id = R.string.expenses_list_filter_category)) },
         onClick = {
           expanded = !expanded
           categoryExpanded = true
@@ -277,13 +277,19 @@ fun ExpenseFilterMenu(onFilterSelect: (String, String) -> Unit) {
       },
       modifier = Modifier.height(250.dp)
     ) {
-      Category.values().forEach {
-        DropdownMenuItem(
-          text = { Text(text = it.name) },
-          onClick = {
-            categoryExpanded = false
-            onFilterSelect("CATEGORY", it.name)
-          })
+      Category.values().forEach { category ->
+        if (category != Category.UNKNOWN__) {
+          DropdownMenuItem(
+            text = {
+              category.adapt().takeIf { it != 0 }?.let {
+                Text(text = stringResource(it))
+              }
+            },
+            onClick = {
+              categoryExpanded = false
+              onFilterSelect("CATEGORY", category.name)
+            })
+        }
       }
     }
   }
