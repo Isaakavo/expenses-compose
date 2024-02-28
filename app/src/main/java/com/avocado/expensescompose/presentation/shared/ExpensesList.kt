@@ -63,6 +63,12 @@ fun filterList(type: String, name: String, list: List<Expense>) = when (type) {
     }
   }
 
+  "CASH" -> {
+    list.filter {
+      it.card == null
+    }
+  }
+
   "RESET" -> {
     list
   }
@@ -362,6 +368,15 @@ fun ExpenseFilterMenu(
           }
         )
       }
+
+      // Cash expenses
+      DropdownMenuItem(
+        text = { Text(text = stringResource(id = R.string.expenses_list_filter_cash)) },
+        onClick = {
+          expanded = false
+          onFilterSelect("CASH", "ALL")
+        }
+      )
 
       Divider()
       // Reset
