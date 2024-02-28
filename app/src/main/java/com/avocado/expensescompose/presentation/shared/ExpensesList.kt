@@ -253,6 +253,35 @@ fun ExpenseDateRow(payBefore: LocalDateTime?, index: Int, expenseList: List<Expe
   }
 }
 
+@Composable
+fun ExpenseCategoryList(
+  categoryExpanded: Boolean,
+  onCategoryExpandedChange: (Boolean) -> Unit,
+  onFilterSelect: (String, String) -> Unit
+) {
+  DropdownMenu(
+    expanded = categoryExpanded,
+    onDismissRequest = {
+      onCategoryExpandedChange(!categoryExpanded)
+    },
+    modifier = Modifier.height(250.dp)
+  ) {
+    Category.values().filter { it != Category.UNKNOWN__ }.forEach { category ->
+      DropdownMenuItem(
+        text = {
+          category.adapt().takeIf { it != 0 }?.let {
+            Text(text = stringResource(it))
+          }
+        },
+        onClick = {
+          onCategoryExpandedChange(false)
+          onFilterSelect("CATEGORY", category.name)
+        }
+      )
+    }
+  }
+}
+
 // Adding client side logic to handle filters to avoid charge the server, I might move this to
 // server side in a future
 @Composable
@@ -270,6 +299,7 @@ fun ExpenseFilterMenu(onFilterSelect: (String, String) -> Unit) {
       expanded = expanded,
       onDismissRequest = { expanded = !expanded }
     ) {
+      // Category list
       DropdownMenuItem(
         text = { Text(text = stringResource(id = R.string.expenses_list_filter_category)) },
         onClick = {
@@ -278,6 +308,7 @@ fun ExpenseFilterMenu(onFilterSelect: (String, String) -> Unit) {
         }
       )
       Divider()
+      // Reset
       DropdownMenuItem(
         text = { Text(text = stringResource(R.string.expenses_list_filter_reset)) },
         onClick = {
@@ -286,27 +317,8 @@ fun ExpenseFilterMenu(onFilterSelect: (String, String) -> Unit) {
         }
       )
     }
-
-    DropdownMenu(
-      expanded = categoryExpanded,
-      onDismissRequest = {
-        categoryExpanded = !categoryExpanded
-      },
-      modifier = Modifier.height(250.dp)
-    ) {
-      Category.values().filter { it != Category.UNKNOWN__ }.forEach { category ->
-        DropdownMenuItem(
-          text = {
-            category.adapt().takeIf { it != 0 }?.let {
-              Text(text = stringResource(it))
-            }
-          },
-          onClick = {
-            categoryExpanded = false
-            onFilterSelect("CATEGORY", category.name)
-          }
-        )
-      }
+    ExpenseCategoryList(categoryExpanded = categoryExpanded, onCategoryExpandedChange = { categoryExpanded = it }) { field, name ->
+      onFilterSelect(field, name)
     }
   }
 }
