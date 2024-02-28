@@ -40,13 +40,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.avocado.expensescompose.R
+import com.avocado.expensescompose.data.adapters.adapt
 import com.avocado.expensescompose.data.model.card.Card
 import com.avocado.expensescompose.presentation.shared.DateDialog
 import com.avocado.expensescompose.presentation.shared.GenericErrorScreen
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.type.Category
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 @Composable
 fun AddExpenseScreen(
@@ -256,11 +256,10 @@ fun AddExpenseScreenContent(
               onOpenEvent = { onEvent(AddExpenseEvent.CategoryListOpen, null) },
               onCloseEvent = { onEvent(AddExpenseEvent.CategoryListClose, null) }
             ) {
-              Category.values().map {
-                Timber.d(it.name)
+              Category.values().filter { it != Category.UNKNOWN__ }.map {
                 DropdownMenuItem(
                   text = {
-                    Text(text = it.name)
+                    Text(text = stringResource(it.adapt()))
                   },
                   onClick = {
                     onEvent(AddExpenseEvent.SelectCategory, it.name)
