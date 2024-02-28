@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.avocado.expensescompose.R
+import com.avocado.expensescompose.data.model.card.Card
 import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.presentation.incomes.incomewithexpense.IncomeWithExpenseEvent
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
@@ -35,6 +36,7 @@ fun IncomeWithExpensesContent(
   remaining: Double,
   expended: Double,
   expenseList: List<Expense>,
+  cards: Set<Card>,
   isLoading: Boolean = false,
   shouldDeleteIncome: Boolean = false,
   shouldDeleteExpense: Boolean = false,
@@ -122,6 +124,7 @@ fun IncomeWithExpensesContent(
           )
           ExpensesList(
             expenseList = expenseList,
+            cards = cards,
             onEdit = { onNavigate(NavigateEvent.NavigateEditExpenseScreen, it) },
             onDelete = { onEvent(IncomeWithExpenseEvent.DeleteExpense, it) }
           )

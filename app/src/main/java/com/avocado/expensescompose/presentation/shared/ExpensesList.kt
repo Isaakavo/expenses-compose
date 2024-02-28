@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.sp
 import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.adapters.adapt
 import com.avocado.expensescompose.data.adapters.formatMoney
+import com.avocado.expensescompose.data.model.card.Card
 import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.presentation.util.formatDateDaysWithMonth
 import com.avocado.expensescompose.util.expenseList
@@ -53,6 +54,12 @@ fun filterList(type: String, name: String, list: List<Expense>) = when (type) {
   "CATEGORY" -> {
     list.filter {
       it.category.name == name
+    }
+  }
+
+  "CARDS" -> {
+    list.filter {
+      it.card?.bank == name
     }
   }
 
@@ -67,6 +74,7 @@ fun filterList(type: String, name: String, list: List<Expense>) = when (type) {
 @Composable
 fun ExpensesList(
   expenseList: List<Expense>,
+  cards: Set<Card> = setOf(),
   onEdit: (expenseId: String) -> Unit = {},
   onDelete: (expenseId: String) -> Unit = {}
 ) {
@@ -103,9 +111,12 @@ fun ExpensesList(
       fontWeight = FontWeight.Bold,
       fontSize = 14.sp
     )
-    ExpenseFilterMenu(onFilterSelect = { type, name ->
-      filteredList = filterList(type, name, expenseList)
-    })
+    ExpenseFilterMenu(
+      cards = cards,
+      onFilterSelect = { type, name ->
+        filteredList = filterList(type, name, expenseList)
+      }
+    )
   }
   LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
     itemsIndexed(filteredList, key = { _, item -> item.id }) { index, expense ->
@@ -282,12 +293,45 @@ fun ExpenseCategoryList(
   }
 }
 
+@Composable
+fun ExpenseCardsList(
+  cards: Set<Card>,
+  cardsExpanded: Boolean,
+  onCardExpandedChange: (Boolean) -> Unit,
+  onFilterSelect: (String, String) -> Unit
+) {
+  val startHeight = 60.dp
+  val maxHeight = 250.dp
+  val listHeight = (startHeight * cards.size).takeUnless { it > maxHeight } ?: maxHeight
+  DropdownMenu(
+    expanded = cardsExpanded,
+    onDismissRequest = {
+      onCardExpandedChange(!cardsExpanded)
+    },
+    modifier = Modifier.height(listHeight)
+  ) {
+    cards.map {
+      DropdownMenuItem(
+        text = { Text(text = it.bank) },
+        onClick = {
+          onCardExpandedChange(false)
+          onFilterSelect("CARDS", it.bank)
+        }
+      )
+    }
+  }
+}
+
 // Adding client side logic to handle filters to avoid charge the server, I might move this to
 // server side in a future
 @Composable
-fun ExpenseFilterMenu(onFilterSelect: (String, String) -> Unit) {
+fun ExpenseFilterMenu(
+  cards: Set<Card>,
+  onFilterSelect: (String, String) -> Unit
+) {
   var expanded by remember { mutableStateOf(false) }
   var categoryExpanded by remember { mutableStateOf(false) }
+  var cardsExpanded by remember { mutableStateOf(false) }
 
   OutlinedButton(onClick = { expanded = !expanded }) {
     Text(text = stringResource(id = R.string.expenses_list_filter), modifier = Modifier)
@@ -307,6 +351,18 @@ fun ExpenseFilterMenu(onFilterSelect: (String, String) -> Unit) {
           categoryExpanded = true
         }
       )
+
+      // Cards List
+      cards.takeIf { it.isNotEmpty() }?.let {
+        DropdownMenuItem(
+          text = { Text(text = stringResource(id = R.string.expenses_list_filter_cards)) },
+          onClick = {
+            expanded = !expanded
+            cardsExpanded = true
+          }
+        )
+      }
+
       Divider()
       // Reset
       DropdownMenuItem(
@@ -320,6 +376,13 @@ fun ExpenseFilterMenu(onFilterSelect: (String, String) -> Unit) {
     ExpenseCategoryList(categoryExpanded = categoryExpanded, onCategoryExpandedChange = { categoryExpanded = it }) { field, name ->
       onFilterSelect(field, name)
     }
+    ExpenseCardsList(
+      cards = cards,
+      cardsExpanded = cardsExpanded,
+      onCardExpandedChange = { cardsExpanded = it }
+    ) { field, bankName ->
+      onFilterSelect(field, bankName)
+    }
   }
 }
 
@@ -329,6 +392,7 @@ fun ExpenseListPreview() {
   Surface(modifier = Modifier) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
       ExpensesList(
+        cards = setOf(),
         expenseList = expenseList
       )
     }

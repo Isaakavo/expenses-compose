@@ -12,6 +12,7 @@ import com.avocado.expensescompose.data.adapters.graphql.scalar.Date
 import com.avocado.expensescompose.data.adapters.graphql.utils.validateData
 import com.avocado.expensescompose.data.adapters.graphql.utils.validateDataWithoutErrors
 import com.avocado.expensescompose.data.apolloclients.GraphQlClientImpl
+import com.avocado.expensescompose.data.model.card.Card
 import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.data.model.successOrError
 import com.avocado.expensescompose.domain.income.models.Income
@@ -38,6 +39,7 @@ sealed class IncomeWithExpenseEvent {
 data class IncomeWithExpenseState(
   val incomes: List<Income>? = null,
   val expensesList: List<Expense> = emptyList(),
+  val cards: Set<Card> = emptySet(),
   val incomesTotal: Double = 0.0,
   val expensesTotal: Double = 0.0,
   val remaining: Double = 0.0,
@@ -115,12 +117,16 @@ class IncomeWithExpenseViewModel @Inject constructor(
               val expensesList = incomesAndExpensesByFortnight?.expenses?.map { expense ->
                 expense.expenseFragment.toExpense()
               }.orEmpty()
+              val cards = expensesList.mapNotNull {
+                it.card
+              }.toSet()
               this.launch {
                 _state.emit(
                   IncomeWithExpenseState(
                     isLoading = false,
                     incomes = incomes,
                     expensesList = expensesList,
+                    cards = cards,
                     incomesTotal = incomesAndExpensesByFortnight?.incomesTotal ?: 0.0,
                     expensesTotal = incomesAndExpensesByFortnight?.expensesTotal ?: 0.0,
                     remaining = incomesAndExpensesByFortnight?.remaining ?: 0.0

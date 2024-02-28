@@ -40,6 +40,7 @@ fun IncomeExpensesScreen(
     remaining = state.remaining,
     expended = state.expensesTotal,
     expenseList = state.expensesList,
+    cards = state.cards,
     isLoading = state.isLoading,
     onNavigate = onNavigate,
     onNavigateBack = onNavigateBack,
