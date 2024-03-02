@@ -51,6 +51,7 @@ sealed class AddExpenseEvent {
   object CategoryListClose : AddExpenseEvent()
   object OpenCardMenu : AddExpenseEvent()
   object CloseCardMenu : AddExpenseEvent()
+  object ClearError : AddExpenseEvent()
 }
 
 data class AddExpensesState(
@@ -63,7 +64,7 @@ data class AddExpensesState(
   val total: String = "",
   val date: String = "",
   val initialDate: Long = 0L,
-  val uiError: Int = 0,
+  val uiError: String? = "",
   val buttonText: String = "Agregar",
   val expenseAdded: Boolean = false,
   val expenseAddedError: Boolean = false,
@@ -144,6 +145,10 @@ class AddExpenseViewModel @Inject constructor(
       AddExpenseEvent.CloseCardMenu -> {
         _state.update { it.copy(openCardMenu = false) }
       }
+
+      AddExpenseEvent.ClearError -> {
+        _state.update { it.copy(expenseAddedError = false, uiError = "") }
+      }
     }
   }
 
@@ -151,14 +156,14 @@ class AddExpenseViewModel @Inject constructor(
     viewModelScope.launch {
       val input = CreateExpenseInput(
         concept = _state.value.concept,
-        comment = Optional.present(_state.value.comment),
+        comment = Optional.present(_state.value.comment.trim().replace(Regex("(?m)^[ \\t]*\\r?\\n"), "")),
         payBefore = _state.value.date.adaptDateForInput(),
-        total = _state.value.total.toDouble(),
+        total = _state.value.total.takeIf { it.isNotEmpty() }?.toDouble() ?: 0.0,
         cardId = Optional.present(_state.value.selectedCard?.id),
         category = _state.value.category
       )
       graphQlClientImpl.mutate(CreateExpenseMutation(input)).map { apolloResponse ->
-        validateData(apolloResponse.data?.createExpense)
+        validateData(apolloResponse)
       }.collect { result ->
         result.successOrError(
           onSuccess = {
@@ -174,10 +179,9 @@ class AddExpenseViewModel @Inject constructor(
               )
             }
           },
-          onError = {
-            this.launch {
-              _state.emit(value = AddExpensesState(expenseAddedError = true))
-            }
+          onError = { error ->
+            Timber.d(error.exception)
+            _state.update { it.copy(expenseAddedError = true, uiError = error.uiErrorText) }
           }
         )
       }
@@ -196,7 +200,7 @@ class AddExpenseViewModel @Inject constructor(
       _state.update { it.copy(loadingCard = true) }
       graphQlClientImpl.query(
         AllCardsQuery(),
-        onError = { _state.emit(AddExpensesState(uiError = R.string.general_error)) }
+        onError = { _state.emit(AddExpensesState(uiError = "")) }
       )
         .map { apolloResponse ->
           try {
@@ -236,7 +240,7 @@ class AddExpenseViewModel @Inject constructor(
     viewModelScope.launch {
       graphQlClientImpl.query(
         ExpenseByIdQuery(expenseByIdId = expenseId),
-        onError = { _state.emit(AddExpensesState(uiError = R.string.general_error)) }
+        onError = { _state.emit(AddExpensesState(uiError = "")) }
       ).map {
         validateDataWithoutErrors(it)
       }

@@ -28,10 +28,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -43,7 +44,6 @@ import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.adapters.adapt
 import com.avocado.expensescompose.data.model.card.Card
 import com.avocado.expensescompose.presentation.shared.DateDialog
-import com.avocado.expensescompose.presentation.shared.GenericErrorScreen
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.type.Category
 import kotlinx.coroutines.launch
@@ -84,7 +84,6 @@ fun AddExpenseScreen(
     openDateDialog = state.openDateDialog,
     openCardMenu = state.openCardMenu,
     openCategoryList = state.openCategoryList,
-    expenseAdded = state.expenseAdded,
     expenseAddedError = state.expenseAddedError,
     loading = state.loading,
     onEvent = viewModel::onEvent,
@@ -92,6 +91,7 @@ fun AddExpenseScreen(
   )
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun AddExpenseScreenContent(
   expenseId: String,
@@ -103,13 +103,12 @@ fun AddExpenseScreenContent(
   comment: String,
   total: String,
   date: String,
-  uiError: Int?,
+  uiError: String?,
   initialSelectedDate: Long,
   buttonText: String,
   openDateDialog: Boolean,
   openCardMenu: Boolean,
   openCategoryList: Boolean,
-  expenseAdded: Boolean,
   expenseAddedError: Boolean,
   loading: Boolean,
   onEvent: (event: AddExpenseEvent, elementId: String?) -> Unit,
@@ -118,17 +117,17 @@ fun AddExpenseScreenContent(
   val scope = rememberCoroutineScope()
   val snackBarHostState = remember { SnackbarHostState() }
   val focusRequester = remember { FocusRequester() }
-  val context = LocalContext.current
+  val keyboardController = LocalSoftwareKeyboardController.current
 
-  LaunchedEffect(key1 = snackBarHostState) {
-    if (expenseAdded || expenseAddedError) {
+  LaunchedEffect(key1 = snackBarHostState, key2 = expenseAddedError) {
+    if (expenseAddedError) {
+      keyboardController?.hide()
       scope.launch {
         snackBarHostState.showSnackbar(
-          context.resources.getString(
-            if (expenseAdded) R.string.add_expense_successfully else R.string.add_expense_error
-          )
+          uiError.orEmpty()
         )
       }
+      onEvent(AddExpenseEvent.ClearError, "")
     }
   }
 
@@ -159,148 +158,132 @@ fun AddExpenseScreenContent(
         .padding(paddingValues)
         .fillMaxSize()
     ) {
-      uiError?.takeIf { it != 0 }?.let {
-        GenericErrorScreen()
-      } ?: run {
-        Column(
-          modifier = Modifier
-            .fillMaxSize()
-            .padding(start = 22.dp)
-            .verticalScroll(state = rememberScrollState()),
-          verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-          if (!loading && !loadingCard) {
-            DateDialog(
-              date = date,
-              initialSelectedDate = initialSelectedDate,
-              iconResource = R.drawable.baseline_calendar_month_24,
-              openDateDialog = openDateDialog,
-              onConfirm = { formattedDate -> onEvent(AddExpenseEvent.UpdateDate, formattedDate) },
-              onDismiss = { onEvent(AddExpenseEvent.DateDialogClose, null) },
-              onSelectTextField = { onEvent(AddExpenseEvent.DateDialogOpen, null) },
-              modifier = Modifier.padding(start = 8.dp)
-            )
-          }
+      Column(
+        modifier = Modifier
+          .fillMaxSize()
+          .padding(start = 22.dp)
+          .verticalScroll(state = rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+      ) {
+        if (!loading && !loadingCard) {
+          DateDialog(
+            date = date,
+            initialSelectedDate = initialSelectedDate,
+            iconResource = R.drawable.baseline_calendar_month_24,
+            openDateDialog = openDateDialog,
+            onConfirm = { formattedDate -> onEvent(AddExpenseEvent.UpdateDate, formattedDate) },
+            onDismiss = { onEvent(AddExpenseEvent.DateDialogClose, null) },
+            onSelectTextField = { onEvent(AddExpenseEvent.DateDialogOpen, null) },
+            modifier = Modifier.padding(start = 8.dp)
+          )
+        }
 
-          AddExpenseRow {
-            Icon(
-              painter = painterResource(id = R.drawable.round_description_24),
-              contentDescription = "Credit card"
+        AddExpenseRow {
+          Icon(
+            painter = painterResource(id = R.drawable.round_description_24),
+            contentDescription = "Credit card"
+          )
+          OutlinedTextField(
+            value = concept,
+            onValueChange = { onEvent(AddExpenseEvent.UpdateConcept, it) },
+            label = { Text(text = stringResource(id = R.string.add_expense_concept)) },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(
+              imeAction = ImeAction.Next
             )
-            OutlinedTextField(
-              value = concept,
-              onValueChange = { onEvent(AddExpenseEvent.UpdateConcept, it) },
-              label = { Text(text = stringResource(id = R.string.add_expense_concept)) },
-              keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Next
-              )
-            )
-          }
+          )
+        }
 
-          AddExpenseRow {
-            Icon(
-              painter = painterResource(id = R.drawable.round_attach_money_24),
-              contentDescription = "total"
+        AddExpenseRow {
+          Icon(
+            painter = painterResource(id = R.drawable.round_attach_money_24),
+            contentDescription = "total"
+          )
+          OutlinedTextField(
+            value = total,
+            onValueChange = { onEvent(AddExpenseEvent.UpdateTotal, it) },
+            label = { Text(text = stringResource(id = R.string.add_expense_total)) },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(
+              keyboardType = KeyboardType.Decimal,
+              imeAction = ImeAction.Next
+            ),
+            keyboardActions = KeyboardActions(
+              onNext = { focusRequester.requestFocus() }
             )
-            OutlinedTextField(
-              value = total,
-              onValueChange = { onEvent(AddExpenseEvent.UpdateTotal, it) },
-              label = { Text(text = stringResource(id = R.string.add_expense_total)) },
-              keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Decimal,
-                imeAction = ImeAction.Next
-              ),
-              keyboardActions = KeyboardActions(
-                onNext = { focusRequester.requestFocus() }
-              )
-            )
-          }
+          )
+        }
 
-          AddExpenseRow {
-            Icon(
-              painter = painterResource(id = R.drawable.baseline_credit_card_24),
-              contentDescription = "Credit card"
-            )
-            DropDownMenu(
-              expanded = openCardMenu,
-              textFieldLabel = stringResource(id = R.string.add_expense_link_card),
-              textFieldValue = selectedCard?.aliasWithBankText() ?: selectedCard?.bank ?: "",
-              textFieldEnabled = cards.isNotEmpty(),
-              dropDownMenuEnabled = cards.isEmpty() && !loadingCard,
-              onOpenEvent = { onEvent(AddExpenseEvent.OpenCardMenu, null) },
-              onCloseEvent = { onEvent(AddExpenseEvent.CloseCardMenu, null) }
-            ) {
-              cards.map {
-                DropdownMenuItem(
-                  text = {
-                    Text(text = "${it.alias}-${it.bank}")
-                  },
-                  onClick = {
-                    onEvent(AddExpenseEvent.SelectCard, it.id)
-                    onEvent(AddExpenseEvent.CloseCardMenu, null)
-                  }
-                )
-              }
-            }
-          }
-
-          AddExpenseRow {
-            Icon(
-              painter = painterResource(id = R.drawable.round_sell_24),
-              contentDescription = "Tags"
-            )
-            DropDownMenu(
-              expanded = openCategoryList,
-              textFieldLabel = stringResource(id = R.string.add_expense_category),
-              textFieldValue = categories.name,
-              onOpenEvent = { onEvent(AddExpenseEvent.CategoryListOpen, null) },
-              onCloseEvent = { onEvent(AddExpenseEvent.CategoryListClose, null) }
-            ) {
-              Category.values().filter { it != Category.UNKNOWN__ }.map {
-                DropdownMenuItem(
-                  text = {
-                    Text(text = stringResource(it.adapt()))
-                  },
-                  onClick = {
-                    onEvent(AddExpenseEvent.SelectCategory, it.name)
-                    onEvent(AddExpenseEvent.CategoryListClose, null)
-                  }
-                )
-              }
-            }
-          }
-
-          AddExpenseRow {
-            Icon(
-              painter = painterResource(R.drawable.round_comment_24),
-              contentDescription = "Comment"
-            )
-            OutlinedTextField(
-              value = comment,
-              onValueChange = { onEvent(AddExpenseEvent.UpdateComment, it) },
-              label = { Text(text = stringResource(id = R.string.add_expense_comment)) },
-              modifier = Modifier
-                .focusRequester(focusRequester)
-                .height(120.dp),
-              maxLines = 3,
-              keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Done
-              ),
-              keyboardActions = KeyboardActions(
-                onNext = { focusRequester.requestFocus() },
-                onDone = {
-                  if (expenseId.isEmpty()) {
-                    onEvent(AddExpenseEvent.AddExpense, null)
-                  } else {
-                    onEvent(
-                      AddExpenseEvent.UpdateExpense,
-                      expenseId
-                    )
-                  }
+        AddExpenseRow {
+          Icon(
+            painter = painterResource(id = R.drawable.baseline_credit_card_24),
+            contentDescription = "Credit card"
+          )
+          DropDownMenu(
+            expanded = openCardMenu,
+            textFieldLabel = stringResource(id = R.string.add_expense_link_card),
+            textFieldValue = selectedCard?.aliasWithBankText() ?: selectedCard?.bank ?: "",
+            textFieldEnabled = cards.isNotEmpty(),
+            dropDownMenuEnabled = cards.isEmpty() && !loadingCard,
+            onOpenEvent = { onEvent(AddExpenseEvent.OpenCardMenu, null) },
+            onCloseEvent = { onEvent(AddExpenseEvent.CloseCardMenu, null) }
+          ) {
+            cards.map {
+              DropdownMenuItem(
+                text = {
+                  Text(text = "${it.alias}-${it.bank}")
+                },
+                onClick = {
+                  onEvent(AddExpenseEvent.SelectCard, it.id)
+                  onEvent(AddExpenseEvent.CloseCardMenu, null)
                 }
               )
-            )
+            }
           }
+        }
+
+        AddExpenseRow {
+          Icon(
+            painter = painterResource(id = R.drawable.round_sell_24),
+            contentDescription = "Tags"
+          )
+          DropDownMenu(
+            expanded = openCategoryList,
+            textFieldLabel = stringResource(id = R.string.add_expense_category),
+            textFieldValue = categories.name,
+            onOpenEvent = { onEvent(AddExpenseEvent.CategoryListOpen, null) },
+            onCloseEvent = { onEvent(AddExpenseEvent.CategoryListClose, null) }
+          ) {
+            Category.values().filter { it != Category.UNKNOWN__ }.map {
+              DropdownMenuItem(
+                text = {
+                  Text(text = stringResource(it.adapt()))
+                },
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                  onEvent(AddExpenseEvent.SelectCategory, it.name)
+                  onEvent(AddExpenseEvent.CategoryListClose, null)
+                }
+              )
+            }
+          }
+        }
+
+        AddExpenseRow {
+          Icon(
+            painter = painterResource(R.drawable.round_comment_24),
+            contentDescription = "Comment"
+          )
+          OutlinedTextField(
+            value = comment,
+            onValueChange = { onEvent(AddExpenseEvent.UpdateComment, it) },
+            label = { Text(text = stringResource(id = R.string.add_expense_comment)) },
+            modifier = Modifier
+              .focusRequester(focusRequester)
+              .fillMaxWidth()
+              .height(120.dp),
+            maxLines = 3
+          )
         }
       }
     }
@@ -340,7 +323,9 @@ fun DropDownMenu(
         )
       },
       enabled = textFieldEnabled,
-      modifier = Modifier.menuAnchor()
+      modifier = Modifier
+        .menuAnchor()
+        .fillMaxWidth()
     )
     ExposedDropdownMenu(
       expanded = if (dropDownMenuEnabled) false else expanded,
@@ -358,7 +343,9 @@ fun AddExpenseRow(content: @Composable () -> Unit) {
   Row(
     horizontalArrangement = Arrangement.spacedBy(12.dp),
     verticalAlignment = Alignment.CenterVertically,
-    modifier = Modifier.fillMaxWidth()
+    modifier = Modifier
+      .fillMaxWidth()
+      .padding(end = 20.dp)
   ) {
     content()
   }

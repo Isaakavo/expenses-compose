@@ -110,7 +110,7 @@ class IncomeWithExpenseViewModel @Inject constructor(
         }.collect { result ->
           result.successOrError(
             onSuccess = { success ->
-              val incomesAndExpensesByFortnight = success.data.data?.incomesAndExpensesByFortnight
+              val incomesAndExpensesByFortnight = success.data?.incomesAndExpensesByFortnight
               val incomes = incomesAndExpensesByFortnight?.incomes?.map { income ->
                 income.incomeFragment.toIncome()
               }.orEmpty()

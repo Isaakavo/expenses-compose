@@ -37,10 +37,10 @@ class ExpensesByCardViewModel @Inject constructor(private val graphQlClientImpl:
           ExpensesByFortnightQuery(input = input),
           onError = { }
         ).map { apolloResponse ->
-          validateData(apolloResponse.data?.expensesByFortnight)
+          validateData(apolloResponse)
         }.collect { collectResult ->
           collectResult.successOrError(onSuccess = { successResult ->
-            val data = successResult.data
+            val data = successResult.data?.expensesByFortnight
             val expensesList =
               data?.expenses?.mapNotNull { it?.expenseFragment?.toExpense() }.orEmpty()
             val expenseTotal = data?.expensesTotal ?: 0.0
@@ -71,11 +71,11 @@ class ExpensesByCardViewModel @Inject constructor(private val graphQlClientImpl:
           ExpensesByMonthQuery(input),
           onError = { _state.emit(ExpensesByCardViewModelState(uiError = R.string.general_error)) }
         ).map { apolloResponse ->
-          validateData(apolloResponse.data?.expensesByMonth)
+          validateData(apolloResponse)
         }.collect { collectResult ->
           collectResult.successOrError(
             onSuccess = { successResult ->
-              val data = successResult.data
+              val data = successResult.data?.expensesByMonth
               val expensesList =
                 data?.expenses?.mapNotNull { it?.expenseFragment?.toExpense() }.orEmpty()
               val expenseTotal = data?.expensesTotal ?: 0.0
