@@ -105,4 +105,6 @@
     <string name="category_sports">Sports</string>
     <string name="category_super_market">Super Market</string>
     <string name="category_transport">Transport</string>
+    <string name="category_subscription">Subscription</string>
+    <string name="category_fixed_expense">Fixed Expense</string>
 </resources>

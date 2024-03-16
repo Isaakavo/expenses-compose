@@ -21,5 +21,7 @@ fun Category.adapt(): Int = when (this) {
   Category.SPORTS -> R.string.category_sports
   Category.SUPER_MARKET -> R.string.category_super_market
   Category.TRANSPORT -> R.string.category_transport
+  Category.SUBSCRIPTION -> R.string.category_subscription
+  Category.FIXED_EXPENSE -> R.string.category_fixed_expense
   else -> 0
 }
