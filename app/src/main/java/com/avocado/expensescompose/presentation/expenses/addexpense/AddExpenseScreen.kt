@@ -46,6 +46,7 @@ import com.avocado.expensescompose.data.model.card.Card
 import com.avocado.expensescompose.presentation.shared.DateDialog
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.type.Category
+import com.avocado.type.FixedExpenseFrequency
 import kotlinx.coroutines.launch
 
 @Composable
@@ -84,8 +85,12 @@ fun AddExpenseScreen(
     openDateDialog = state.openDateDialog,
     openCardMenu = state.openCardMenu,
     openCategoryList = state.openCategoryList,
+    openFrequencyList = state.openFixedFrequencyList,
     expenseAddedError = state.expenseAddedError,
     loading = state.loading,
+    isMonthWithoutInterest = state.isMonthWithoutInterest,
+    recurrentExpenseFrequency = state.recurrentExpenseFrequency,
+    numberOfMonthsOrWeeks = state.numberOfMonthsOrWeeks,
     onEvent = viewModel::onEvent,
     onPopBackStack = onPopBackStack
   )
@@ -109,8 +114,12 @@ fun AddExpenseScreenContent(
   openDateDialog: Boolean,
   openCardMenu: Boolean,
   openCategoryList: Boolean,
+  openFrequencyList: Boolean,
   expenseAddedError: Boolean,
   loading: Boolean,
+  isMonthWithoutInterest: Boolean,
+  recurrentExpenseFrequency: FixedExpenseFrequency,
+  numberOfMonthsOrWeeks: String,
   onEvent: (event: AddExpenseEvent, elementId: String?) -> Unit,
   onPopBackStack: () -> Unit = {}
 ) {
@@ -266,6 +275,57 @@ fun AddExpenseScreenContent(
                 }
               )
             }
+          }
+        }
+
+        if (isMonthWithoutInterest) {
+          Row(
+            modifier = Modifier
+              .fillMaxWidth()
+              .padding(start = 34.dp, end = 20.dp)
+          ) {
+            DropDownMenu(
+              expanded = openFrequencyList,
+              textFieldLabel = stringResource(id = R.string.add_expense_frequency),
+              textFieldValue = recurrentExpenseFrequency.name,
+              onOpenEvent = { onEvent(AddExpenseEvent.FixedFrequencyListOpen, null) },
+              onCloseEvent = { onEvent(AddExpenseEvent.FixedFrequencyListClose, null) }
+            ) {
+              FixedExpenseFrequency.values().filter { it != FixedExpenseFrequency.UNKNOWN__ }.map {
+                DropdownMenuItem(
+                  text = {
+                    Text(text = stringResource(it.adapt()))
+                  },
+                  onClick = {
+                    onEvent(AddExpenseEvent.SelectFrequency, it.name)
+                    onEvent(AddExpenseEvent.FixedFrequencyListClose, null)
+                  }
+                )
+              }
+            }
+          }
+          Row(
+            modifier = Modifier
+              .fillMaxWidth()
+              .padding(start = 34.dp, end = 20.dp)
+          ) {
+            OutlinedTextField(
+              value = numberOfMonthsOrWeeks,
+              onValueChange = { onEvent(AddExpenseEvent.UpdateNumberOfMonthsOrWeeks, it) },
+              label = {
+                Text(
+                  text = stringResource(id = if (recurrentExpenseFrequency.name == FixedExpenseFrequency.Monthly.name) R.string.add_expense_number_months else R.string.add_expense_number_weeks)
+                )
+              },
+              modifier = Modifier.fillMaxWidth(),
+              keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Decimal,
+                imeAction = ImeAction.Next
+              ),
+              keyboardActions = KeyboardActions(
+                onNext = { focusRequester.requestFocus() }
+              )
+            )
           }
         }
 

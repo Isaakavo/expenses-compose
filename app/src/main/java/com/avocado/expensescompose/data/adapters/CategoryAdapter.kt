@@ -23,5 +23,6 @@ fun Category.adapt(): Int = when (this) {
   Category.TRANSPORT -> R.string.category_transport
   Category.SUBSCRIPTION -> R.string.category_subscription
   Category.FIXED_EXPENSE -> R.string.category_fixed_expense
+  Category.MONTHS_WITHOUT_INTEREST -> R.string.category_months_without_interest
   else -> 0
 }

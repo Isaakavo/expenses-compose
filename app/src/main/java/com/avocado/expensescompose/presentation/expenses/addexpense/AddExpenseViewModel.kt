@@ -6,6 +6,7 @@ import com.apollographql.apollo3.api.Optional
 import com.apollographql.apollo3.exception.ApolloException
 import com.avocado.AllCardsQuery
 import com.avocado.CreateExpenseMutation
+import com.avocado.CreateFixedExpenseMutation
 import com.avocado.ExpenseByIdQuery
 import com.avocado.UpdateExpenseMutation
 import com.avocado.expensescompose.R
@@ -24,6 +25,8 @@ import com.avocado.expensescompose.presentation.util.formatDateToISO
 import com.avocado.expensescompose.presentation.util.formatDateWithYear
 import com.avocado.type.Category
 import com.avocado.type.CreateExpenseInput
+import com.avocado.type.CreateFixedExpenseInput
+import com.avocado.type.FixedExpenseFrequency
 import com.avocado.type.UpdateExpenseInput
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDateTime
@@ -39,9 +42,11 @@ import timber.log.Timber
 sealed class AddExpenseEvent {
   object SelectCard : AddExpenseEvent()
   object SelectCategory : AddExpenseEvent()
+  object SelectFrequency : AddExpenseEvent()
   object UpdateConcept : AddExpenseEvent()
   object UpdateComment : AddExpenseEvent()
   object UpdateTotal : AddExpenseEvent()
+  object UpdateNumberOfMonthsOrWeeks : AddExpenseEvent()
   object UpdateDate : AddExpenseEvent()
   object AddExpense : AddExpenseEvent()
   object UpdateExpense : AddExpenseEvent()
@@ -49,6 +54,8 @@ sealed class AddExpenseEvent {
   object DateDialogClose : AddExpenseEvent()
   object CategoryListOpen : AddExpenseEvent()
   object CategoryListClose : AddExpenseEvent()
+  object FixedFrequencyListOpen : AddExpenseEvent()
+  object FixedFrequencyListClose : AddExpenseEvent()
   object OpenCardMenu : AddExpenseEvent()
   object CloseCardMenu : AddExpenseEvent()
   object ClearError : AddExpenseEvent()
@@ -70,10 +77,14 @@ data class AddExpensesState(
   val expenseAddedError: Boolean = false,
   val openDateDialog: Boolean = false,
   val openCategoryList: Boolean = false,
+  val openFixedFrequencyList: Boolean = false,
   val openCardMenu: Boolean = false,
   val loadingCard: Boolean = true,
   val loading: Boolean = true,
-  val isAdded: Boolean = false
+  val isAdded: Boolean = false,
+  val isMonthWithoutInterest: Boolean = false,
+  val recurrentExpenseFrequency: FixedExpenseFrequency = FixedExpenseFrequency.Monthly,
+  val numberOfMonthsOrWeeks: String = ""
 )
 
 @HiltViewModel
@@ -85,7 +96,6 @@ class AddExpenseViewModel @Inject constructor(
 
   init {
     getAllCards()
-//    _state.update { it.copy(date = LocalDateTime.now().formatDateDaysWithMonth()) }
   }
 
   fun <T> onEvent(event: AddExpenseEvent, params: T) {
@@ -95,7 +105,19 @@ class AddExpenseViewModel @Inject constructor(
       }
 
       AddExpenseEvent.SelectCategory -> {
-        _state.update { it.copy(category = Category.valueOf(params as String)) }
+        _state.update {
+          when {
+            params == Category.MONTHS_WITHOUT_INTEREST.name || params == Category.FIXED_EXPENSE.name -> {
+              it.copy(category = Category.valueOf(params as String), isMonthWithoutInterest = true)
+            }
+
+            else -> it.copy(category = Category.valueOf(params as String), isMonthWithoutInterest = false)
+          }
+        }
+      }
+
+      AddExpenseEvent.SelectFrequency -> {
+        _state.update { it.copy(recurrentExpenseFrequency = FixedExpenseFrequency.valueOf(params as String)) }
       }
 
       AddExpenseEvent.UpdateConcept -> {
@@ -110,12 +132,20 @@ class AddExpenseViewModel @Inject constructor(
         _state.update { it.copy(total = params as String) }
       }
 
+      AddExpenseEvent.UpdateNumberOfMonthsOrWeeks -> {
+        _state.update { it.copy(numberOfMonthsOrWeeks = params as String) }
+      }
+
       AddExpenseEvent.UpdateDate -> {
         _state.update { it.copy(date = params as String) }
       }
 
       AddExpenseEvent.AddExpense -> {
-        createExpense()
+        if (!_state.value.isMonthWithoutInterest) {
+          createExpense()
+        } else {
+          createRecurrentExpense()
+        }
       }
 
       AddExpenseEvent.UpdateExpense -> {
@@ -136,6 +166,14 @@ class AddExpenseViewModel @Inject constructor(
 
       AddExpenseEvent.CategoryListOpen -> {
         _state.update { it.copy(openCategoryList = true) }
+      }
+
+      AddExpenseEvent.FixedFrequencyListOpen -> {
+        _state.update { it.copy(openFixedFrequencyList = true) }
+      }
+
+      AddExpenseEvent.FixedFrequencyListClose -> {
+        _state.update { it.copy(openFixedFrequencyList = false) }
       }
 
       AddExpenseEvent.OpenCardMenu -> {
@@ -163,6 +201,44 @@ class AddExpenseViewModel @Inject constructor(
         category = _state.value.category
       )
       graphQlClientImpl.mutate(CreateExpenseMutation(input)).map { apolloResponse ->
+        validateData(apolloResponse)
+      }.collect { result ->
+        result.successOrError(
+          onSuccess = {
+            this.launch {
+              _state.emit(
+                value = AddExpensesState(
+                  expenseAdded = true,
+                  isAdded = true,
+                  cardsList = _state.value.cardsList,
+                  category = _state.value.category,
+                  date = _state.value.date
+                )
+              )
+            }
+          },
+          onError = { error ->
+            Timber.d(error.exception)
+            _state.update { it.copy(expenseAddedError = true, uiError = error.uiErrorText) }
+          }
+        )
+      }
+    }
+  }
+
+  private fun createRecurrentExpense() {
+    viewModelScope.launch {
+      val input = CreateFixedExpenseInput(
+        concept = _state.value.concept,
+        comment = Optional.present(_state.value.comment.trim().replace(Regex("(?m)^[ \\t]*\\r?\\n"), "")),
+        payBefore = _state.value.date.adaptDateForInput(),
+        total = _state.value.total.takeIf { it.isNotEmpty() }?.toDouble() ?: 0.0,
+        cardId = Optional.present(_state.value.selectedCard?.id),
+        category = _state.value.category,
+        numberOfMonthsOrWeeks = _state.value.numberOfMonthsOrWeeks.toInt(),
+        frequency = Optional.present(_state.value.recurrentExpenseFrequency)
+      )
+      graphQlClientImpl.mutate(CreateFixedExpenseMutation(Optional.present(input))).map { apolloResponse ->
         validateData(apolloResponse)
       }.collect { result ->
         result.successOrError(

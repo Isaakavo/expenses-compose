@@ -66,6 +66,11 @@
     <string name="add_expense_total">Total</string>
     <string name="add_expense_link_card">Link card</string>
     <string name="add_expense_category">Category</string>
+    <string name="add_expense_months_without_interest">Months Without Interest</string>
+    <string name="add_expense_initial_date">Initial Date</string>
+    <string name="add_expense_number_months">How many months?</string>
+    <string name="add_expense_number_weeks">How many bi-weeks?</string>
+    <string name="add_expense_frequency">Frequency</string>
     <string name="add_expense_comment">Comment</string>
     <string name="cards_add_successfully">The card was added %1s</string>
     <string name="cards_delete">The card was delete</string>
@@ -107,4 +112,7 @@
     <string name="category_transport">Transport</string>
     <string name="category_subscription">Subscription</string>
     <string name="category_fixed_expense">Fixed Expense</string>
+    <string name="category_months_without_interest">Months Without Interest</string>
+    <string name="fixed_expense_frequency_month">Monthly</string>
+    <string name="fixed_expense_frequency_biweekly">Weekly</string>
 </resources>

@@ -62,21 +62,29 @@ fun DateDialog(
   }
 
   if (openDateDialog) {
-    DatePickerDialog(onDismissRequest = { onDismiss() }, confirmButton = {
-      TextButton(onClick = {
-        datePickerState.selectedDateMillis?.let { millis ->
-          val formattedDate = millis.formatDateFromMillis()
-          onConfirm(formattedDate)
+    DatePickerDialog(
+      onDismissRequest = { onDismiss() },
+      confirmButton = {
+        TextButton(
+          onClick = {
+            datePickerState.selectedDateMillis?.let { millis ->
+              val formattedDate = millis.formatDateFromMillis()
+              onConfirm(formattedDate)
+            }
+            onDismiss()
+          }
+        ) {
+          Text(text = stringResource(id = R.string.dialog_accept))
         }
-        onDismiss()
-      }) {
-        Text(text = stringResource(id = R.string.dialog_accept))
-      }
-    }, dismissButton = {
-        TextButton(onClick = { onDismiss() }) {
+      },
+      dismissButton = {
+        TextButton(
+          onClick = { onDismiss() }
+        ) {
           Text(text = stringResource(id = R.string.dialog_cancel))
         }
-      }) {
+      }
+    ) {
       DatePicker(state = datePickerState)
     }
   }
