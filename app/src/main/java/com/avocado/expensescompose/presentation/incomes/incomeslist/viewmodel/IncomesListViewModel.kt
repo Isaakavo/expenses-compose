@@ -1,7 +1,6 @@
-package com.avocado.expensescompose.presentation.incomes.homescreen.viewmodel
+package com.avocado.expensescompose.presentation.incomes.incomeslist.viewmodel
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.avocado.HomeScreenAllIncomesQuery
 import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.adapters.graphql.fragments.toIncome
@@ -17,48 +16,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
 @HiltViewModel
-class IncomesViewModel @Inject constructor(
+class IncomesListViewModel @Inject constructor(
   private val graphQlClientImpl: GraphQlClientImpl
 ) : ViewModel() {
   private val _state = MutableStateFlow(IncomesViewModelState())
   val state = _state.asStateFlow()
-
-  fun onEvent(incomeEvent: IncomeEvent) {
-    when (incomeEvent) {
-      is IncomeEvent.BackPressInitialTouch -> {
-        _state.update {
-          it.copy(backPressState = BackPress.InitialTouch, showToast = true)
-        }
-      }
-
-      is IncomeEvent.BackPressIdle -> {
-        _state.update {
-          it.copy(backPressState = BackPress.Idle)
-        }
-      }
-
-      IncomeEvent.CloseToast -> {
-        _state.update {
-          it.copy(showToast = false)
-        }
-      }
-
-      IncomeEvent.OpenToast -> {
-        _state.update {
-          it.copy(showToast = true)
-        }
-      }
-
-      IncomeEvent.FetchIncomes -> {
-        viewModelScope.launch {
-          getAllIncomes()
-        }
-      }
-    }
-  }
 
   private fun getIncomesMap(incomesList: List<Income>): Map<String, MutableMap<String, MutableMap<String, MutableList<Income>?>>>? {
     val yearMap =
@@ -104,7 +68,7 @@ class IncomesViewModel @Inject constructor(
     return yearMap.toMap()
   }
 
-  private suspend fun getAllIncomes() {
+  suspend fun getAllIncomes() {
     _state.update { it.copy(isLoading = true) }
     graphQlClientImpl.query(
       HomeScreenAllIncomesQuery(),

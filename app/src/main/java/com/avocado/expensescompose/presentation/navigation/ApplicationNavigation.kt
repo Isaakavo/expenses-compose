@@ -20,8 +20,8 @@ import com.avocado.expensescompose.presentation.cards.expensesbycard.ExpensesByC
 import com.avocado.expensescompose.presentation.cards.expensestotalbycard.ExpensesTotalByCardScreen
 import com.avocado.expensescompose.presentation.cards.expensestotalbycard.viewmodel.DataSelector
 import com.avocado.expensescompose.presentation.expenses.addexpense.AddExpenseScreen
+import com.avocado.expensescompose.presentation.homescreen.HomeScreen
 import com.avocado.expensescompose.presentation.incomes.addscreen.AddIncomeScreen
-import com.avocado.expensescompose.presentation.incomes.homescreen.IncomesScreen
 import com.avocado.expensescompose.presentation.incomes.incomewithexpense.IncomeExpensesScreen
 import com.avocado.expensescompose.presentation.login.LoginScreen
 import com.avocado.expensescompose.presentation.util.Operations
@@ -50,7 +50,7 @@ private fun <T> navigate(navigateEvent: NavigateEvent, navController: NavControl
     }
 
     NavigateEvent.NavigateIncomeOverview -> {
-      navController.navigate("${RoutesConstants.INCOME_OVERVIEW}/$param")
+      navController.navigate("${RoutesConstants.HOME_SCREEN}/$param")
     }
 
     NavigateEvent.NavigateIncomeExpensesList -> {
@@ -62,7 +62,7 @@ private fun <T> navigate(navigateEvent: NavigateEvent, navController: NavControl
     NavigateEvent.NavigationAddIncomeScreen -> {
       navController.navigate(RoutesConstants.INCOME_ADD) {
         launchSingleTop = true
-        popUpTo("${RoutesConstants.INCOME_OVERVIEW}/$param") {
+        popUpTo("${RoutesConstants.HOME_SCREEN}/$param") {
           inclusive = true
         }
       }
@@ -71,7 +71,7 @@ private fun <T> navigate(navigateEvent: NavigateEvent, navController: NavControl
     NavigateEvent.NavigationEditIncomeScreen -> {
       navController.navigate("${RoutesConstants.INCOME_ADD}/$param") {
         launchSingleTop = true
-        popUpTo("${RoutesConstants.INCOME_OVERVIEW}/$param") {
+        popUpTo("${RoutesConstants.HOME_SCREEN}/$param") {
           inclusive = true
         }
       }
@@ -146,16 +146,16 @@ fun ExpensesApplication() {
 
     // Incomes Screen
     composable(
-      "${RoutesConstants.INCOME_OVERVIEW}/{operation}",
+      "${RoutesConstants.HOME_SCREEN}/{operation}",
       arguments = listOf(
         navArgument("operation") { type = NavType.StringType }
       )
     ) {
       val operation = it.arguments?.getString("operation").orEmpty()
-      IncomesScreen(
+      HomeScreen(
         operation = operation,
-        onNavigate = { navigateEventVal, incomeDetails ->
-          navigate(navigateEventVal, navController, incomeDetails?.paymentDate.toString())
+        onNavigate = { navigateEventVal, payBefore ->
+          navigate(navigateEventVal, navController, payBefore?.toString())
         },
         onNavigateCardsScreen = { event, navigateOperation ->
           navigate(event, navController, navigateOperation)

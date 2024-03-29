@@ -1,4 +1,4 @@
-package com.avocado.expensescompose.presentation.incomes.homescreen.viewmodel
+package com.avocado.expensescompose.presentation.homescreen.viewmodel
 
 sealed class BackPress {
   object Idle : BackPress()
@@ -11,5 +11,4 @@ sealed class IncomeEvent {
   object BackPressIdle : IncomeEvent()
   object CloseToast : IncomeEvent()
   object OpenToast : IncomeEvent()
-  object FetchIncomes : IncomeEvent()
 }

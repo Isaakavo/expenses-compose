@@ -1,11 +1,11 @@
-package com.avocado.expensescompose.presentation.incomes.homescreen
+package com.avocado.expensescompose.presentation.homescreen
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.avocado.expensescompose.presentation.incomes.homescreen.components.IncomeScreenContent
-import com.avocado.expensescompose.presentation.incomes.homescreen.viewmodel.IncomesViewModel
+import com.avocado.expensescompose.presentation.homescreen.components.HomeScreenContent
+import com.avocado.expensescompose.presentation.homescreen.viewmodel.HomeScreenViewModel
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import java.time.LocalDateTime
 
@@ -14,21 +14,19 @@ data class NavigationIncomeDetails(
 )
 
 @Composable
-fun IncomesScreen(
+fun HomeScreen(
   operation: String = "",
-  viewModel: IncomesViewModel = hiltViewModel(),
-  onNavigate: (navigateEvent: NavigateEvent, income: NavigationIncomeDetails?) -> Unit,
+  viewModel: HomeScreenViewModel = hiltViewModel(),
+  onNavigate: (navigateEvent: NavigateEvent, income: LocalDateTime?) -> Unit,
   onNavigateCardsScreen: (navigateEvent: NavigateEvent, operation: String) -> Unit
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
 
-  IncomeScreenContent(
+  HomeScreenContent(
     backPressState = state.backPressState,
     isLoading = state.isLoading,
     uiError = state.uiError,
     operation = operation,
-    incomesMap = state.incomesMap,
-    totalByMonth = state.totalByMonth,
     showToast = state.showToast,
     onNavigate = onNavigate,
     onEvent = viewModel::onEvent,

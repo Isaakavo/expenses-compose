@@ -1,7 +1,8 @@
-package com.avocado.expensescompose.presentation.incomes.homescreen.viewmodel
+package com.avocado.expensescompose.presentation.incomes.incomeslist.viewmodel
 
 import com.avocado.expensescompose.data.model.total.Total
 import com.avocado.expensescompose.domain.income.models.Income
+import com.avocado.expensescompose.presentation.homescreen.viewmodel.BackPress
 
 data class IncomesViewModelState(
   val incomesMap: Map<String, MutableMap<String, MutableMap<String, MutableList<Income>?>>>? = null,

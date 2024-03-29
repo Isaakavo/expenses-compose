@@ -1,4 +1,4 @@
-package com.avocado.expensescompose.presentation.incomes.homescreen.components
+package com.avocado.expensescompose.presentation.homescreen.components
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable

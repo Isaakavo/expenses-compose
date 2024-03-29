@@ -1,4 +1,4 @@
-package com.avocado.expensescompose.presentation.incomes.homescreen.components
+package com.avocado.expensescompose.presentation.homescreen.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -8,22 +8,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.avocado.expensescompose.R
 import com.avocado.expensescompose.domain.income.models.Income
-import com.avocado.expensescompose.presentation.incomes.homescreen.NavigationIncomeDetails
-import com.avocado.expensescompose.presentation.navigation.NavigateEvent
+import java.time.LocalDateTime
 
 @Composable
 fun IncomeItem(
   items: List<Income>,
   fortnight: String,
-  onNavigate: (navigateEvent: NavigateEvent, income: NavigationIncomeDetails) -> Unit
+  onNavigate: (incomeDate: LocalDateTime?) -> Unit
 ) {
   Column(
     modifier = Modifier.clickable {
       onNavigate(
-        NavigateEvent.NavigateIncomeExpensesList,
-        NavigationIncomeDetails(
-          paymentDate = items[0].paymentDate.date
-        )
+        items[0].paymentDate.date
       )
     }
   ) {

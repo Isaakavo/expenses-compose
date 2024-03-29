@@ -1,4 +1,4 @@
-package com.avocado.expensescompose.presentation.incomes.homescreen.components
+package com.avocado.expensescompose.presentation.homescreen.components
 
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -7,18 +7,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Menu
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerState
@@ -44,31 +37,27 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.avocado.expensescompose.R
-import com.avocado.expensescompose.data.model.total.Total
-import com.avocado.expensescompose.domain.income.models.Income
-import com.avocado.expensescompose.presentation.incomes.homescreen.NavigationIncomeDetails
-import com.avocado.expensescompose.presentation.incomes.homescreen.viewmodel.BackPress
-import com.avocado.expensescompose.presentation.incomes.homescreen.viewmodel.IncomeEvent
+import com.avocado.expensescompose.presentation.homescreen.viewmodel.BackPress
+import com.avocado.expensescompose.presentation.homescreen.viewmodel.IncomeEvent
+import com.avocado.expensescompose.presentation.incomes.incomeslist.IncomesList
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.shared.CustomScaffold
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.expensescompose.presentation.util.Operations
-import com.avocado.expensescompose.presentation.util.getMonthTotal
 import com.avocado.expensescompose.presentation.util.validateOperation
+import java.time.LocalDateTime
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun IncomeScreenContent(
+fun HomeScreenContent(
   backPressState: BackPress?,
   isLoading: Boolean,
   uiError: Int,
   operation: String,
-  incomesMap: Map<String, MutableMap<String, MutableMap<String, MutableList<Income>?>>>?,
-  totalByMonth: List<Total?>,
   showToast: Boolean,
-  onNavigate: (navigateEvent: NavigateEvent, income: NavigationIncomeDetails?) -> Unit,
+  onNavigate: (navigateEvent: NavigateEvent, income: LocalDateTime?) -> Unit,
   onEvent: (IncomeEvent) -> Unit = {},
   onNavigateCardsScreen: (navigateEvent: NavigateEvent, operation: String) -> Unit = { one, two -> }
 ) {
@@ -76,6 +65,7 @@ fun IncomeScreenContent(
   val drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
   val snackBarHostState = remember { SnackbarHostState() }
   val context = LocalContext.current
+
   if (operation.isNotEmpty()) {
     LaunchedEffect(key1 = Unit) {
       validateOperation(
@@ -100,9 +90,6 @@ fun IncomeScreenContent(
               context.resources.getString(R.string.income_delete_successfully)
             )
           }
-        },
-        onAlwaysExecute = {
-          onEvent(IncomeEvent.FetchIncomes)
         }
       )
     }
@@ -168,72 +155,30 @@ fun IncomeScreenContent(
       }
     ) { paddingValues ->
 
-      if (uiError != 0) {
-        Column(
-          modifier = Modifier.padding(paddingValues),
-          verticalArrangement = Arrangement.Center,
-          horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-          Text(text = stringResource(uiError), style = MaterialTheme.typography.headlineLarge)
-        }
-      } else if (isLoading) {
-        Column(
-          modifier = Modifier.padding(paddingValues),
-          verticalArrangement = Arrangement.Center,
-          horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-          CircularProgressIndicator(strokeWidth = 6.dp)
-        }
-      } else {
-        if (incomesMap?.isNotEmpty() == true) {
-          LazyColumn(
-            contentPadding = PaddingValues(start = 24.dp, end = 24.dp)
-          ) {
-            items(incomesMap.toList()) { year ->
-              YearRow(year = year.first)
-              year.second.map { month ->
-                Card(
-                  shape = RoundedCornerShape(16.dp),
-                  modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-                    .padding(bottom = 22.dp, start = 12.dp, end = 12.dp),
-                  elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
-                ) {
-                  Column(
-                    modifier = Modifier.padding(
-                      start = 12.dp,
-                      end = 12.dp,
-                      top = 12.dp,
-                      bottom = 6.dp
-                    )
-                  ) {
-                    MonthRow(
-                      monthTotal = getMonthTotal(totalByMonth, month.key, year.first),
-                      incomeMonth = month.key
-                    )
-                    month.value.map { income ->
-                      IncomeItem(
-                        items = income.value ?: emptyList(),
-                        fortnight = income.key,
-                        onNavigate = onNavigate
-                      )
-                    }
-                  }
-                }
-              }
-            }
-          }
-        } else {
+      when {
+        uiError != 0 -> {
           Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(paddingValues),
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(start = 12.dp, end = 12.dp)
+            horizontalAlignment = Alignment.CenterHorizontally
           ) {
-            Text(
-              text = stringResource(id = R.string.income_empty_list),
-              style = MaterialTheme.typography.headlineLarge
-            )
+            Text(text = stringResource(uiError), style = MaterialTheme.typography.headlineLarge)
+          }
+        }
+
+        isLoading -> {
+          Column(
+            modifier = Modifier.padding(paddingValues),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+          ) {
+            CircularProgressIndicator(strokeWidth = 6.dp)
+          }
+        }
+
+        else -> {
+          IncomesList {
+            onNavigate(NavigateEvent.NavigateIncomeExpensesList, it)
           }
         }
       }
