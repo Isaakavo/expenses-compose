@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
@@ -29,10 +28,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
@@ -53,6 +50,7 @@ import com.avocado.expensescompose.presentation.incomes.homescreen.NavigationInc
 import com.avocado.expensescompose.presentation.incomes.homescreen.viewmodel.BackPress
 import com.avocado.expensescompose.presentation.incomes.homescreen.viewmodel.IncomeEvent
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
+import com.avocado.expensescompose.presentation.shared.CustomScaffold
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.expensescompose.presentation.util.Operations
 import com.avocado.expensescompose.presentation.util.getMonthTotal
@@ -143,127 +141,126 @@ fun IncomeScreenContent(
       }
     }
   ) {
-    Scaffold(topBar = {
-      AppBar(
-        title = stringResource(id = R.string.income_income),
-        navigationIcon = Icons.Rounded.Menu,
-        onNavigationIconClick = {
-          scope.launch {
-            drawerState.apply {
-              if (isClosed) open() else close()
+    CustomScaffold(
+      topBar = {
+        AppBar(
+          title = stringResource(id = R.string.income_income),
+          navigationIcon = Icons.Rounded.Menu,
+          onNavigationIconClick = {
+            scope.launch {
+              drawerState.apply {
+                if (isClosed) open() else close()
+              }
             }
           }
-        }
-      )
-    }, snackbarHost = {
+        )
+      },
+      snackBarHost = {
         SnackbarHost(hostState = snackBarHostState)
-      }, floatingActionButton = {
+      },
+      floatingActionButton = {
         FabAddButtons(onNavigateAddIncome = {
           onNavigate(
             NavigateEvent.NavigationAddIncomeScreen,
             null
           )
         }, onNavigateAddExpense = { onNavigate(NavigateEvent.NavigateAddExpenseScreen, null) })
-      }) { paddingValues ->
-      Surface(
-        modifier = Modifier
-          .fillMaxSize()
-          .padding(paddingValues)
-      ) {
-        if (uiError != 0) {
-          Column(
-            modifier = Modifier.padding(paddingValues),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+      }
+    ) { paddingValues ->
+
+      if (uiError != 0) {
+        Column(
+          modifier = Modifier.padding(paddingValues),
+          verticalArrangement = Arrangement.Center,
+          horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+          Text(text = stringResource(uiError), style = MaterialTheme.typography.headlineLarge)
+        }
+      } else if (isLoading) {
+        Column(
+          modifier = Modifier.padding(paddingValues),
+          verticalArrangement = Arrangement.Center,
+          horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+          CircularProgressIndicator(strokeWidth = 6.dp)
+        }
+      } else {
+        if (incomesMap?.isNotEmpty() == true) {
+          LazyColumn(
+            contentPadding = PaddingValues(start = 24.dp, end = 24.dp)
           ) {
-            Text(text = stringResource(uiError), style = MaterialTheme.typography.headlineLarge)
-          }
-        } else if (isLoading) {
-          Column(
-            modifier = Modifier.padding(paddingValues),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-          ) {
-            CircularProgressIndicator(strokeWidth = 6.dp)
-          }
-        } else {
-          if (incomesMap?.isNotEmpty() == true) {
-            LazyColumn(
-              contentPadding = PaddingValues(start = 24.dp, end = 24.dp)
-            ) {
-              items(incomesMap.toList()) { year ->
-                YearRow(year = year.first)
-                year.second.map { month ->
-                  Card(
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier
-                      .fillMaxWidth()
-                      .wrapContentHeight()
-                      .padding(bottom = 22.dp, start = 12.dp, end = 12.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
+            items(incomesMap.toList()) { year ->
+              YearRow(year = year.first)
+              year.second.map { month ->
+                Card(
+                  shape = RoundedCornerShape(16.dp),
+                  modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(bottom = 22.dp, start = 12.dp, end = 12.dp),
+                  elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
+                ) {
+                  Column(
+                    modifier = Modifier.padding(
+                      start = 12.dp,
+                      end = 12.dp,
+                      top = 12.dp,
+                      bottom = 6.dp
+                    )
                   ) {
-                    Column(
-                      modifier = Modifier.padding(
-                        start = 12.dp,
-                        end = 12.dp,
-                        top = 12.dp,
-                        bottom = 6.dp
+                    MonthRow(
+                      monthTotal = getMonthTotal(totalByMonth, month.key, year.first),
+                      incomeMonth = month.key
+                    )
+                    month.value.map { income ->
+                      IncomeItem(
+                        items = income.value ?: emptyList(),
+                        fortnight = income.key,
+                        onNavigate = onNavigate
                       )
-                    ) {
-                      MonthRow(
-                        monthTotal = getMonthTotal(totalByMonth, month.key, year.first),
-                        incomeMonth = month.key
-                      )
-                      month.value.map { income ->
-                        IncomeItem(
-                          items = income.value ?: emptyList(),
-                          fortnight = income.key,
-                          onNavigate = onNavigate
-                        )
-                      }
                     }
                   }
                 }
               }
             }
-          } else {
-            Column(
-              horizontalAlignment = Alignment.CenterHorizontally,
-              verticalArrangement = Arrangement.Center,
-              modifier = Modifier.padding(start = 12.dp, end = 12.dp)
-            ) {
-              Text(
-                text = stringResource(id = R.string.income_empty_list),
-                style = MaterialTheme.typography.headlineLarge
-              )
-            }
+          }
+        } else {
+          Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.padding(start = 12.dp, end = 12.dp)
+          ) {
+            Text(
+              text = stringResource(id = R.string.income_empty_list),
+              style = MaterialTheme.typography.headlineLarge
+            )
           }
         }
       }
+    }
 
-      LaunchedEffect(key1 = backPressState) {
-        if (backPressState == BackPress.InitialTouch) {
-          delay(2000)
-          onEvent(IncomeEvent.BackPressIdle)
-        }
+    LaunchedEffect(key1 = backPressState) {
+      if (backPressState == BackPress.InitialTouch) {
+        delay(2000)
+        onEvent(IncomeEvent.BackPressIdle)
       }
+    }
 
-      BackHandler(true) {
-        if (backPressState == BackPress.InitialTouch) {
-          onNavigate(NavigateEvent.NavigateLogin, null)
-        }
-        onEvent(IncomeEvent.BackPressInitialTouch)
+    BackHandler(true) {
+      if (backPressState == BackPress.InitialTouch) {
+        onNavigate(NavigateEvent.NavigateLogin, null)
       }
+      onEvent(IncomeEvent.BackPressInitialTouch)
+    }
 
-      if (showToast) {
-        Toast.makeText(
-          LocalContext.current,
-          stringResource(id = R.string.income_press_again_exit),
-          Toast.LENGTH_LONG
-        )
-          .show()
-        onEvent(IncomeEvent.CloseToast)
-      }
+    if (showToast) {
+      Toast.makeText(
+        LocalContext.current,
+        stringResource(id = R.string.income_press_again_exit),
+        Toast.LENGTH_LONG
+      )
+        .show()
+      onEvent(IncomeEvent.CloseToast)
     }
   }
 }
