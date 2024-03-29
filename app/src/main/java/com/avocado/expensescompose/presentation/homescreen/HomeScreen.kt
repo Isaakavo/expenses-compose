@@ -9,10 +9,6 @@ import com.avocado.expensescompose.presentation.homescreen.viewmodel.HomeScreenV
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import java.time.LocalDateTime
 
-data class NavigationIncomeDetails(
-  val paymentDate: LocalDateTime?
-)
-
 @Composable
 fun HomeScreen(
   operation: String = "",
