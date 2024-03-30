@@ -25,11 +25,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.adapters.formatMoney
-import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.presentation.cards.expensesbycard.viewmodel.ExpensesByCardViewModel
 import com.avocado.expensescompose.presentation.cards.expensestotalbycard.viewmodel.DataSelector
+import com.avocado.expensescompose.presentation.expenses.allexpenses.AllExpensesListScreen
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
-import com.avocado.expensescompose.presentation.shared.ExpensesList
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.expensescompose.presentation.util.formatDateMonthWithYear
 import timber.log.Timber
@@ -60,7 +59,6 @@ fun ExpensesByCardScreen(
   }
 
   ExpensesByCardContent(
-    expensesList = state.expensesList,
     expensesTotal = state.expenseTotal,
     cardAlias = state.card?.alias ?: "",
     cardBank = state.card?.bank ?: stringResource(id = R.string.appbar_expenses_cards_title),
@@ -73,7 +71,6 @@ fun ExpensesByCardScreen(
 
 @Composable
 fun ExpensesByCardContent(
-  expensesList: List<Expense>,
   expensesTotal: Double,
   cardAlias: String,
   cardBank: String,
@@ -108,9 +105,9 @@ fun ExpensesByCardContent(
           verticalArrangement = Arrangement.spacedBy(22.dp)
         ) {
           CardExpensesDetails(expensesTotal = expensesTotal, payBefore = payBefore)
-          ExpensesList(
-            expenseList = expensesList,
-            onEdit = { onNavigate(NavigateEvent.NavigateEditExpenseScreen, it) }
+          AllExpensesListScreen(
+            payBeforeInput = payBefore,
+            onNavigate = onNavigate
           )
         }
       }

@@ -16,12 +16,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.avocado.expensescompose.R
-import com.avocado.expensescompose.data.model.card.Card
-import com.avocado.expensescompose.data.model.expense.Expense
+import com.avocado.expensescompose.presentation.expenses.allexpenses.AllExpensesListScreen
 import com.avocado.expensescompose.presentation.incomes.incomewithexpense.IncomeWithExpenseEvent
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.shared.DeleteAlertDialog
-import com.avocado.expensescompose.presentation.shared.ExpensesList
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.expensescompose.presentation.topbar.MenuItems
 import com.avocado.expensescompose.presentation.util.Operations
@@ -35,8 +33,7 @@ fun IncomeWithExpensesContent(
   month: String,
   remaining: Double,
   expended: Double,
-  expenseList: List<Expense>,
-  cards: Set<Card>,
+  paymentDate: String,
   isLoading: Boolean = false,
   shouldDeleteIncome: Boolean = false,
   shouldDeleteExpense: Boolean = false,
@@ -122,12 +119,7 @@ fun IncomeWithExpensesContent(
             expended = expended,
             month = month
           )
-          ExpensesList(
-            expenseList = expenseList,
-            cards = cards,
-            onEdit = { onNavigate(NavigateEvent.NavigateEditExpenseScreen, it) },
-            onDelete = { onEvent(IncomeWithExpenseEvent.DeleteExpense, it) }
-          )
+          AllExpensesListScreen(payBeforeInput = paymentDate, onNavigate = onNavigate)
         }
       }
     }

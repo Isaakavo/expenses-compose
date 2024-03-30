@@ -96,21 +96,29 @@ fun ToolBarDropDownMenu(
         onDismissRequest = { expanded = false }
       ) {
         actionsList.map { action ->
-          DropdownMenuItem(
-            text = { Text(text = action.text, modifier = Modifier.fillMaxWidth()) },
-            onClick = {
-              action.action.invoke()
-              expanded = false
-            },
-            leadingIcon = {
-              if (action.icon != null) {
+          if (action.icon != null) {
+            DropdownMenuItem(
+              text = { Text(text = action.text, modifier = Modifier.fillMaxWidth()) },
+              leadingIcon = {
                 Icon(
                   imageVector = action.icon,
                   contentDescription = action.text
                 )
+              },
+              onClick = {
+                action.action.invoke()
+                expanded = false
               }
-            }
-          )
+            )
+          } else {
+            DropdownMenuItem(
+              text = { Text(text = action.text, modifier = Modifier.fillMaxWidth()) },
+              onClick = {
+                action.action.invoke()
+                expanded = false
+              }
+            )
+          }
         }
       }
     }
@@ -140,7 +148,11 @@ fun ToolBarPreview() {
       )
     }
   ) {
-    Surface(modifier = Modifier.padding(it).fillMaxSize()) {
+    Surface(
+      modifier = Modifier
+        .padding(it)
+        .fillMaxSize()
+    ) {
     }
   }
 }

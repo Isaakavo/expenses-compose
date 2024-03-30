@@ -48,7 +48,6 @@ class ExpensesByCardViewModel @Inject constructor(private val graphQlClientImpl:
             this.launch {
               _state.emit(
                 ExpensesByCardViewModelState(
-                  expensesList = expensesList,
                   expenseTotal = expenseTotal,
                   card = card?.card,
                   isLoading = false
@@ -83,7 +82,6 @@ class ExpensesByCardViewModel @Inject constructor(private val graphQlClientImpl:
               this.launch {
                 _state.emit(
                   ExpensesByCardViewModelState(
-                    expensesList = expensesList,
                     expenseTotal = expenseTotal,
                     card = card?.card,
                     isLoading = false

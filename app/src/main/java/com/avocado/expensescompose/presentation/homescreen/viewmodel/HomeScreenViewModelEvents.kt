@@ -5,10 +5,10 @@ sealed class BackPress {
   object InitialTouch : BackPress()
 }
 
-sealed class IncomeEvent {
-  //  object FetchQuery : IncomeEvent()
-  object BackPressInitialTouch : IncomeEvent()
-  object BackPressIdle : IncomeEvent()
-  object CloseToast : IncomeEvent()
-  object OpenToast : IncomeEvent()
+sealed class HomeScreenEvents {
+  object ScreenToDisplay : HomeScreenEvents()
+  object BackPressInitialTouch : HomeScreenEvents()
+  object BackPressIdle : HomeScreenEvents()
+  object CloseToast : HomeScreenEvents()
+  object OpenToast : HomeScreenEvents()
 }

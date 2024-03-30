@@ -12,27 +12,33 @@ class HomeScreenViewModel @Inject constructor() : ViewModel() {
   private val _state = MutableStateFlow(HomeScreenState())
   val state = _state.asStateFlow()
 
-  fun onEvent(incomeEvent: IncomeEvent) {
+  fun onEvent(incomeEvent: HomeScreenEvents, screen: HomeScreens? = null) {
     when (incomeEvent) {
-      is IncomeEvent.BackPressInitialTouch -> {
+      HomeScreenEvents.ScreenToDisplay -> {
+        _state.update {
+          it.copy(screen = screen ?: HomeScreens.INCOME)
+        }
+      }
+
+      is HomeScreenEvents.BackPressInitialTouch -> {
         _state.update {
           it.copy(backPressState = BackPress.InitialTouch, showToast = true)
         }
       }
 
-      is IncomeEvent.BackPressIdle -> {
+      is HomeScreenEvents.BackPressIdle -> {
         _state.update {
           it.copy(backPressState = BackPress.Idle)
         }
       }
 
-      IncomeEvent.CloseToast -> {
+      HomeScreenEvents.CloseToast -> {
         _state.update {
           it.copy(showToast = false)
         }
       }
 
-      IncomeEvent.OpenToast -> {
+      HomeScreenEvents.OpenToast -> {
         _state.update {
           it.copy(showToast = true)
         }

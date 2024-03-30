@@ -1,6 +1,13 @@
 package com.avocado.expensescompose.presentation.homescreen.viewmodel
 
+enum class HomeScreens {
+  INCOME,
+  CARDS,
+  EXPENSES
+}
+
 data class HomeScreenState(
+  val screen: HomeScreens = HomeScreens.INCOME,
   val showAddButtons: Boolean = false,
   val backPressState: BackPress = BackPress.Idle,
   val showToast: Boolean = false,

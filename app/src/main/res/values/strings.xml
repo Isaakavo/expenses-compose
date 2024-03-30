@@ -18,6 +18,9 @@
     <string name="expenses_list_card">Card</string>
     <string name="expenses_list_delete">Delete</string>
     <string name="expenses_list_edit">Edit</string>
+    <string name="homescreen_incomes_option">Incomes</string>
+    <string name="homescreen_cards_option">Cards</string>
+    <string name="homescreen_expenses_option">Expenses</string>
     <string name="dialog_accept">Accept</string>
     <string name="dialog_cancel">Cancel</string>
     <string name="delete_dialog_warning">Attention! This action is irreversible. Please note that the expenses associated with this income will not be deleted.</string>

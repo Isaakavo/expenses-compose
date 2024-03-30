@@ -19,6 +19,7 @@ fun HomeScreen(
   val state by viewModel.state.collectAsStateWithLifecycle()
 
   HomeScreenContent(
+    screens = state.screen,
     backPressState = state.backPressState,
     isLoading = state.isLoading,
     uiError = state.uiError,
