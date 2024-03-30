@@ -44,9 +44,6 @@ class AllExpensesListViewModel @Inject constructor(
       AllExpensesListEvents.DeleteExpense -> {
       }
 
-      AllExpensesListEvents.FilterExpenses -> {
-      }
-
       AllExpensesListEvents.ApplyFilter -> {
         filterList(filterType, filterName)
       }

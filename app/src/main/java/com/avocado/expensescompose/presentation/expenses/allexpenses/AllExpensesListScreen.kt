@@ -3,7 +3,6 @@ package com.avocado.expensescompose.presentation.expenses.allexpenses
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.avocado.expensescompose.presentation.expenses.allexpenses.components.AllExpensesListContent
