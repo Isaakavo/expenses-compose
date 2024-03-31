@@ -301,6 +301,28 @@ input PayBeforeInput {
   cardId: ID
 }
 
+input initialDate {
+  year: Int
+
+  month: Int
+
+  day: Int
+}
+
+input endDate {
+  year: Int
+
+  month: Int
+
+  day: Int
+}
+
+input AllExpensesByDateRangeInput {
+  initialDate: initialDate
+
+  endDate: endDate
+}
+
 type Query {
   incomesList: IncomesList
 
@@ -316,7 +338,9 @@ type Query {
 
   incomesAndExpensesByFortnight(input: PayBeforeInput!): IncomesListAndExpenses!
 
-  allExpenses(year: Int, month: Int, day: Int): [Expense]
+  allExpenses: [Expense]
+
+  allExpensesByDateRange(input: AllExpensesByDateRangeInput): [Expense]
 
   financialBalanceByFortnight(input: PayBeforeInput!): FinancialBalance
 

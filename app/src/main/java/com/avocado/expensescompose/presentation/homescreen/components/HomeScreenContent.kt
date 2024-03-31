@@ -33,7 +33,7 @@ import com.avocado.expensescompose.presentation.homescreen.viewmodel.HomeScreens
 import com.avocado.expensescompose.presentation.incomes.incomeslist.IncomesList
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.shared.CustomScaffold
-import com.avocado.expensescompose.presentation.shared.DateDialog
+import com.avocado.expensescompose.presentation.shared.DateRangeDialog
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.expensescompose.presentation.topbar.MenuItems
 import com.avocado.expensescompose.presentation.util.Operations
@@ -164,18 +164,18 @@ fun HomeScreenContent(
           }
 
           HomeScreens.EXPENSES -> {
-            var date by remember { mutableStateOf("") }
+            var date by remember { mutableStateOf(LongRange.EMPTY) }
             Column(
               modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 12.dp)
             ) {
-              DateDialog(
+              DateRangeDialog(
                 iconResource = R.drawable.baseline_calendar_month_24,
                 onConfirm = { date = it }
               )
               AllExpensesListScreen(
-                year = date,
+                dateRange = date,
                 onNavigate = onNavigateCardsScreen
               )
             }

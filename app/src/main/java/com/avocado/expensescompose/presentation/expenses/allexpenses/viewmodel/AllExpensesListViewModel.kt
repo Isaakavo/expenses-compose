@@ -3,6 +3,7 @@ package com.avocado.expensescompose.presentation.expenses.allexpenses.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apollographql.apollo3.api.Optional
+import com.avocado.AllExpensesByDateRangeQuery
 import com.avocado.AllExpensesQuery
 import com.avocado.ExpensesByFortnightQuery
 import com.avocado.expensescompose.R
@@ -14,7 +15,11 @@ import com.avocado.expensescompose.data.model.card.Card
 import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.data.model.successOrError
 import com.avocado.expensescompose.presentation.util.formatDateForRequest
+import com.avocado.expensescompose.presentation.util.formatDateFromMillis
 import com.avocado.expensescompose.presentation.util.formatDateToISO
+import com.avocado.type.AllExpensesByDateRangeInput
+import com.avocado.type.EndDate
+import com.avocado.type.InitialDate
 import com.avocado.type.PayBeforeInput
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -80,18 +85,12 @@ class AllExpensesListViewModel @Inject constructor(
   }
 
   // TODO refactor those two functions to avoid repeat code
-  fun getAllExpenses(year: String?) {
+  fun getAllExpenses() {
     viewModelScope.launch {
       setLoadingState(true)
 
-      val yearInput = if (year?.formatDateToISO() != null) {
-        Optional.present(year.formatDateToISO()?.year)
-      } else {
-        Optional.absent()
-      }
-
       graphQlClientImpl.query(
-        AllExpensesQuery(year = yearInput),
+        AllExpensesQuery(),
         onError = {}
       )
         .map { apolloResponse -> validateData(apolloResponse) }
@@ -100,6 +99,63 @@ class AllExpensesListViewModel @Inject constructor(
             onSuccess = { successResult ->
               val allExpenses = successResult.data?.allExpenses
               val expensesList = allExpenses?.mapNotNull { expense ->
+                expense?.expenseFragment?.toExpense()
+              } ?: emptyList()
+              val cards = expensesList.mapNotNull { card -> card.card }.toSet()
+
+              this.launch {
+                _state.emit(
+                  AllExpensesListState(
+                    expenses = expensesList,
+                    filteredExpenses = expensesList,
+                    totalExpenses = reduceExpenses(expensesList),
+                    cards = cards,
+                    isLoading = false,
+                    uiError = null
+                  )
+                )
+              }
+            },
+            onError = {}
+          )
+        }
+    }
+  }
+
+  fun getAllExpensesByDateRange(dateRange: LongRange?) {
+    viewModelScope.launch {
+      setLoadingState(true)
+
+      val formattedInitialDate = dateRange?.start?.formatDateFromMillis()?.formatDateToISO()
+      val formattedEndDate = dateRange?.last?.formatDateFromMillis()?.formatDateToISO()
+
+      val input = Optional.present(
+        AllExpensesByDateRangeInput(
+          initialDate = Optional.present(
+            InitialDate(
+              year = Optional.present(formattedInitialDate?.year),
+              month = Optional.present(formattedInitialDate?.monthValue?.minus(1)),
+              day = Optional.present(
+                formattedInitialDate?.dayOfMonth
+              )
+            )
+          ),
+          endDate = Optional.present(
+            EndDate(
+              year = Optional.present(formattedEndDate?.year),
+              month = Optional.present(formattedEndDate?.monthValue?.minus(1)),
+              day = Optional.present(formattedEndDate?.dayOfMonth)
+            )
+          )
+        )
+      )
+      graphQlClientImpl.query(AllExpensesByDateRangeQuery(input), onError = {})
+        .map { validateData(it) }
+        .collect { result ->
+          result.successOrError(
+            onSuccess = {
+              val allExpensesByDateRange = it.data?.allExpensesByDateRange
+              val expensesList = allExpensesByDateRange?.mapNotNull { expense ->
                 expense?.expenseFragment?.toExpense()
               } ?: emptyList()
               val cards = expensesList.mapNotNull { card -> card.card }.toSet()

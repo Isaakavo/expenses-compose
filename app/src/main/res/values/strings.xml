@@ -21,6 +21,8 @@
     <string name="homescreen_incomes_option">Incomes</string>
     <string name="homescreen_cards_option">Cards</string>
     <string name="homescreen_expenses_option">Expenses</string>
+    <string name="homescreen_expenses_all">All Expenses</string>
+    <string name="homescreen_expenses_all_dates">%s - %s</string>
     <string name="dialog_accept">Accept</string>
     <string name="dialog_cancel">Cancel</string>
     <string name="delete_dialog_warning">Attention! This action is irreversible. Please note that the expenses associated with this income will not be deleted.</string>
