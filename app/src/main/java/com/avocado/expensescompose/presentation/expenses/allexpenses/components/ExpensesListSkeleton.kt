@@ -84,7 +84,7 @@ fun ExpenseItemSkeleton() {
 
 @Preview
 @Composable
-fun prev() {
+fun Prev() {
   CustomScaffold {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
       repeat(15) {
