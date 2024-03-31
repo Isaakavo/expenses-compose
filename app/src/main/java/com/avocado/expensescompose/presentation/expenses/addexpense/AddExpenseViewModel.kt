@@ -50,8 +50,6 @@ sealed class AddExpenseEvent {
   object UpdateDate : AddExpenseEvent()
   object AddExpense : AddExpenseEvent()
   object UpdateExpense : AddExpenseEvent()
-  object DateDialogOpen : AddExpenseEvent()
-  object DateDialogClose : AddExpenseEvent()
   object CategoryListOpen : AddExpenseEvent()
   object CategoryListClose : AddExpenseEvent()
   object FixedFrequencyListOpen : AddExpenseEvent()
@@ -75,7 +73,6 @@ data class AddExpensesState(
   val buttonText: String = "Agregar",
   val expenseAdded: Boolean = false,
   val expenseAddedError: Boolean = false,
-  val openDateDialog: Boolean = false,
   val openCategoryList: Boolean = false,
   val openFixedFrequencyList: Boolean = false,
   val openCardMenu: Boolean = false,
@@ -150,14 +147,6 @@ class AddExpenseViewModel @Inject constructor(
 
       AddExpenseEvent.UpdateExpense -> {
         updateExpenseById(params as String)
-      }
-
-      AddExpenseEvent.DateDialogOpen -> {
-        _state.update { it.copy(openDateDialog = true) }
-      }
-
-      AddExpenseEvent.DateDialogClose -> {
-        _state.update { it.copy(openDateDialog = false) }
       }
 
       AddExpenseEvent.CategoryListClose -> {

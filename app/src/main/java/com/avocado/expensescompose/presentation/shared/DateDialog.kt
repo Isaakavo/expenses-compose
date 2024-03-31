@@ -12,6 +12,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -26,14 +30,12 @@ import java.time.LocalDateTime
 @Composable
 fun DateDialog(
   modifier: Modifier = Modifier,
-  date: String,
   iconResource: Int? = null,
-  openDateDialog: Boolean,
   initialSelectedDate: Long? = null,
-  onConfirm: (String) -> Unit,
-  onDismiss: () -> Unit,
-  onSelectTextField: () -> Unit
+  onConfirm: (String) -> Unit
 ) {
+  var date by remember { mutableStateOf(LocalDateTime.now().formatDateWithYear()) }
+  var openDateDialog by remember { mutableStateOf(false) }
   val dateToDisplay = date.ifEmpty { LocalDateTime.now().formatDateWithYear() }
 
   val datePickerState = rememberDatePickerState(
@@ -57,21 +59,22 @@ fun DateDialog(
       )
     }
     ClickableText(text = dateToDisplay, modifier = modifier) {
-      onSelectTextField()
+      openDateDialog = true
     }
   }
 
   if (openDateDialog) {
     DatePickerDialog(
-      onDismissRequest = { onDismiss() },
+      onDismissRequest = { openDateDialog = false },
       confirmButton = {
         TextButton(
           onClick = {
             datePickerState.selectedDateMillis?.let { millis ->
               val formattedDate = millis.formatDateFromMillis()
+              date = formattedDate
               onConfirm(formattedDate)
             }
-            onDismiss()
+            openDateDialog = false
           }
         ) {
           Text(text = stringResource(id = R.string.dialog_accept))
@@ -79,7 +82,7 @@ fun DateDialog(
       },
       dismissButton = {
         TextButton(
-          onClick = { onDismiss() }
+          onClick = { openDateDialog = false }
         ) {
           Text(text = stringResource(id = R.string.dialog_cancel))
         }

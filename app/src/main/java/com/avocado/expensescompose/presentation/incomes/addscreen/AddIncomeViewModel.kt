@@ -29,7 +29,6 @@ sealed class AddIncomeEvent {
   object InsertIncome : AddIncomeEvent()
   object UpdateIncome : AddIncomeEvent()
   object UpdateDate : AddIncomeEvent()
-  object DateDialogOpen : AddIncomeEvent()
   object DateDialogClose : AddIncomeEvent()
   object UpdateTotal : AddIncomeEvent()
   object UpdateComment : AddIncomeEvent()
@@ -98,10 +97,6 @@ class AddIncomeViewModel @Inject constructor(
 
       AddIncomeEvent.DateDialogClose -> {
         _state.update { it.copy(openDateDialog = false) }
-      }
-
-      AddIncomeEvent.DateDialogOpen -> {
-        _state.update { it.copy(openDateDialog = true) }
       }
 
       AddIncomeEvent.UpdateComment -> {

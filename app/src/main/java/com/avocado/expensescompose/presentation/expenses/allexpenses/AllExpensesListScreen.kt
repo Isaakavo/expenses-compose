@@ -13,15 +13,16 @@ import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 fun AllExpensesListScreen(
   viewModel: AllExpensesListViewModel = hiltViewModel(),
   payBeforeInput: String? = null,
+  year: String? = null,
   onNavigate: (navigateEvent: NavigateEvent, operation: String) -> Unit = { one, two -> }
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
 
-  LaunchedEffect(key1 = payBeforeInput) {
-    if (payBeforeInput != null) {
+  LaunchedEffect(key1 = payBeforeInput, key2 = year) {
+    if (!payBeforeInput.isNullOrEmpty()) {
       viewModel.getExpensesByFortnight(payBeforeInput)
     } else {
-      viewModel.getAllExpenses()
+      viewModel.getAllExpenses(year)
     }
   }
 

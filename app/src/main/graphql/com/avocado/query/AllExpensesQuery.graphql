@@ -1,5 +1,5 @@
-query AllExpensesQuery {
-    allExpenses {
+query AllExpensesQuery($year: Int) {
+    allExpenses(year: $year) {
         ...expenseFragment
     }
 }

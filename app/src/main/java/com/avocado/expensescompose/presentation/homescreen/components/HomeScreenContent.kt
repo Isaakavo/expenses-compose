@@ -15,8 +15,11 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -30,6 +33,7 @@ import com.avocado.expensescompose.presentation.homescreen.viewmodel.HomeScreens
 import com.avocado.expensescompose.presentation.incomes.incomeslist.IncomesList
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.shared.CustomScaffold
+import com.avocado.expensescompose.presentation.shared.DateDialog
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.expensescompose.presentation.topbar.MenuItems
 import com.avocado.expensescompose.presentation.util.Operations
@@ -160,19 +164,20 @@ fun HomeScreenContent(
           }
 
           HomeScreens.EXPENSES -> {
-//            DateDialog(
-//              date = ,
-//              openDateDialog = ,
-//              onConfirm = ,
-//              onDismiss = { /*TODO*/ }) {
-//
-//            }
+            var date by remember { mutableStateOf("") }
             Column(
               modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 12.dp)
             ) {
-              AllExpensesListScreen(onNavigate = onNavigateCardsScreen)
+              DateDialog(
+                iconResource = R.drawable.baseline_calendar_month_24,
+                onConfirm = { date = it }
+              )
+              AllExpensesListScreen(
+                year = date,
+                onNavigate = onNavigateCardsScreen
+              )
             }
           }
 

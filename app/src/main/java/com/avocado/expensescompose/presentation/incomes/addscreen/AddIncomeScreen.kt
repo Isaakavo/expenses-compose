@@ -55,7 +55,6 @@ fun AddIncomeScreen(
     initialSelectedDate = state.initialDate,
     isInserted = state.isInserted,
     isUpdated = state.isUpdated,
-    openDateDialog = state.openDateDialog,
     loading = state.loading,
     onPopBackStack = onPopBackStack,
     onNavigate = onNavigate,
@@ -72,7 +71,6 @@ fun AddIncomeContent(
   initialSelectedDate: Long,
   isInserted: Boolean,
   isUpdated: Boolean,
-  openDateDialog: Boolean,
   loading: Boolean,
   onPopBackStack: () -> Unit = {},
   onNavigate: (navigateEvent: NavigateEvent, shouldRefresh: String) -> Unit,
@@ -109,18 +107,14 @@ fun AddIncomeContent(
       ) {
         if (!loading) {
           DateDialog(
-            date = date,
             initialSelectedDate = initialSelectedDate,
-            openDateDialog = openDateDialog,
             modifier = Modifier.fillMaxWidth(),
             onConfirm = { formattedDate ->
               onEvent(
                 AddIncomeEvent.UpdateDate,
                 formattedDate
               )
-            },
-            onDismiss = { onEvent(AddIncomeEvent.DateDialogClose, null) },
-            onSelectTextField = { onEvent(AddIncomeEvent.DateDialogOpen, null) }
+            }
           )
         }
         OutlinedTextField(

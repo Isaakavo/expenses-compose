@@ -78,11 +78,9 @@ fun AddExpenseScreen(
     concept = state.concept,
     comment = state.comment,
     total = state.total,
-    date = state.date,
     uiError = state.uiError,
     initialSelectedDate = state.initialDate,
     buttonText = state.buttonText,
-    openDateDialog = state.openDateDialog,
     openCardMenu = state.openCardMenu,
     openCategoryList = state.openCategoryList,
     openFrequencyList = state.openFixedFrequencyList,
@@ -107,11 +105,9 @@ fun AddExpenseScreenContent(
   concept: String,
   comment: String,
   total: String,
-  date: String,
   uiError: String?,
   initialSelectedDate: Long,
   buttonText: String,
-  openDateDialog: Boolean,
   openCardMenu: Boolean,
   openCategoryList: Boolean,
   openFrequencyList: Boolean,
@@ -176,13 +172,9 @@ fun AddExpenseScreenContent(
       ) {
         if (!loading && !loadingCard) {
           DateDialog(
-            date = date,
             initialSelectedDate = initialSelectedDate,
             iconResource = R.drawable.baseline_calendar_month_24,
-            openDateDialog = openDateDialog,
             onConfirm = { formattedDate -> onEvent(AddExpenseEvent.UpdateDate, formattedDate) },
-            onDismiss = { onEvent(AddExpenseEvent.DateDialogClose, null) },
-            onSelectTextField = { onEvent(AddExpenseEvent.DateDialogOpen, null) },
             modifier = Modifier.padding(start = 8.dp)
           )
         }

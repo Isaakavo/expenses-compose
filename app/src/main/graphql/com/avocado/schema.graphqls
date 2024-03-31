@@ -316,7 +316,7 @@ type Query {
 
   incomesAndExpensesByFortnight(input: PayBeforeInput!): IncomesListAndExpenses!
 
-  allExpenses: [Expense]
+  allExpenses(year: Int, month: Int, day: Int): [Expense]
 
   financialBalanceByFortnight(input: PayBeforeInput!): FinancialBalance
 

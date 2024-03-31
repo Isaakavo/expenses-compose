@@ -2,6 +2,7 @@ package com.avocado.expensescompose.presentation.expenses.allexpenses.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.apollographql.apollo3.api.Optional
 import com.avocado.AllExpensesQuery
 import com.avocado.ExpensesByFortnightQuery
 import com.avocado.expensescompose.R
@@ -13,6 +14,7 @@ import com.avocado.expensescompose.data.model.card.Card
 import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.data.model.successOrError
 import com.avocado.expensescompose.presentation.util.formatDateForRequest
+import com.avocado.expensescompose.presentation.util.formatDateToISO
 import com.avocado.type.PayBeforeInput
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -78,12 +80,18 @@ class AllExpensesListViewModel @Inject constructor(
   }
 
   // TODO refactor those two functions to avoid repeat code
-  fun getAllExpenses() {
+  fun getAllExpenses(year: String?) {
     viewModelScope.launch {
       setLoadingState(true)
 
+      val yearInput = if (year?.formatDateToISO() != null) {
+        Optional.present(year.formatDateToISO()?.year)
+      } else {
+        Optional.absent()
+      }
+
       graphQlClientImpl.query(
-        AllExpensesQuery(),
+        AllExpensesQuery(year = yearInput),
         onError = {}
       )
         .map { apolloResponse -> validateData(apolloResponse) }
