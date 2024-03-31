@@ -33,46 +33,47 @@ fun AllExpensesListContent(
   onEdit: (expenseId: String) -> Unit = {},
   onEvent: (event: AllExpensesListEvents, expenseId: String?, filterType: String?, filterName: String?) -> Unit = { one, two, three, four -> }
 ) {
-  if (isLoading) {
-    CircularProgressIndicator()
-  }
-
-  Row(
-    modifier = Modifier
-      .fillMaxWidth()
-      .padding(end = 24.dp),
-    verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.SpaceBetween
-  ) {
-    Text(
-      text = stringResource(
-        R.string.expenses_list_transaction,
-        filteredList.size,
-        totalExpenses.formatMoney()
-      ),
-      modifier = Modifier
-        .padding(start = 8.dp)
-        .weight(0.5f),
-      textAlign = TextAlign.Start,
-      fontWeight = FontWeight.Bold,
-      fontSize = 14.sp
-    )
-    ExpenseFilterMenu(
-      cards = cards,
-      onFilterSelect = { type, name ->
-        onEvent(AllExpensesListEvents.ApplyFilter, null, type, name)
-      }
-    )
-  }
-  LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-    itemsIndexed(filteredList, key = { _, item -> item.id }) { index, expense ->
-      ExpenseDateRow(payBefore = expense.payBefore, index = index, expenseList = filteredList)
-      Row(modifier = Modifier.animateItemPlacement()) {
-        ExpenseItem(
-          expense = expense,
-          onEdit = onEdit,
-          onDelete = { onEvent(AllExpensesListEvents.DeleteExpense, it, null, null) }
+  when {
+    isLoading -> CircularProgressIndicator()
+    else -> {
+      Row(
+        modifier = Modifier
+          .fillMaxWidth()
+          .padding(end = 24.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+      ) {
+        Text(
+          text = stringResource(
+            R.string.expenses_list_transaction,
+            filteredList.size,
+            totalExpenses.formatMoney()
+          ),
+          modifier = Modifier
+            .padding(start = 8.dp)
+            .weight(0.5f),
+          textAlign = TextAlign.Start,
+          fontWeight = FontWeight.Bold,
+          fontSize = 14.sp
         )
+        ExpenseFilterMenu(
+          cards = cards,
+          onFilterSelect = { type, name ->
+            onEvent(AllExpensesListEvents.ApplyFilter, null, type, name)
+          }
+        )
+      }
+      LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        itemsIndexed(filteredList, key = { _, item -> item.id }) { index, expense ->
+          ExpenseDateRow(payBefore = expense.payBefore, index = index, expenseList = filteredList)
+          Row(modifier = Modifier.animateItemPlacement()) {
+            ExpenseItem(
+              expense = expense,
+              onEdit = onEdit,
+              onDelete = { onEvent(AllExpensesListEvents.DeleteExpense, it, null, null) }
+            )
+          }
+        }
       }
     }
   }
