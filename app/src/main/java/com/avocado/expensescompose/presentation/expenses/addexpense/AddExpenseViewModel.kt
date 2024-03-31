@@ -284,8 +284,7 @@ class AddExpenseViewModel @Inject constructor(
               _state.update {
                 it.copy(
                   cardsList = result.data ?: emptyList(),
-                  loadingCard = false,
-                  loading = false
+                  loadingCard = false
                 )
               }
             }
@@ -300,7 +299,7 @@ class AddExpenseViewModel @Inject constructor(
 
   fun getExpenseById(expenseId: String) {
     _state.update {
-      it.copy(buttonText = "Actualizar")
+      it.copy(buttonText = "Actualizar", loading = true, loadingCard = true)
     }
     viewModelScope.launch {
       graphQlClientImpl.query(
