@@ -2,12 +2,12 @@ package com.avocado.expensescompose.presentation.expenses.allexpenses.components
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -34,7 +34,22 @@ fun AllExpensesListContent(
   onEvent: (event: AllExpensesListEvents, expenseId: String?, filterType: String?, filterName: String?) -> Unit = { one, two, three, four -> }
 ) {
   when {
-    isLoading -> CircularProgressIndicator()
+    isLoading -> {
+      Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        repeat(15) {
+          Row(
+            modifier = Modifier
+              .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+
+          ) {
+            ExpenseItemSkeleton()
+          }
+        }
+      }
+    }
+
     else -> {
       Row(
         modifier = Modifier
