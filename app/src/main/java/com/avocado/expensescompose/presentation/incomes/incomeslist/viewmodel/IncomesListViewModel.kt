@@ -24,7 +24,7 @@ class IncomesListViewModel @Inject constructor(
   private val _state = MutableStateFlow(IncomesViewModelState())
   val state = _state.asStateFlow()
 
-  private fun getIncomesMap(incomesList: List<Income>): Map<String, MutableMap<String, MutableMap<String, MutableList<Income>?>>>? {
+  private fun getIncomesMap(incomesList: List<Income>): Map<String, MutableMap<String, MutableMap<String, MutableList<Income>?>>> {
     val yearMap =
       mutableMapOf<String, MutableMap<String, MutableMap<String, MutableList<Income>?>>>()
     var monthMap = mutableMapOf<String, MutableMap<String, MutableList<Income>?>>()
@@ -32,8 +32,8 @@ class IncomesListViewModel @Inject constructor(
 
     incomesList.map { income ->
       val year = income.paymentDate.date?.year.toString()
-      val month = income.paymentDate.date?.month?.name ?: return null
-      val fortnight = income.paymentDate.fortnight ?: return null
+      val month = income.paymentDate.date?.month?.name ?: return emptyMap()
+      val fortnight = income.paymentDate.fortnight ?: return emptyMap()
       val incomeYear = yearMap[year]
       val incomeMonths = incomeYear?.get(month)
 

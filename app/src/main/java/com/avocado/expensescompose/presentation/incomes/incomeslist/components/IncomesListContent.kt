@@ -3,6 +3,7 @@ package com.avocado.expensescompose.presentation.incomes.incomeslist.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -22,9 +23,6 @@ import androidx.compose.ui.unit.dp
 import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.model.total.Total
 import com.avocado.expensescompose.domain.income.models.Income
-import com.avocado.expensescompose.presentation.homescreen.components.IncomeItem
-import com.avocado.expensescompose.presentation.homescreen.components.MonthRow
-import com.avocado.expensescompose.presentation.homescreen.components.YearRow
 import com.avocado.expensescompose.presentation.util.getMonthTotal
 import java.time.LocalDateTime
 
@@ -32,12 +30,37 @@ import java.time.LocalDateTime
 fun IncomesListContent(
   isLoading: Boolean,
   uiError: Int,
-  incomesMap: Map<String, MutableMap<String, MutableMap<String, MutableList<Income>?>>>?,
+  incomesMap: Map<String, MutableMap<String, MutableMap<String, MutableList<Income>?>>>,
   totalByMonth: List<Total?>,
   onNavigate: (incomeId: LocalDateTime?) -> Unit
 ) {
   when {
-    incomesMap?.isNotEmpty() == true -> {
+    isLoading -> {
+      Column(modifier = Modifier.fillMaxSize()) {
+        CircularProgressIndicator()
+      }
+    }
+
+    uiError != 0 -> {
+      Column {
+        Text(text = stringResource(id = uiError))
+      }
+    }
+
+    incomesMap.isEmpty() -> {
+      Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.padding(start = 12.dp, end = 12.dp)
+      ) {
+        Text(
+          text = stringResource(id = R.string.income_empty_list),
+          style = MaterialTheme.typography.headlineLarge
+        )
+      }
+    }
+
+    else -> {
       LazyColumn(
         contentPadding = PaddingValues(start = 24.dp, end = 24.dp)
       ) {
@@ -75,19 +98,6 @@ fun IncomesListContent(
             }
           }
         }
-      }
-    }
-    isLoading -> CircularProgressIndicator()
-    else -> {
-      Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier.padding(start = 12.dp, end = 12.dp)
-      ) {
-        Text(
-          text = stringResource(id = R.string.income_empty_list),
-          style = MaterialTheme.typography.headlineLarge
-        )
       }
     }
   }

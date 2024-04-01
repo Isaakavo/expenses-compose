@@ -1,4 +1,4 @@
-package com.avocado.expensescompose.presentation.homescreen.components
+package com.avocado.expensescompose.presentation.incomes.incomeslist.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column

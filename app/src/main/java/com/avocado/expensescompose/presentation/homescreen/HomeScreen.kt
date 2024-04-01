@@ -21,8 +21,6 @@ fun HomeScreen(
   HomeScreenContent(
     screens = state.screen,
     backPressState = state.backPressState,
-    isLoading = state.isLoading,
-    uiError = state.uiError,
     operation = operation,
     showToast = state.showToast,
     onNavigate = onNavigate,

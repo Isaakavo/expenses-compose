@@ -2,16 +2,12 @@ package com.avocado.expensescompose.presentation.homescreen.components
 
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Menu
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -19,7 +15,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -46,8 +41,6 @@ import kotlinx.coroutines.launch
 fun HomeScreenContent(
   screens: HomeScreens?,
   backPressState: BackPress?,
-  isLoading: Boolean,
-  uiError: Int,
   operation: String,
   showToast: Boolean,
   onNavigate: (navigateEvent: NavigateEvent, income: LocalDateTime?) -> Unit,
@@ -123,63 +116,39 @@ fun HomeScreenContent(
     }
   ) { paddingValues ->
 
-    when {
-      uiError != 0 -> {
+    when (screens) {
+      HomeScreens.INCOME -> {
+        IncomesList {
+          onNavigate(NavigateEvent.NavigateIncomeExpensesList, it)
+        }
+      }
+
+      HomeScreens.CARDS -> {
+        onNavigateCardsScreen(
+          NavigateEvent.NavigateCardsScreen,
+          Operations.NONE.name
+        )
+      }
+
+      HomeScreens.EXPENSES -> {
+        var date by remember { mutableStateOf(LongRange.EMPTY) }
         Column(
-          modifier = Modifier.padding(paddingValues),
-          verticalArrangement = Arrangement.Center,
-          horizontalAlignment = Alignment.CenterHorizontally
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 12.dp)
         ) {
-          Text(text = stringResource(uiError), style = MaterialTheme.typography.headlineLarge)
+          DateRangeDialog(
+            iconResource = R.drawable.baseline_calendar_month_24,
+            onConfirm = { date = it }
+          )
+          AllExpensesListScreen(
+            dateRange = date,
+            onNavigate = onNavigateCardsScreen
+          )
         }
       }
 
-      isLoading -> {
-        Column(
-          modifier = Modifier.padding(paddingValues),
-          verticalArrangement = Arrangement.Center,
-          horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-          CircularProgressIndicator(strokeWidth = 6.dp)
-        }
-      }
-
-      else -> {
-        when (screens) {
-          HomeScreens.INCOME -> {
-            IncomesList {
-              onNavigate(NavigateEvent.NavigateIncomeExpensesList, it)
-            }
-          }
-
-          HomeScreens.CARDS -> {
-            onNavigateCardsScreen(
-              NavigateEvent.NavigateCardsScreen,
-              Operations.NONE.name
-            )
-          }
-
-          HomeScreens.EXPENSES -> {
-            var date by remember { mutableStateOf(LongRange.EMPTY) }
-            Column(
-              modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 12.dp)
-            ) {
-              DateRangeDialog(
-                iconResource = R.drawable.baseline_calendar_month_24,
-                onConfirm = { date = it }
-              )
-              AllExpensesListScreen(
-                dateRange = date,
-                onNavigate = onNavigateCardsScreen
-              )
-            }
-          }
-
-          null -> TODO()
-        }
-      }
+      null -> TODO()
     }
   }
 

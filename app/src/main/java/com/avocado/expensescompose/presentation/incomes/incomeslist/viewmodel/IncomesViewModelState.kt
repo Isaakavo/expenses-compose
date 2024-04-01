@@ -5,7 +5,7 @@ import com.avocado.expensescompose.domain.income.models.Income
 import com.avocado.expensescompose.presentation.homescreen.viewmodel.BackPress
 
 data class IncomesViewModelState(
-  val incomesMap: Map<String, MutableMap<String, MutableMap<String, MutableList<Income>?>>>? = null,
+  val incomesMap: Map<String, MutableMap<String, MutableMap<String, MutableList<Income>?>>> = emptyMap(),
   val totalByMonth: List<Total?> = emptyList(),
   val showAddButtons: Boolean = false,
   val backPressState: BackPress = BackPress.Idle,
