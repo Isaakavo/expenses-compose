@@ -12,8 +12,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.Card
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,6 +33,7 @@ import com.avocado.expensescompose.presentation.cards.expensestotalbycard.viewmo
 import com.avocado.expensescompose.presentation.cards.expensestotalbycard.viewmodel.ExpensesTotalByCardEvent
 import com.avocado.expensescompose.presentation.cards.expensestotalbycard.viewmodel.ExpensesTotalByCardViewModel
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
+import com.avocado.expensescompose.presentation.shared.CustomScaffold
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.expensescompose.presentation.topbar.MenuItems
 import com.avocado.expensescompose.presentation.util.Operations
@@ -89,7 +88,7 @@ fun CardWithExpenseContent(
     }
   }
 
-  Scaffold(topBar = {
+  CustomScaffold(topBar = {
     AppBar(
       title = cardAlias.ifEmpty { cardBank },
       dropDownMenuItems = listOf(
@@ -110,44 +109,38 @@ fun CardWithExpenseContent(
       onNavigationIconClick = { onPopBackStack() }
     )
   }) { paddingValues ->
-    Surface(
-      modifier = Modifier
-        .padding(paddingValues)
-        .fillMaxSize()
-    ) {
-      uiError?.takeIf { it != 0 }?.let {
-        Column(
-          modifier = Modifier.fillMaxSize(),
-          verticalArrangement = Arrangement.Center,
-          horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-          Text(text = stringResource(it), fontSize = 26.sp)
-        }
-      } ?: run {
-        Column(
-          modifier = Modifier
-            .fillMaxSize()
-            .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 12.dp),
-          verticalArrangement = Arrangement.spacedBy(22.dp)
-        ) {
-          when (dataSelector) {
-            DataSelector.FORTNIGHT -> {
-              TotalByFortnight(
-                totalByFortnight = totalByFortnight,
-                cardId = cardId,
-                dataSelector = dataSelector,
-                onNavigate = onNavigate
-              )
-            }
+    uiError?.takeIf { it != 0 }?.let {
+      Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+      ) {
+        Text(text = stringResource(it), fontSize = 26.sp)
+      }
+    } ?: run {
+      Column(
+        modifier = Modifier
+          .fillMaxSize()
+          .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(22.dp)
+      ) {
+        when (dataSelector) {
+          DataSelector.FORTNIGHT -> {
+            TotalByFortnight(
+              totalByFortnight = totalByFortnight,
+              cardId = cardId,
+              dataSelector = dataSelector,
+              onNavigate = onNavigate
+            )
+          }
 
-            DataSelector.MONTH -> {
-              TotalByMonth(
-                totalByMonth = totalByMonth,
-                cardId = cardId,
-                dataSelector = dataSelector,
-                onNavigate = onNavigate
-              )
-            }
+          DataSelector.MONTH -> {
+            TotalByMonth(
+              totalByMonth = totalByMonth,
+              cardId = cardId,
+              dataSelector = dataSelector,
+              onNavigate = onNavigate
+            )
           }
         }
       }

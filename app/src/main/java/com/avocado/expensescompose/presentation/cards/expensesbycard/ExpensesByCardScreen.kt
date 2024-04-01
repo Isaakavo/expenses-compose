@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -29,6 +27,7 @@ import com.avocado.expensescompose.presentation.cards.expensesbycard.viewmodel.E
 import com.avocado.expensescompose.presentation.cards.expensestotalbycard.viewmodel.DataSelector
 import com.avocado.expensescompose.presentation.expenses.allexpenses.AllExpensesListScreen
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
+import com.avocado.expensescompose.presentation.shared.CustomScaffold
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.expensescompose.presentation.util.formatDateMonthWithYear
 import timber.log.Timber
@@ -79,37 +78,32 @@ fun ExpensesByCardContent(
   onPopBackStack: () -> Unit,
   onNavigate: (navigateEvent: NavigateEvent, param: String) -> Unit = { one, two -> }
 ) {
-  Scaffold(
+  CustomScaffold(
     topBar = {
       AppBar(title = "$cardAlias $cardBank", onNavigationIconClick = { onPopBackStack() })
     }
   ) { paddingValues ->
-    Surface(
-      modifier = Modifier
-        .padding(paddingValues)
-        .fillMaxSize()
-    ) {
-      if (isLoading) {
-        Column(
-          modifier = Modifier.padding(paddingValues),
-          verticalArrangement = Arrangement.Center,
-          horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-          CircularProgressIndicator(strokeWidth = 6.dp)
-        }
-      } else {
-        Column(
-          modifier = Modifier
-            .fillMaxSize()
-            .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 12.dp),
-          verticalArrangement = Arrangement.spacedBy(22.dp)
-        ) {
-          CardExpensesDetails(expensesTotal = expensesTotal, payBefore = payBefore)
-          AllExpensesListScreen(
-            payBeforeInput = payBefore,
-            onNavigate = onNavigate
-          )
-        }
+
+    if (isLoading) {
+      Column(
+        modifier = Modifier.padding(paddingValues),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+      ) {
+        CircularProgressIndicator(strokeWidth = 6.dp)
+      }
+    } else {
+      Column(
+        modifier = Modifier
+          .fillMaxSize()
+          .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(22.dp)
+      ) {
+        CardExpensesDetails(expensesTotal = expensesTotal, payBefore = payBefore)
+        AllExpensesListScreen(
+          payBeforeInput = payBefore,
+          onNavigate = onNavigate
+        )
       }
     }
   }

@@ -9,8 +9,6 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -19,6 +17,7 @@ import com.avocado.expensescompose.R
 import com.avocado.expensescompose.presentation.expenses.allexpenses.AllExpensesListScreen
 import com.avocado.expensescompose.presentation.incomes.incomewithexpense.IncomeWithExpenseEvent
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
+import com.avocado.expensescompose.presentation.shared.CustomScaffold
 import com.avocado.expensescompose.presentation.shared.DeleteAlertDialog
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.expensescompose.presentation.topbar.MenuItems
@@ -42,7 +41,7 @@ fun IncomeWithExpensesContent(
   onEditIncome: (navigateEvent: NavigateEvent, incomeId: String) -> Unit = { one, two -> },
   onEvent: (event: IncomeWithExpenseEvent, param: String) -> Unit = { one, two -> }
 ) {
-  Scaffold(
+  CustomScaffold(
     topBar = {
       AppBar(
         title = stringResource(id = R.string.income_fortnight, fortnight),
@@ -75,52 +74,46 @@ fun IncomeWithExpensesContent(
         )
       )
     }
-  ) { paddingValues ->
-    Surface(
-      modifier = Modifier
-        .padding(paddingValues)
-        .fillMaxSize()
-    ) {
-      if (isLoading) {
-        Column(
-          modifier = Modifier
-            .fillMaxSize()
-            .padding(22.dp)
-        ) {
-          CircularProgressIndicator(strokeWidth = 6.dp)
-        }
-      } else {
-        DeleteAlertDialog(
-          shouldDisplay = shouldDeleteIncome || shouldDeleteExpense,
-          deleteMessage = stringResource(
-            id = if (shouldDeleteIncome) R.string.income_expense_delete_income else R.string.income_expense_delete_expense
-          ),
-          onConfirmRequest = {
-            if (shouldDeleteIncome) {
-              onEvent(
-                IncomeWithExpenseEvent.ConfirmDeleteIncome,
-                incomeId
-              )
-            } else {
-              onEvent(IncomeWithExpenseEvent.ConfirmDeleteExpense, "")
-            }
-          },
-          onDismissRequest = { onEvent(IncomeWithExpenseEvent.CancelDeleteIncome, "") }
+  ) {
+    if (isLoading) {
+      Column(
+        modifier = Modifier
+          .fillMaxSize()
+          .padding(22.dp)
+      ) {
+        CircularProgressIndicator(strokeWidth = 6.dp)
+      }
+    } else {
+      DeleteAlertDialog(
+        shouldDisplay = shouldDeleteIncome || shouldDeleteExpense,
+        deleteMessage = stringResource(
+          id = if (shouldDeleteIncome) R.string.income_expense_delete_income else R.string.income_expense_delete_expense
+        ),
+        onConfirmRequest = {
+          if (shouldDeleteIncome) {
+            onEvent(
+              IncomeWithExpenseEvent.ConfirmDeleteIncome,
+              incomeId
+            )
+          } else {
+            onEvent(IncomeWithExpenseEvent.ConfirmDeleteExpense, "")
+          }
+        },
+        onDismissRequest = { onEvent(IncomeWithExpenseEvent.CancelDeleteIncome, "") }
+      )
+      Column(
+        modifier = Modifier
+          .fillMaxSize()
+          .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+      ) {
+        IncomeDetails(
+          incomesTotal = incomesTotal,
+          remaining = remaining,
+          expended = expended,
+          month = month
         )
-        Column(
-          modifier = Modifier
-            .fillMaxSize()
-            .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 12.dp),
-          verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-          IncomeDetails(
-            incomesTotal = incomesTotal,
-            remaining = remaining,
-            expended = expended,
-            month = month
-          )
-          AllExpensesListScreen(payBeforeInput = paymentDate, onNavigate = onNavigate)
-        }
+        AllExpensesListScreen(payBeforeInput = paymentDate, onNavigate = onNavigate)
       }
     }
   }

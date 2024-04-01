@@ -13,10 +13,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,6 +30,7 @@ import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.model.card.Card
 import com.avocado.expensescompose.presentation.cards.cardsscreen.CardsScreenEvents
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
+import com.avocado.expensescompose.presentation.shared.CustomScaffold
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.expensescompose.presentation.topbar.MenuItems
 import com.avocado.expensescompose.presentation.util.validateOperation
@@ -99,10 +97,7 @@ fun CardsScreenContent(
     )
   }
 
-  Scaffold(
-    snackbarHost = {
-      SnackbarHost(hostState = snackBarHostState)
-    },
+  CustomScaffold(
     topBar = {
       AppBar(
         title = stringResource(id = R.string.appbar_cards),
@@ -117,76 +112,71 @@ fun CardsScreenContent(
       }
     }
   ) { paddingValues ->
-    Surface(
-      modifier = Modifier
-        .fillMaxSize()
-        .padding(paddingValues)
-    ) {
-      if (uiError != 0) {
+
+    if (uiError != 0) {
+      Column(
+        modifier = Modifier
+          .fillMaxSize()
+          .padding(18.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+      ) {
+        Text(text = stringResource(uiError), style = MaterialTheme.typography.headlineMedium)
+      }
+    } else if (cardsList.isEmpty()) {
+      Card(
+        modifier = Modifier
+          .padding(16.dp)
+          .wrapContentHeight(),
+        shape = RoundedCornerShape(16.dp)
+      ) {
         Column(
           modifier = Modifier
             .fillMaxSize()
-            .padding(18.dp),
+            .padding(22.dp),
           horizontalAlignment = Alignment.CenterHorizontally,
-          verticalArrangement = Arrangement.Center
+          verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
-          Text(text = stringResource(uiError), style = MaterialTheme.typography.headlineMedium)
-        }
-      } else if (cardsList.isEmpty()) {
-        Card(
-          modifier = Modifier
-            .padding(16.dp)
-            .wrapContentHeight(),
-          shape = RoundedCornerShape(16.dp)
-        ) {
-          Column(
-            modifier = Modifier
-              .fillMaxSize()
-              .padding(22.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(18.dp)
+          Text(
+            text = stringResource(id = R.string.cards_empty_list_title),
+            style = MaterialTheme.typography.headlineLarge,
+            modifier = Modifier.padding(bottom = 16.dp)
+          )
+          Text(
+            text = stringResource(id = R.string.cards_empty_list_body),
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.padding(bottom = 8.dp),
+            textAlign = TextAlign.Center
+          )
+          Button(
+            onClick = { onEvent(CardsScreenEvents.OpenAddCardDialog, "") },
+            modifier = Modifier.align(Alignment.CenterHorizontally)
           ) {
-            Text(
-              text = stringResource(id = R.string.cards_empty_list_title),
-              style = MaterialTheme.typography.headlineLarge,
-              modifier = Modifier.padding(bottom = 16.dp)
+            Icon(
+              painterResource(id = R.drawable.baseline_credit_card_24),
+              contentDescription = "",
+              modifier = Modifier.padding(end = 12.dp)
             )
-            Text(
-              text = stringResource(id = R.string.cards_empty_list_body),
-              style = MaterialTheme.typography.headlineMedium,
-              modifier = Modifier.padding(bottom = 8.dp),
-              textAlign = TextAlign.Center
-            )
-            Button(
-              onClick = { onEvent(CardsScreenEvents.OpenAddCardDialog, "") },
-              modifier = Modifier.align(Alignment.CenterHorizontally)
-            ) {
-              Icon(
-                painterResource(id = R.drawable.baseline_credit_card_24),
-                contentDescription = "",
-                modifier = Modifier.padding(end = 12.dp)
-              )
-              Text(text = stringResource(id = R.string.cards_empty_list_button))
-            }
+            Text(text = stringResource(id = R.string.cards_empty_list_button))
           }
         }
-      } else {
-        LazyColumn(
-          contentPadding = PaddingValues(16.dp),
-          verticalArrangement = Arrangement.spacedBy(16.dp),
-          modifier = Modifier.padding(start = 12.dp, end = 12.dp, top = 8.dp)
-        ) {
-          items(cardsList) { card ->
-            CardItem(
-              id = card.id,
-              alias = card.alias ?: "",
-              bank = card.bank,
-              cardType = stringResource(
-                if (card.isDebit == true) R.string.cards_list_type_debit else R.string.cards_list_type_credit
-              ),
-              onNavigate = onNavigate
-            )
-          }
+      }
+    } else {
+      LazyColumn(
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.padding(start = 12.dp, end = 12.dp, top = 8.dp)
+      ) {
+        items(cardsList) { card ->
+          CardItem(
+            id = card.id,
+            alias = card.alias ?: "",
+            bank = card.bank,
+            cardType = stringResource(
+              if (card.isDebit == true) R.string.cards_list_type_debit else R.string.cards_list_type_credit
+            ),
+            onNavigate = onNavigate
+          )
         }
       }
     }
