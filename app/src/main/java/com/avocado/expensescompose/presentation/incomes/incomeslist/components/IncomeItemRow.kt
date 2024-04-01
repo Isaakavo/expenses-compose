@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -34,7 +35,7 @@ fun IncomeItemRow(item: Income, renderIcon: Boolean = true) {
     )
     Text(text = item.total.formatMoney(), style = MaterialTheme.typography.titleMedium)
     if (renderIcon) {
-      Icon(Icons.Filled.KeyboardArrowRight, "")
+      Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, "")
     }
   }
 }
