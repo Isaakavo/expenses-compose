@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.apollographql.apollo3.api.Optional
 import com.avocado.AllExpensesByDateRangeQuery
 import com.avocado.AllExpensesQuery
+import com.avocado.DeleteExpenseMutation
 import com.avocado.ExpensesByFortnightQuery
 import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.adapters.graphql.fragments.toExpense
@@ -35,6 +36,8 @@ data class AllExpensesListState(
   val totalExpenses: Double = 0.0,
   val cards: Set<Card> = emptySet(),
   val payBeforeInput: String = "",
+  val expenseToDelete: String = "",
+  val successDelete: Boolean = false,
   val isLoading: Boolean = false,
   val uiError: Int? = null
 )
@@ -46,13 +49,27 @@ class AllExpensesListViewModel @Inject constructor(
   private val _state = MutableStateFlow(AllExpensesListState())
   val state = _state.asStateFlow()
 
-  fun onEvent(event: AllExpensesListEvents, expenseId: String?, filterType: String?, filterName: String?) {
+  fun onEvent(event: AllExpensesListEvents, expenseId: String, filterType: String?, filterName: String?) {
     when (event) {
       AllExpensesListEvents.DeleteExpense -> {
+        _state.update { it.copy(successDelete = true, expenseToDelete = expenseId) }
+        updateListsForDelete()
       }
 
       AllExpensesListEvents.ApplyFilter -> {
         filterList(filterType, filterName)
+      }
+
+      AllExpensesListEvents.UpdateDeleteExpenseId -> {
+        _state.update { it.copy(expenseToDelete = expenseId) }
+      }
+
+      AllExpensesListEvents.UpdateSuccessDelete -> {
+        _state.update { it.copy(successDelete = false) }
+      }
+
+      AllExpensesListEvents.RestoreLists -> {
+        restoreLists()
       }
     }
   }
@@ -82,6 +99,17 @@ class AllExpensesListViewModel @Inject constructor(
       else -> return
     }
     updateFilteredList(filteredList, reduceExpenses(filteredList))
+  }
+
+  private fun updateListsForDelete() {
+    val expenseId = _state.value.expenseToDelete
+    val updatedFilteredList = _state.value.expenses.filter { it.id != expenseId }
+    _state.update { it.copy(filteredExpenses = updatedFilteredList) }
+  }
+
+  private fun restoreLists() {
+    val expenses = _state.value.expenses
+    _state.update { it.copy(filteredExpenses = expenses) }
   }
 
   // TODO refactor those two functions to avoid repeat code
@@ -217,6 +245,33 @@ class AllExpensesListViewModel @Inject constructor(
                     uiError = null
                   )
                 )
+              }
+            },
+            onError = {}
+          )
+        }
+    }
+  }
+
+  fun deleteExpense() {
+    viewModelScope.launch {
+      val expenseId = _state.value.expenseToDelete
+      graphQlClientImpl.mutate(DeleteExpenseMutation(expenseId))
+        .map { validateData(it) }
+        .collect { result ->
+          result.successOrError(
+            onSuccess = { success ->
+              val isDeleted = success.data?.deleteExpense
+              if (isDeleted == true) {
+                val updatedFExpensesList = _state.value.expenses.filter { it.id != expenseId }
+                val updatedFilteredList = _state.value.filteredExpenses.filter { it.id != expenseId }
+                _state.update {
+                  it.copy(
+                    successDelete = false,
+                    expenses = updatedFExpensesList,
+                    filteredExpenses = updatedFilteredList
+                  )
+                }
               }
             },
             onError = {}

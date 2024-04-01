@@ -31,7 +31,7 @@ fun AllExpensesListContent(
   cards: Set<Card> = setOf(),
   isLoading: Boolean,
   onEdit: (expenseId: String) -> Unit = {},
-  onEvent: (event: AllExpensesListEvents, expenseId: String?, filterType: String?, filterName: String?) -> Unit = { one, two, three, four -> }
+  onEvent: (event: AllExpensesListEvents, expenseId: String, filterType: String?, filterName: String?) -> Unit = { one, two, three, four -> }
 ) {
   when {
     isLoading -> {
@@ -74,7 +74,7 @@ fun AllExpensesListContent(
         ExpenseFilterMenu(
           cards = cards,
           onFilterSelect = { type, name ->
-            onEvent(AllExpensesListEvents.ApplyFilter, null, type, name)
+            onEvent(AllExpensesListEvents.ApplyFilter, "", type, name)
           }
         )
       }

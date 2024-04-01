@@ -18,6 +18,7 @@
     <string name="expenses_list_card">Card</string>
     <string name="expenses_list_delete">Delete</string>
     <string name="expenses_list_edit">Edit</string>
+    <string name="expenses_list_delete_successful">Expense deleted, you can still regret</string>
     <string name="homescreen_incomes_option">Incomes</string>
     <string name="homescreen_cards_option">Cards</string>
     <string name="homescreen_expenses_option">Expenses</string>
@@ -120,4 +121,5 @@
     <string name="category_months_without_interest">Months Without Interest</string>
     <string name="fixed_expense_frequency_month">Monthly</string>
     <string name="fixed_expense_frequency_biweekly">Weekly</string>
+    <string name="snackbar_undo">Undo</string>
 </resources>
