@@ -33,10 +33,11 @@ import java.time.LocalDateTime
 fun DateDialog(
   modifier: Modifier = Modifier,
   iconResource: Int? = null,
-  initialSelectedDate: Long = LocalDateTime.now().convertDateToMillis(),
+  initialSelectedDate: Long,
   onConfirm: (String) -> Unit
 ) {
-  var date by remember { mutableStateOf(initialSelectedDate.formatDateFromMillis()) }
+  val calculatedInitialDate = if (initialSelectedDate != 0L) initialSelectedDate else LocalDateTime.now().convertDateToMillis()
+  var date by remember { mutableStateOf(calculatedInitialDate.formatDateFromMillis()) }
   var openDateDialog by remember { mutableStateOf(false) }
   val dateToDisplay = date.ifEmpty { LocalDateTime.now().formatDateWithYear() }
   var datePickerState: DatePickerState? by remember {
@@ -46,7 +47,7 @@ fun DateDialog(
   LaunchedEffect(key1 = initialSelectedDate) {
     datePickerState = DatePickerState(
       locale = CalendarLocale("en"),
-      initialSelectedDateMillis = initialSelectedDate
+      initialSelectedDateMillis = calculatedInitialDate
     )
   }
 

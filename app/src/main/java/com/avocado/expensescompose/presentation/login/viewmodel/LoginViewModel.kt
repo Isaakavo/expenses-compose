@@ -1,12 +1,10 @@
-package com.avocado.expensescompose.presentation.login
+package com.avocado.expensescompose.presentation.login.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.domain.login.usecase.LoginUseCase
-import com.avocado.expensescompose.presentation.login.viewmodel.LoginViewModelEvents
-import com.avocado.expensescompose.presentation.login.viewmodel.LoginViewModelState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow

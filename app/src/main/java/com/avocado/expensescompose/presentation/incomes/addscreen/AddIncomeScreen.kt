@@ -9,6 +9,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -41,7 +42,7 @@ fun AddIncomeScreen(
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
 
-  LaunchedEffect(key1 = Unit) {
+  LaunchedEffect(key1 = incomeId) {
     if (incomeId.isNotEmpty()) {
       viewModel.getIncomeById(incomeId)
     }
@@ -103,41 +104,44 @@ fun AddIncomeContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp)
       ) {
-        if (!loading) {
-          DateDialog(
-            initialSelectedDate = initialSelectedDate,
-            modifier = Modifier.fillMaxWidth(),
-            onConfirm = { formattedDate ->
-              onEvent(
-                AddIncomeEvent.UpdateDate,
-                formattedDate
+        when {
+          loading -> CircularProgressIndicator()
+          else -> {
+            DateDialog(
+              initialSelectedDate = initialSelectedDate,
+              modifier = Modifier.fillMaxWidth(),
+              onConfirm = { formattedDate ->
+                onEvent(
+                  AddIncomeEvent.UpdateDate,
+                  formattedDate
+                )
+              }
+            )
+            OutlinedTextField(
+              value = total,
+              label = { Text(text = stringResource(id = R.string.add_income_total)) },
+              onValueChange = { onEvent(AddIncomeEvent.UpdateTotal, it) },
+              keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Decimal,
+                imeAction = ImeAction.Next
               )
-            }
-          )
-        }
-        OutlinedTextField(
-          value = total,
-          label = { Text(text = stringResource(id = R.string.add_income_total)) },
-          onValueChange = { onEvent(AddIncomeEvent.UpdateTotal, it) },
-          keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Decimal,
-            imeAction = ImeAction.Next
-          )
-        )
+            )
 
-        OutlinedTextField(
-          value = comment,
-          label = { Text(text = stringResource(id = R.string.add_income_comments)) },
-          onValueChange = { onEvent(AddIncomeEvent.UpdateComment, it) },
-          maxLines = 12,
-          keyboardOptions = KeyboardOptions(
-            imeAction = ImeAction.Done
-          ),
-          keyboardActions = KeyboardActions(
-            onNext = { focusRequester.requestFocus() },
-            onDone = { onEvent(AddIncomeEvent.InsertIncome, null) }
-          )
-        )
+            OutlinedTextField(
+              value = comment,
+              label = { Text(text = stringResource(id = R.string.add_income_comments)) },
+              onValueChange = { onEvent(AddIncomeEvent.UpdateComment, it) },
+              maxLines = 12,
+              keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Done
+              ),
+              keyboardActions = KeyboardActions(
+                onNext = { focusRequester.requestFocus() },
+                onDone = { onEvent(AddIncomeEvent.InsertIncome, null) }
+              )
+            )
+          }
+        }
       }
 
       if (isInserted) {

@@ -171,8 +171,11 @@ fun AddExpenseScreenContent(
           .verticalScroll(state = rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(12.dp)
       ) {
+        // TODO create a component to get the list of cards
         when {
-          loading || loadingCard -> CircularProgressIndicator()
+          loading -> {
+            CircularProgressIndicator()
+          }
           else -> {
             DateDialog(
               initialSelectedDate = initialSelectedDate,

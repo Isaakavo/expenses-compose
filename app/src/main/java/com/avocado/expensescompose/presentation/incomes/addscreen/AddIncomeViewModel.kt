@@ -143,6 +143,7 @@ class AddIncomeViewModel @Inject constructor(
 
   fun getIncomeById(incomeId: String) {
     viewModelScope.launch {
+      _state.update { it.copy(loading = true) }
       graphQlClientImpl.query(
         IncomeByIdQuery(incomeId = incomeId),
         onError = { _state.emit(AddIncomeState(uiError = R.string.general_error)) }
