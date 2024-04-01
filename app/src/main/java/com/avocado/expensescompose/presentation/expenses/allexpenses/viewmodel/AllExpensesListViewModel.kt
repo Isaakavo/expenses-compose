@@ -12,7 +12,6 @@ import com.avocado.expensescompose.data.adapters.graphql.fragments.toExpense
 import com.avocado.expensescompose.data.adapters.graphql.scalar.Date
 import com.avocado.expensescompose.data.adapters.graphql.utils.validateData
 import com.avocado.expensescompose.data.apolloclients.GraphQlClientImpl
-import com.avocado.expensescompose.data.model.card.Card
 import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.data.model.successOrError
 import com.avocado.expensescompose.presentation.util.formatDateForRequest
@@ -29,18 +28,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
-data class AllExpensesListState(
-  val expenses: List<Expense> = emptyList(),
-  val filteredExpenses: List<Expense> = emptyList(),
-  val totalExpenses: Double = 0.0,
-  val cards: Set<Card> = emptySet(),
-  val payBeforeInput: String = "",
-  val expenseToDelete: String = "",
-  val successDelete: Boolean = false,
-  val isLoading: Boolean = false,
-  val uiError: Int? = null
-)
 
 @HiltViewModel
 class AllExpensesListViewModel @Inject constructor(
