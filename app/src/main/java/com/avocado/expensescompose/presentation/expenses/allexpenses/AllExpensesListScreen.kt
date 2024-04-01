@@ -14,7 +14,7 @@ import com.avocado.expensescompose.presentation.expenses.allexpenses.components.
 import com.avocado.expensescompose.presentation.expenses.allexpenses.viewmodel.AllExpensesListEvents
 import com.avocado.expensescompose.presentation.expenses.allexpenses.viewmodel.AllExpensesListViewModel
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
-import com.avocado.expensescompose.presentation.shared.LocalSnackBarHostState
+import com.avocado.expensescompose.ui.theme.LocalSnackBarHostState
 import kotlinx.coroutines.launch
 
 @Composable
@@ -26,7 +26,7 @@ fun AllExpensesListScreen(
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
   val scope = rememberCoroutineScope()
-  val snackbarHostState = LocalSnackBarHostState.current
+  val snackBarHostState = LocalSnackBarHostState.current
   val context = LocalContext.current
 
   LaunchedEffect(key1 = payBeforeInput, key2 = dateRange) {
@@ -44,13 +44,13 @@ fun AllExpensesListScreen(
   LaunchedEffect(key1 = state.successDelete) {
     if (state.successDelete) {
       scope.launch {
-        val snackbarResult = snackbarHostState.showSnackbar(
+        val snackBarResult = snackBarHostState.showSnackbar(
           context.resources.getString(R.string.expenses_list_delete_successful),
           actionLabel = context.resources.getString(R.string.snackbar_undo),
           duration = SnackbarDuration.Long
         )
 
-        when (snackbarResult) {
+        when (snackBarResult) {
           SnackbarResult.ActionPerformed -> {
             viewModel.onEvent(AllExpensesListEvents.UpdateSuccessDelete, "", null, null)
             viewModel.onEvent(AllExpensesListEvents.UpdateDeleteExpenseId, "", null, null)

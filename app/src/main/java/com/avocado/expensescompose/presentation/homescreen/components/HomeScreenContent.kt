@@ -10,7 +10,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -113,9 +112,6 @@ fun HomeScreenContent(
           )
         )
       )
-    },
-    snackBarHost = {
-      SnackbarHost(hostState = snackBarHostState)
     },
     floatingActionButton = {
       FabAddButtons(onNavigateAddIncome = {
