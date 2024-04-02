@@ -7,13 +7,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Menu
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -31,54 +29,18 @@ import com.avocado.expensescompose.presentation.shared.DateRangeDialog
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.expensescompose.presentation.topbar.MenuItems
 import com.avocado.expensescompose.presentation.util.Operations
-import com.avocado.expensescompose.presentation.util.validateOperation
 import java.time.LocalDateTime
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreenContent(
   screens: HomeScreens?,
   backPressState: BackPress?,
-  operation: String,
   showToast: Boolean,
   onNavigate: (navigateEvent: NavigateEvent, income: LocalDateTime?) -> Unit,
   onEvent: (HomeScreenEvents, screens: HomeScreens?) -> Unit = { one, two -> },
   onNavigateCardsScreen: (navigateEvent: NavigateEvent, operation: String) -> Unit = { one, two -> }
 ) {
-  val scope: CoroutineScope = rememberCoroutineScope()
-  val snackBarHostState = remember { SnackbarHostState() }
-  val context = LocalContext.current
-
-  if (operation.isNotEmpty()) {
-    LaunchedEffect(key1 = Unit) {
-      validateOperation(
-        operation,
-        onAdd = {
-          scope.launch {
-            snackBarHostState.showSnackbar(
-              context.resources.getString(R.string.income_add_successfully)
-            )
-          }
-        },
-        onUpdate = {
-          scope.launch {
-            snackBarHostState.showSnackbar(
-              context.resources.getString(R.string.income_update_successfully)
-            )
-          }
-        },
-        onDelete = {
-          scope.launch {
-            snackBarHostState.showSnackbar(
-              context.resources.getString(R.string.income_delete_successfully)
-            )
-          }
-        }
-      )
-    }
-  }
   CustomScaffold(
     topBar = {
       AppBar(
