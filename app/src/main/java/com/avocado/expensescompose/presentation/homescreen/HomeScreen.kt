@@ -62,7 +62,6 @@ fun HomeScreen(
   HomeScreenContent(
     screens = state.screen,
     backPressState = state.backPressState,
-    operation = operation,
     showToast = state.showToast,
     onNavigate = onNavigate,
     onEvent = viewModel::onEvent,
