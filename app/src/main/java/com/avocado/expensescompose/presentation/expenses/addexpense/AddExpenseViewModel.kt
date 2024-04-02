@@ -3,21 +3,16 @@ package com.avocado.expensescompose.presentation.expenses.addexpense
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apollographql.apollo3.api.Optional
-import com.apollographql.apollo3.exception.ApolloException
-import com.avocado.AllCardsQuery
 import com.avocado.CreateExpenseMutation
 import com.avocado.CreateFixedExpenseMutation
 import com.avocado.ExpenseByIdQuery
 import com.avocado.UpdateExpenseMutation
-import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.adapters.graphql.fragments.toExpense
 import com.avocado.expensescompose.data.adapters.graphql.scalar.Date
 import com.avocado.expensescompose.data.adapters.graphql.scalar.adaptDateForInput
-import com.avocado.expensescompose.data.adapters.graphql.types.toCard
 import com.avocado.expensescompose.data.adapters.graphql.utils.validateData
 import com.avocado.expensescompose.data.adapters.graphql.utils.validateDataWithoutErrors
 import com.avocado.expensescompose.data.apolloclients.GraphQlClientImpl
-import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.data.model.card.Card
 import com.avocado.expensescompose.data.model.successOrError
 import com.avocado.expensescompose.presentation.util.convertDateToMillis
@@ -40,7 +35,6 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 
 sealed class AddExpenseEvent {
-  object SelectCard : AddExpenseEvent()
   object SelectCategory : AddExpenseEvent()
   object SelectFrequency : AddExpenseEvent()
   object UpdateConcept : AddExpenseEvent()
@@ -54,8 +48,6 @@ sealed class AddExpenseEvent {
   object CategoryListClose : AddExpenseEvent()
   object FixedFrequencyListOpen : AddExpenseEvent()
   object FixedFrequencyListClose : AddExpenseEvent()
-  object OpenCardMenu : AddExpenseEvent()
-  object CloseCardMenu : AddExpenseEvent()
   object ClearError : AddExpenseEvent()
 }
 
@@ -77,7 +69,7 @@ data class AddExpensesState(
   val openFixedFrequencyList: Boolean = false,
   val openCardMenu: Boolean = false,
   val loadingCard: Boolean = true,
-  val loading: Boolean = true,
+  val loading: Boolean = false,
   val isAdded: Boolean = false,
   val isMonthWithoutInterest: Boolean = false,
   val recurrentExpenseFrequency: FixedExpenseFrequency = FixedExpenseFrequency.Monthly,
@@ -91,16 +83,8 @@ class AddExpenseViewModel @Inject constructor(
   private val _state = MutableStateFlow(AddExpensesState())
   val state = _state.asStateFlow()
 
-  init {
-    getAllCards()
-  }
-
   fun <T> onEvent(event: AddExpenseEvent, params: T) {
     when (event) {
-      AddExpenseEvent.SelectCard -> {
-        addSelectedCard(params as String)
-      }
-
       AddExpenseEvent.SelectCategory -> {
         _state.update {
           when {
@@ -163,14 +147,6 @@ class AddExpenseViewModel @Inject constructor(
 
       AddExpenseEvent.FixedFrequencyListClose -> {
         _state.update { it.copy(openFixedFrequencyList = false) }
-      }
-
-      AddExpenseEvent.OpenCardMenu -> {
-        _state.update { it.copy(openCardMenu = true) }
-      }
-
-      AddExpenseEvent.CloseCardMenu -> {
-        _state.update { it.copy(openCardMenu = false) }
       }
 
       AddExpenseEvent.ClearError -> {
@@ -253,47 +229,9 @@ class AddExpenseViewModel @Inject constructor(
     }
   }
 
-  private fun addSelectedCard(cardId: String) {
-    val selectedCard = _state.value.cardsList.firstOrNull() { it.id == cardId }
-    if (selectedCard != null) {
-      _state.update { it.copy(selectedCard = selectedCard) }
-    }
-  }
-
-  private fun getAllCards() {
-    viewModelScope.launch {
-      _state.update { it.copy(loadingCard = true) }
-      graphQlClientImpl.query(
-        AllCardsQuery(),
-        onError = { _state.emit(AddExpensesState(uiError = "")) }
-      )
-        .map { apolloResponse ->
-          try {
-            val cardsList = apolloResponse.data?.cardList
-            MyResult.Success(
-              cardsList?.mapNotNull {
-                it?.toCard()
-              }
-            )
-          } catch (e: ApolloException) {
-            MyResult.Error(data = null, uiText = R.string.cards_add_card_retrieve_card_error)
-          }
-        }.collect { result ->
-          when (result) {
-            is MyResult.Success -> {
-              _state.update {
-                it.copy(
-                  cardsList = result.data ?: emptyList(),
-                  loadingCard = false
-                )
-              }
-            }
-
-            is MyResult.Error -> {
-              _state.update { it.copy(loadingCard = false) }
-            }
-          }
-        }
+  fun addSelectedCard(card: Card?) {
+    if (card != null) {
+      _state.update { it.copy(selectedCard = card) }
     }
   }
 
