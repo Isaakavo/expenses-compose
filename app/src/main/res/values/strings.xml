@@ -5,6 +5,7 @@
     <string name="general_error_title">Oops! 😓</string>
     <string name="general_error_body">Something didn\'t go as expected. \n Please try again.</string>
     <string name="credentials_error">Oh no! Something went wrong retrieving your credentials. 😓"</string>
+    <string name="generic_Add">Add</string>
     <string name="token_user_not_found">Username not found</string>
     <string name="token_user_error">An error occurred trying to get your info.</string>
     <string name="token_user_save_error">An error occurred trying to save your info</string>

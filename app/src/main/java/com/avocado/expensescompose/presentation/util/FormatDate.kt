@@ -55,7 +55,7 @@ fun String.getFifteenDayOfMonth(): String {
 }
 
 fun String.getLastDayOfMonth(): String {
-  val localDateTime = LocalDateTime.parse("${this}T00:00:00", DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+  val localDateTime = LocalDateTime.parse("${this}T00:00", DateTimeFormatter.ISO_LOCAL_DATE_TIME)
   val yearMonth = YearMonth.from(localDateTime)
   val lastDay = yearMonth.atEndOfMonth().atTime(23, 59, 59).dayOfMonth
   val dateArr = this.split("-")

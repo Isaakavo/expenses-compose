@@ -19,7 +19,7 @@ fun LoginScreen(
 
   if (state.isSuccess) {
     LaunchedEffect(key1 = Unit) {
-      onNavigate(NavigateEvent.NavigateIncomeOverview, Operations.SUCCESS_LOGIN.name)
+      onNavigate(NavigateEvent.NavigateHomeScreen, Operations.SUCCESS_LOGIN.name)
     }
   }
 

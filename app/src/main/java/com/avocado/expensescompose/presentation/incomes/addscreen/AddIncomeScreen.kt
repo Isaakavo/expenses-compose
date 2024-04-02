@@ -146,11 +146,11 @@ fun AddIncomeContent(
 
       if (isInserted) {
         LaunchedEffect(key1 = Unit) {
-          onNavigate(NavigateEvent.NavigateIncomeOverview, Operations.ADD.name)
+          onNavigate(NavigateEvent.NavigateHomeScreen, Operations.ADD.name)
         }
       } else if (isUpdated) {
         LaunchedEffect(key1 = Unit) {
-          onNavigate(NavigateEvent.NavigateIncomeOverview, Operations.UPDATE.name)
+          onNavigate(NavigateEvent.NavigateHomeScreen, Operations.UPDATE.name)
         }
       }
     }

@@ -18,6 +18,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.avocado.expensescompose.R
+import com.avocado.expensescompose.presentation.cards.cardsscreen.CardsScreen
 import com.avocado.expensescompose.presentation.expenses.allexpenses.AllExpensesListScreen
 import com.avocado.expensescompose.presentation.homescreen.viewmodel.BackPress
 import com.avocado.expensescompose.presentation.homescreen.viewmodel.HomeScreenEvents
@@ -28,7 +29,6 @@ import com.avocado.expensescompose.presentation.shared.CustomScaffold
 import com.avocado.expensescompose.presentation.shared.DateRangeDialog
 import com.avocado.expensescompose.presentation.topbar.AppBar
 import com.avocado.expensescompose.presentation.topbar.MenuItems
-import com.avocado.expensescompose.presentation.util.Operations
 import java.time.LocalDateTime
 import kotlinx.coroutines.delay
 
@@ -69,15 +69,22 @@ fun HomeScreenContent(
       )
     },
     floatingActionButton = {
-      FabAddButtons(onNavigateAddIncome = {
-        onNavigate(
-          NavigateEvent.NavigationAddIncomeScreen,
-          null
-        )
-      }, onNavigateAddExpense = { onNavigate(NavigateEvent.NavigateAddExpenseScreen, null) })
+      FabAddButtons(
+        onNavigateAddIncome = {
+          onNavigate(
+            NavigateEvent.NavigationAddIncomeScreen,
+            null
+          )
+        },
+        onNavigateAddExpense = {
+          onNavigate(NavigateEvent.NavigateAddExpenseScreen, null)
+        },
+        onNavigateAddCard = {
+          onNavigate(NavigateEvent.NavigateAddCardsScreen, null)
+        }
+      )
     }
-  ) { paddingValues ->
-
+  ) {
     when (screens) {
       HomeScreens.INCOME -> {
         IncomesList {
@@ -86,9 +93,8 @@ fun HomeScreenContent(
       }
 
       HomeScreens.CARDS -> {
-        onNavigateCardsScreen(
-          NavigateEvent.NavigateCardsScreen,
-          Operations.NONE.name
+        CardsScreen(
+          onNavigate = onNavigateCardsScreen
         )
       }
 

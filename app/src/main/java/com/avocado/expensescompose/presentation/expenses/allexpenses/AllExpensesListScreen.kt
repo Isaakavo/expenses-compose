@@ -67,6 +67,15 @@ fun AllExpensesListScreen(
     }
   }
 
+  LaunchedEffect(key1 = state.uiError) {
+    if (state.uiError != null && state.uiError != 0) {
+      snackBarHostState.showSnackbar(
+        context.resources.getString(state.uiError!!),
+        duration = SnackbarDuration.Short
+      )
+    }
+  }
+
   AllExpensesListContent(
     filteredList = state.filteredExpenses,
     totalExpenses = state.totalExpenses,

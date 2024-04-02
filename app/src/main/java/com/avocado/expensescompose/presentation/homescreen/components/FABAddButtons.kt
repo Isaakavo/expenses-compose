@@ -38,7 +38,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun FabAddButtons(
   onNavigateAddIncome: () -> Unit = {},
-  onNavigateAddExpense: () -> Unit = {}
+  onNavigateAddExpense: () -> Unit = {},
+  onNavigateAddCard: () -> Unit = {}
 ) {
   var expanded by remember {
     mutableStateOf(false)
@@ -57,21 +58,27 @@ fun FabAddButtons(
     horizontalAlignment = Alignment.End
   ) {
     if (expanded) {
-      ExtendedFloatingActionButton(
-        elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation(1.dp),
-        onClick = { onNavigateAddIncome() }
-      ) {
-        Icon(painterResource(id = R.drawable.round_account_balance_24), contentDescription = "")
-        Text(text = stringResource(id = R.string.fab_add_income))
-      }
+      ExtendedButtonWithIcon(
+        icon = R.drawable.round_attach_money_24,
+        text = R.string.fab_add_expense,
+        onClick = onNavigateAddExpense
+      )
+
       Spacer(modifier = Modifier.height(8.dp))
-      ExtendedFloatingActionButton(
-        elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation(1.dp),
-        onClick = { onNavigateAddExpense() }
-      ) {
-        Icon(painterResource(id = R.drawable.round_attach_money_24), contentDescription = "")
-        Text(text = stringResource(id = R.string.fab_add_expense))
-      }
+
+      ExtendedButtonWithIcon(
+        icon = R.drawable.round_account_balance_24,
+        text = R.string.fab_add_income,
+        onClick = onNavigateAddIncome
+      )
+
+      Spacer(modifier = Modifier.height(8.dp))
+
+      ExtendedButtonWithIcon(
+        icon = R.drawable.baseline_credit_card_24,
+        text = R.string.cards_add_card_title,
+        onClick = onNavigateAddCard
+      )
     }
 
     Spacer(modifier = Modifier.height(8.dp))
@@ -98,6 +105,21 @@ fun FabAddButtons(
         )
       }
     }
+  }
+}
+
+@Composable
+fun ExtendedButtonWithIcon(
+  icon: Int,
+  text: Int,
+  onClick: () -> Unit
+) {
+  ExtendedFloatingActionButton(
+    elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation(1.dp),
+    onClick = { onClick() }
+  ) {
+    Icon(painterResource(id = icon), contentDescription = "")
+    Text(text = stringResource(id = text))
   }
 }
 

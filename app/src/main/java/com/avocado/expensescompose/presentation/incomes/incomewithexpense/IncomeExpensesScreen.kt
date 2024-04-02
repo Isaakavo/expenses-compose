@@ -26,7 +26,7 @@ fun IncomeExpensesScreen(
 
   if (state.isDeleted) {
     LaunchedEffect(key1 = Unit) {
-      onNavigate(NavigateEvent.NavigateIncomeOverview, Operations.DELETE.name)
+      onNavigate(NavigateEvent.NavigateHomeScreen, Operations.DELETE.name)
     }
   }
 

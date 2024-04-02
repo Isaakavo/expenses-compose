@@ -84,7 +84,7 @@ fun CardWithExpenseContent(
 ) {
   if (isDeleted) {
     LaunchedEffect(key1 = Unit) {
-      onNavigate(NavigateEvent.NavigateCardsScreen, Operations.DELETE.name)
+      onNavigate(NavigateEvent.NavigateAddCardsScreen, Operations.DELETE.name)
     }
   }
 

@@ -9,27 +9,16 @@ import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 
 @Composable
 fun CardsScreen(
-  operation: String = "",
   viewModel: CardsScreenViewModel = hiltViewModel(),
-  onPopBackStack: () -> Unit = {},
-  onNavigate: (navigateEvent: NavigateEvent, cardId: String) -> Unit
+  onNavigate: (navigateEvent: NavigateEvent, cardId: String) -> Unit = { one, two -> }
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
 
   CardsScreenContent(
-    operation = operation,
     cardsList = state.cardsList,
-    bank = state.bank,
-    alias = state.alias,
     uiError = state.uiError,
-    openAddCardDialog = state.openAddCardDialog,
-    isDebitCard = state.isDebit,
-    isCreditCard = state.isCredit,
-    isPhysical = state.isPhysical,
-    isDigital = state.isDigital,
     isAdded = state.isAdded,
     onEvent = viewModel::onEvent,
-    onPopBackStack = onPopBackStack,
     onNavigate = onNavigate
   )
 }

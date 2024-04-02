@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @HiltViewModel
 class AllExpensesListViewModel @Inject constructor(
@@ -197,6 +198,8 @@ class AllExpensesListViewModel @Inject constructor(
   fun getExpensesByFortnight(payBefore: String?) {
     viewModelScope.launch {
       setLoadingState(true)
+
+      Timber.d(payBefore)
 
       val formattedDate = payBefore?.formatDateForRequest()?.let { Date(it) } ?: run {
         _state.update { it.copy(isLoading = false, uiError = R.string.general_error) }

@@ -15,7 +15,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.avocado.expensescompose.presentation.RoutesConstants
-import com.avocado.expensescompose.presentation.cards.cardsscreen.CardsScreen
+import com.avocado.expensescompose.presentation.cards.addcards.AddCardScreen
 import com.avocado.expensescompose.presentation.cards.expensesbycard.ExpensesByCardScreen
 import com.avocado.expensescompose.presentation.cards.expensestotalbycard.ExpensesTotalByCardScreen
 import com.avocado.expensescompose.presentation.cards.expensestotalbycard.viewmodel.DataSelector
@@ -25,14 +25,16 @@ import com.avocado.expensescompose.presentation.incomes.addscreen.AddIncomeScree
 import com.avocado.expensescompose.presentation.incomes.incomewithexpense.IncomeExpensesScreen
 import com.avocado.expensescompose.presentation.login.LoginScreen
 import com.avocado.expensescompose.presentation.util.Operations
+import timber.log.Timber
 
 sealed class NavigateEvent {
   object NavigateLogin : NavigateEvent()
-  object NavigateIncomeOverview : NavigateEvent()
+  object NavigateHomeScreen : NavigateEvent()
   object NavigateIncomeExpensesList : NavigateEvent()
   object NavigationAddIncomeScreen : NavigateEvent()
   object NavigationEditIncomeScreen : NavigateEvent()
-  object NavigateCardsScreen : NavigateEvent()
+  object NavigateAddCardsScreen : NavigateEvent()
+  object NavigateEditCardsScreen : NavigateEvent()
   object NavigateAddExpenseScreen : NavigateEvent()
   object NavigateEditExpenseScreen : NavigateEvent()
   object NavigateCardsWithExpenseScreen : NavigateEvent()
@@ -49,7 +51,7 @@ private fun <T> navigate(navigateEvent: NavigateEvent, navController: NavControl
       }
     }
 
-    NavigateEvent.NavigateIncomeOverview -> {
+    NavigateEvent.NavigateHomeScreen -> {
       navController.navigate("${RoutesConstants.HOME_SCREEN}/$param")
     }
 
@@ -77,14 +79,28 @@ private fun <T> navigate(navigateEvent: NavigateEvent, navController: NavControl
       }
     }
 
-    NavigateEvent.NavigateCardsScreen -> {
-      navController.navigate("${RoutesConstants.CARDS_SCREEN}/$param")
+    NavigateEvent.NavigateAddCardsScreen -> {
+      navController.navigate(RoutesConstants.CARDS_ADD) {
+        launchSingleTop = true
+        popUpTo("${RoutesConstants.HOME_SCREEN}/$param") {
+          inclusive = true
+        }
+      }
+    }
+
+    NavigateEvent.NavigateEditCardsScreen -> {
+      navController.navigate("${RoutesConstants.CARDS_ADD}/$param") {
+        launchSingleTop = true
+        popUpTo("${RoutesConstants.HOME_SCREEN}/$param") {
+          inclusive = true
+        }
+      }
     }
 
     NavigateEvent.NavigateCardsWithExpenseScreen -> {
       navController.navigate("${RoutesConstants.CARDS_EXPENSE_SCREEN}/$param") {
         launchSingleTop = true
-        popUpTo("${RoutesConstants.CARDS_SCREEN}/$param") {
+        popUpTo("${RoutesConstants.CARDS_ADD}/$param") {
           inclusive = true
         }
       }
@@ -235,19 +251,29 @@ fun ExpensesApplication() {
 
     // Cards Screen
     composable(
-      "${RoutesConstants.CARDS_SCREEN}/{operation}",
+      route = RoutesConstants.CARDS_ADD
+    ) { navBackStackEntry ->
+      AddCardScreen(
+        onNavigate = { navigateEvent, operation ->
+          navigate(navigateEvent, navController, operation)
+        },
+        onPopBackStack = { navController.popBackStack() }
+      )
+    }
+
+    composable(
+      route = "${RoutesConstants.CARDS_ADD}/{cardId}",
       arguments = listOf(
-        navArgument("operation") {
+        navArgument("cardId") {
           type = NavType.StringType
         }
       )
     ) { navBackStackEntry ->
-      val operation = navBackStackEntry.arguments?.getString("operation").orEmpty()
-      CardsScreen(
-        operation = operation,
-        onPopBackStack = { navController.popBackStack() },
-        onNavigate = { event, cardId ->
-          navigate(event, navController, cardId)
+      val cardId = navBackStackEntry.arguments?.getString("cardId") ?: ""
+
+      AddCardScreen(
+        onNavigate = { navigateEvent, operation ->
+          navigate(navigateEvent, navController, operation)
         }
       )
     }
@@ -288,6 +314,7 @@ fun ExpensesApplication() {
       val cardId = navBackStackEntry.arguments?.getString("cardId").orEmpty()
       val payBefore = navBackStackEntry.arguments?.getString("payBefore").orEmpty()
       val dataSelector = navBackStackEntry.arguments?.getString("dataSelector").orEmpty()
+      Timber.d(payBefore)
       ExpensesByCardScreen(
         cardId = cardId,
         payBefore = payBefore,
