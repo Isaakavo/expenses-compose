@@ -17,12 +17,14 @@ import com.avocado.expensescompose.data.model.successOrError
 import com.avocado.expensescompose.presentation.util.formatDateForRequest
 import com.avocado.expensescompose.presentation.util.formatDateFromMillis
 import com.avocado.expensescompose.presentation.util.formatDateToISO
+import com.avocado.expensescompose.presentation.util.logWithThread
 import com.avocado.type.AllExpensesByDateRangeInput
 import com.avocado.type.EndDate
 import com.avocado.type.InitialDate
 import com.avocado.type.PayBeforeInput
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
@@ -78,15 +80,18 @@ class AllExpensesListViewModel @Inject constructor(
   private fun reduceExpenses(filteredList: List<Expense>): Double = filteredList.fold(0.0) { acc, item -> acc + item.total }
 
   private fun filterList(type: String?, name: String?) {
-    val expenses = _state.value.expenses
-    val filteredList = when (type) {
-      "CATEGORY" -> expenses.filter { it.category.name == name }
-      "CARDS" -> expenses.filter { it.card?.bank == name }
-      "CASH" -> expenses.filter { it.card == null }
-      "RESET" -> expenses
-      else -> return
+    viewModelScope.launch(Dispatchers.Default) {
+      val expenses = _state.value.expenses
+      logWithThread("Filtering expenses")
+      val filteredList = when (type) {
+        "CATEGORY" -> expenses.filter { it.category.name == name }
+        "CARDS" -> expenses.filter { it.card?.bank == name }
+        "CASH" -> expenses.filter { it.card == null }
+        "RESET" -> expenses
+        else -> return@launch
+      }
+      updateFilteredList(filteredList, reduceExpenses(filteredList))
     }
-    updateFilteredList(filteredList, reduceExpenses(filteredList))
   }
 
   private fun updateListsForDelete() {
