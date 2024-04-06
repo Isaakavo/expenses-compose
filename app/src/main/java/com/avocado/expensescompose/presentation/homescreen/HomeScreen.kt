@@ -61,6 +61,7 @@ fun HomeScreen(
 
   HomeScreenContent(
     screens = state.screen,
+    screenTitle = state.screenTitle,
     backPressState = state.backPressState,
     showToast = state.showToast,
     onNavigate = onNavigate,

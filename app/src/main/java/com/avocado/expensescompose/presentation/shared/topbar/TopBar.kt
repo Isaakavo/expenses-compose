@@ -1,4 +1,4 @@
-package com.avocado.expensescompose.presentation.topbar
+package com.avocado.expensescompose.presentation.shared.topbar
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.MoreVert
@@ -44,7 +44,7 @@ data class MenuItems(
 @Composable
 fun AppBar(
   title: String,
-  navigationIcon: ImageVector = Icons.Rounded.ArrowBack,
+  navigationIcon: ImageVector = Icons.AutoMirrored.Rounded.ArrowBack,
   buttonText: String = "",
   dropDownMenuItems: List<MenuItems> = emptyList(),
   onNavigationIconClick: () -> Unit = {},

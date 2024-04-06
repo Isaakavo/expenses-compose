@@ -11,4 +11,5 @@ sealed class HomeScreenEvents {
   object BackPressIdle : HomeScreenEvents()
   object CloseToast : HomeScreenEvents()
   object OpenToast : HomeScreenEvents()
+  object UpdateTopBarTitle : HomeScreenEvents()
 }

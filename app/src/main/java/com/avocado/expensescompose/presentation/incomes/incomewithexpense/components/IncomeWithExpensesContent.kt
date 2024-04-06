@@ -19,8 +19,8 @@ import com.avocado.expensescompose.presentation.incomes.incomewithexpense.Income
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.shared.CustomScaffold
 import com.avocado.expensescompose.presentation.shared.DeleteAlertDialog
-import com.avocado.expensescompose.presentation.topbar.AppBar
-import com.avocado.expensescompose.presentation.topbar.MenuItems
+import com.avocado.expensescompose.presentation.shared.topbar.AppBar
+import com.avocado.expensescompose.presentation.shared.topbar.MenuItems
 import com.avocado.expensescompose.presentation.util.Operations
 import timber.log.Timber
 

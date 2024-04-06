@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.sp
 import com.avocado.expensescompose.R
 import com.avocado.expensescompose.presentation.cards.addcards.viewmodel.AddCardEvents
 import com.avocado.expensescompose.presentation.shared.CustomScaffold
-import com.avocado.expensescompose.presentation.topbar.AppBar
+import com.avocado.expensescompose.presentation.shared.topbar.AppBar
 
 @Composable
 fun AddCardContent(

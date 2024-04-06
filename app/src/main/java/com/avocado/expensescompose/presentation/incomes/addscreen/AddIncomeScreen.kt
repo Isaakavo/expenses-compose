@@ -30,7 +30,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.avocado.expensescompose.R
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.shared.DateDialog
-import com.avocado.expensescompose.presentation.topbar.AppBar
+import com.avocado.expensescompose.presentation.shared.topbar.AppBar
 import com.avocado.expensescompose.presentation.util.Operations
 
 @Composable

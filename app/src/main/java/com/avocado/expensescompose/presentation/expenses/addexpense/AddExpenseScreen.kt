@@ -41,7 +41,7 @@ import com.avocado.expensescompose.presentation.cards.cardsinputtext.CardsInputT
 import com.avocado.expensescompose.presentation.shared.CustomScaffold
 import com.avocado.expensescompose.presentation.shared.DateDialog
 import com.avocado.expensescompose.presentation.shared.DropDownMenu
-import com.avocado.expensescompose.presentation.topbar.AppBar
+import com.avocado.expensescompose.presentation.shared.topbar.AppBar
 import com.avocado.expensescompose.ui.theme.LocalSnackBarHostState
 import com.avocado.type.Category
 import com.avocado.type.FixedExpenseFrequency

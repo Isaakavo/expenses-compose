@@ -1,6 +1,7 @@
 package com.avocado.expensescompose.presentation.homescreen.viewmodel
 
 import androidx.lifecycle.ViewModel
+import com.avocado.expensescompose.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,13 +21,13 @@ class HomeScreenViewModel @Inject constructor() : ViewModel() {
         }
       }
 
-      is HomeScreenEvents.BackPressInitialTouch -> {
+      HomeScreenEvents.BackPressInitialTouch -> {
         _state.update {
           it.copy(backPressState = BackPress.InitialTouch, showToast = true)
         }
       }
 
-      is HomeScreenEvents.BackPressIdle -> {
+      HomeScreenEvents.BackPressIdle -> {
         _state.update {
           it.copy(backPressState = BackPress.Idle)
         }
@@ -44,11 +45,18 @@ class HomeScreenViewModel @Inject constructor() : ViewModel() {
         }
       }
 
-//      IncomeEvent.FetchIncomes -> {
-//        viewModelScope.launch {
-//          getAllIncomes()
-//        }
-//      }
+      HomeScreenEvents.UpdateTopBarTitle -> {
+        _state.update {
+          it.copy(
+            screenTitle = when (screen) {
+              HomeScreens.EXPENSES -> R.string.homescreen_expenses_all
+              HomeScreens.CARDS -> R.string.homescreen_cards_option
+              HomeScreens.INCOME -> R.string.homescreen_incomes_option
+              else -> R.string.homescreen_error
+            }
+          )
+        }
+      }
     }
   }
 }

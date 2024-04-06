@@ -5,8 +5,6 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -27,14 +25,15 @@ import com.avocado.expensescompose.presentation.incomes.incomeslist.IncomesList
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.shared.CustomScaffold
 import com.avocado.expensescompose.presentation.shared.DateRangeDialog
-import com.avocado.expensescompose.presentation.topbar.AppBar
-import com.avocado.expensescompose.presentation.topbar.MenuItems
+import com.avocado.expensescompose.presentation.shared.topbar.AppBar
+import com.avocado.expensescompose.presentation.shared.topbar.MenuItems
 import java.time.LocalDateTime
 import kotlinx.coroutines.delay
 
 @Composable
 fun HomeScreenContent(
   screens: HomeScreens?,
+  screenTitle: Int,
   backPressState: BackPress?,
   showToast: Boolean,
   onNavigate: (navigateEvent: NavigateEvent, income: LocalDateTime?) -> Unit,
@@ -44,8 +43,7 @@ fun HomeScreenContent(
   CustomScaffold(
     topBar = {
       AppBar(
-        title = stringResource(id = R.string.income_income),
-        navigationIcon = Icons.Rounded.Menu,
+        title = stringResource(id = screenTitle),
         dropDownMenuItems = listOf(
           MenuItems(
             text = stringResource(id = R.string.homescreen_incomes_option),
@@ -87,18 +85,21 @@ fun HomeScreenContent(
   ) {
     when (screens) {
       HomeScreens.INCOME -> {
+        onEvent(HomeScreenEvents.UpdateTopBarTitle, HomeScreens.INCOME)
         IncomesList {
           onNavigate(NavigateEvent.NavigateIncomeExpensesList, it)
         }
       }
 
       HomeScreens.CARDS -> {
+        onEvent(HomeScreenEvents.UpdateTopBarTitle, HomeScreens.CARDS)
         CardsScreen(
           onNavigate = onNavigateCardsScreen
         )
       }
 
       HomeScreens.EXPENSES -> {
+        onEvent(HomeScreenEvents.UpdateTopBarTitle, HomeScreens.INCOME)
         var date by remember { mutableStateOf(LongRange.EMPTY) }
         Column(
           modifier = Modifier

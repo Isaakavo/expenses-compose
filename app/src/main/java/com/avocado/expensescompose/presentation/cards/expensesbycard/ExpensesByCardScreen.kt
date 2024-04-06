@@ -28,7 +28,7 @@ import com.avocado.expensescompose.presentation.cards.expensestotalbycard.viewmo
 import com.avocado.expensescompose.presentation.expenses.allexpenses.AllExpensesListScreen
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.shared.CustomScaffold
-import com.avocado.expensescompose.presentation.topbar.AppBar
+import com.avocado.expensescompose.presentation.shared.topbar.AppBar
 import com.avocado.expensescompose.presentation.util.formatDateMonthWithYear
 import timber.log.Timber
 
