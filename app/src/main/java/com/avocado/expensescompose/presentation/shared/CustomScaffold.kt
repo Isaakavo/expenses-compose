@@ -12,6 +12,7 @@ import com.avocado.expensescompose.ui.theme.LocalSnackBarHostState
 
 @Composable
 fun CustomScaffold(
+  modifier: Modifier = Modifier,
   topBar: @Composable () -> Unit = {},
   floatingActionButton: @Composable () -> Unit = {},
   mainContent: @Composable (PaddingValues) -> Unit
@@ -21,7 +22,8 @@ fun CustomScaffold(
   Scaffold(
     topBar = topBar,
     snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
-    floatingActionButton = floatingActionButton
+    floatingActionButton = floatingActionButton,
+    modifier = modifier
   ) { paddingValues ->
     Surface(
       modifier = Modifier

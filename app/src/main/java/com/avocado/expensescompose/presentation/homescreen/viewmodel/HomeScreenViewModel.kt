@@ -17,7 +17,11 @@ class HomeScreenViewModel @Inject constructor() : ViewModel() {
     when (incomeEvent) {
       HomeScreenEvents.ScreenToDisplay -> {
         _state.update {
-          it.copy(screen = screen ?: HomeScreens.INCOME)
+          it.copy(
+            screen = screen ?: HomeScreens.INCOME,
+            screenTitle = screen?.toText() ?: R.string.homescreen_incomes_option,
+            selectedTabIndex = screen?.ordinal ?: 0
+          )
         }
       }
 
@@ -42,19 +46,6 @@ class HomeScreenViewModel @Inject constructor() : ViewModel() {
       HomeScreenEvents.OpenToast -> {
         _state.update {
           it.copy(showToast = true)
-        }
-      }
-
-      HomeScreenEvents.UpdateTopBarTitle -> {
-        _state.update {
-          it.copy(
-            screenTitle = when (screen) {
-              HomeScreens.EXPENSES -> R.string.homescreen_expenses_all
-              HomeScreens.CARDS -> R.string.homescreen_cards_option
-              HomeScreens.INCOME -> R.string.homescreen_incomes_option
-              else -> R.string.homescreen_error
-            }
-          )
         }
       }
     }
