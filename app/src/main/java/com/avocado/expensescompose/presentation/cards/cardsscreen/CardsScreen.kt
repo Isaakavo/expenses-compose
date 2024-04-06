@@ -18,6 +18,7 @@ fun CardsScreen(
     cardsList = state.cardsList,
     uiError = state.uiError,
     isAdded = state.isAdded,
+    isLoading = state.isLoading,
     onEvent = viewModel::onEvent,
     onNavigate = onNavigate
   )

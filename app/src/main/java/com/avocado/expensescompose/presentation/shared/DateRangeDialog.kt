@@ -59,14 +59,16 @@ fun DateRangeDialog(
       }
     }
 
-    TextButton(
-      onClick = {
-        dateRange = LongRange.EMPTY
-        dateToDisplay = R.string.homescreen_expenses_all
-        onConfirm(LongRange.EMPTY)
+    if (dateRange != LongRange.EMPTY) {
+      TextButton(
+        onClick = {
+          dateRange = LongRange.EMPTY
+          dateToDisplay = R.string.homescreen_expenses_all
+          onConfirm(LongRange.EMPTY)
+        }
+      ) {
+        Text(text = stringResource(id = R.string.expenses_list_filter_reset))
       }
-    ) {
-      Text(text = stringResource(id = R.string.expenses_list_filter_reset))
     }
   }
 

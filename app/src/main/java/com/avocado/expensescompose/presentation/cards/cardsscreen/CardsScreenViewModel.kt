@@ -36,6 +36,7 @@ data class CardsScreenState(
   val alias: String = "",
   val uiError: Int = 0,
   val openAddCardDialog: Boolean = false,
+  val isLoading: Boolean = false,
   val isDebit: Boolean = true,
   val isCredit: Boolean = false,
   val isPhysical: Boolean = true,
@@ -94,6 +95,7 @@ class CardsScreenViewModel @Inject constructor(private val graphQlClient: GraphQ
 
       CardsScreenEvents.CreateCard -> {
         viewModelScope.launch {
+          _state.update { it.copy(isLoading = true) }
           graphQlClient.mutate(
             CreateCardMutation(
               Optional.present(
@@ -130,7 +132,8 @@ class CardsScreenViewModel @Inject constructor(private val graphQlClient: GraphQ
                   it.copy(
                     cardsList = cardList.toList(),
                     isAdded = true,
-                    openAddCardDialog = false
+                    openAddCardDialog = false,
+                    isLoading = false
                   )
                 }
               }
@@ -138,7 +141,8 @@ class CardsScreenViewModel @Inject constructor(private val graphQlClient: GraphQ
               is MyResult.Error -> {
                 _state.update {
                   it.copy(
-                    openAddCardDialog = false
+                    openAddCardDialog = false,
+                    isLoading = false
                   )
                 }
               }
@@ -151,6 +155,7 @@ class CardsScreenViewModel @Inject constructor(private val graphQlClient: GraphQ
 
   private fun getAllCards() {
     viewModelScope.launch {
+      _state.update { it.copy(isLoading = true) }
       graphQlClient.query(
         AllCardsQuery(),
         onError = {
@@ -168,7 +173,8 @@ class CardsScreenViewModel @Inject constructor(private val graphQlClient: GraphQ
                 _state.emit(
                   CardsScreenState(
                     cardsList = it.data.cardList?.mapNotNull { it?.toCard() }
-                      ?: emptyList()
+                      ?: emptyList(),
+                    isLoading = false
                   )
                 )
               }
@@ -177,7 +183,8 @@ class CardsScreenViewModel @Inject constructor(private val graphQlClient: GraphQ
               this.launch {
                 _state.emit(
                   CardsScreenState(
-                    uiError = R.string.cards_add_card_retrieve_card_error
+                    uiError = R.string.cards_add_card_retrieve_card_error,
+                    isLoading = false
                   )
                 )
               }
