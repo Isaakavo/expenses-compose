@@ -121,7 +121,10 @@ class AddIncomeViewModel @Inject constructor(
         comment = if (comment.isNotEmpty()) Optional.present(comment) else Optional.absent(),
         paymentDate = Date(date)
       )
-      graphQlClientImpl.mutate(UpdateIncomeMutation(input = Optional.present(input)))
+      graphQlClientImpl.mutate(
+        UpdateIncomeMutation(input = Optional.present(input)),
+        onError = {}
+      )
         .map { validateDataWithoutErrors(it) }
         .collect { result ->
           result.successOrError(

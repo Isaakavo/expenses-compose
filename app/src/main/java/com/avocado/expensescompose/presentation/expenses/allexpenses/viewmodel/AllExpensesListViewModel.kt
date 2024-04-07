@@ -251,7 +251,10 @@ class AllExpensesListViewModel @Inject constructor(
   fun deleteExpense() {
     viewModelScope.launch {
       val expenseId = _state.value.expenseToDelete
-      graphQlClientImpl.mutate(DeleteExpenseMutation(expenseId))
+      graphQlClientImpl.mutate(
+        DeleteExpenseMutation(expenseId),
+        onError = {}
+      )
         .map { validateData(it) }
         .collect { result ->
           result.successOrError(

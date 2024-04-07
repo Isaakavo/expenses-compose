@@ -107,7 +107,8 @@ class CardsScreenViewModel @Inject constructor(private val graphQlClient: GraphQ
                 )
               )
 
-            )
+            ),
+            onError = {}
           ).map { apolloResponse ->
             val response = apolloResponse.data?.createCard
             if (response != null) {

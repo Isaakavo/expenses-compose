@@ -116,7 +116,10 @@ class ExpensesTotalByCardViewModel @Inject constructor(
 
   private fun deleteCard(cardId: String) {
     viewModelScope.launch {
-      graphQlClientImpl.mutate(DeleteCardMutation(deleteCardId = cardId)).map {
+      graphQlClientImpl.mutate(
+        DeleteCardMutation(deleteCardId = cardId),
+        onError = {}
+      ).map {
         validateDataWithoutErrors(it)
       }.collect { collectResult ->
         collectResult.successOrError(

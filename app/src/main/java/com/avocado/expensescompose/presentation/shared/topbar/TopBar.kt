@@ -52,7 +52,7 @@ fun AppBar(
 ) {
   TopAppBar(
     title = { Text(title, color = Color.White) },
-    colors = TopAppBarDefaults.smallTopAppBarColors(
+    colors = TopAppBarDefaults.topAppBarColors(
       containerColor = MaterialTheme.colorScheme.primaryContainer
     ),
     navigationIcon = {

@@ -7,7 +7,7 @@ sealed class MyResult<out R> {
   data class Error<out T>(
     val data: T? = null,
     val uiText: Int? = null,
-    val uiErrorText: String? = null,
+    var uiErrorText: String? = null,
     val exception: Throwable? = null
   ) : MyResult<T>()
 }

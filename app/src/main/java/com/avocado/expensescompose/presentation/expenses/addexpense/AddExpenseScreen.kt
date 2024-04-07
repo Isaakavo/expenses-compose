@@ -11,6 +11,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -22,10 +23,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -54,6 +55,11 @@ fun AddExpenseScreen(
   onPopBackStack: () -> Unit = {}
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
+  val scope = rememberCoroutineScope()
+  val context = LocalContext.current
+  val snackBarHostState = LocalSnackBarHostState.current
+  val focusRequester = remember { FocusRequester() }
+  val keyboardController = LocalSoftwareKeyboardController.current
 
   LaunchedEffect(key1 = expenseId) {
     if (expenseId.isNotEmpty()) {
@@ -67,6 +73,18 @@ fun AddExpenseScreen(
     }
   }
 
+  LaunchedEffect(key1 = state.expenseAddedError) {
+    if (state.expenseAddedError) {
+      keyboardController?.hide()
+      scope.launch {
+        snackBarHostState.showSnackbar(
+          context.getString(state.uiError)
+        )
+      }
+      viewModel.onEvent(AddExpenseEvent.ClearError, "")
+    }
+  }
+
   AddExpenseScreenContent(
     expenseId = expenseId,
     categories = state.category,
@@ -74,23 +92,21 @@ fun AddExpenseScreen(
     selectedCard = state.selectedCard,
     comment = state.comment,
     total = state.total,
-    uiError = state.uiError,
     initialSelectedDate = state.initialDate,
     buttonText = state.buttonText,
     openCategoryList = state.openCategoryList,
     openFrequencyList = state.openFixedFrequencyList,
-    expenseAddedError = state.expenseAddedError,
-    loading = state.loading,
+    isLoading = state.isLoading,
     isMonthWithoutInterest = state.isMonthWithoutInterest,
     recurrentExpenseFrequency = state.recurrentExpenseFrequency,
     numberOfMonthsOrWeeks = state.numberOfMonthsOrWeeks,
+    focusRequester = focusRequester,
     onEvent = viewModel::onEvent,
     onCardSelect = viewModel::addSelectedCard,
     onPopBackStack = onPopBackStack
   )
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun AddExpenseScreenContent(
   expenseId: String,
@@ -99,42 +115,24 @@ fun AddExpenseScreenContent(
   selectedCard: Card?,
   comment: String,
   total: String,
-  uiError: String?,
   initialSelectedDate: Long,
-  buttonText: String,
+  buttonText: Int,
   openCategoryList: Boolean,
   openFrequencyList: Boolean,
-  expenseAddedError: Boolean,
-  loading: Boolean,
+  isLoading: Boolean,
   isMonthWithoutInterest: Boolean,
   recurrentExpenseFrequency: FixedExpenseFrequency,
   numberOfMonthsOrWeeks: String,
+  focusRequester: FocusRequester,
   onEvent: (event: AddExpenseEvent, elementId: String?) -> Unit,
   onCardSelect: (card: Card?) -> Unit,
   onPopBackStack: () -> Unit = {}
 ) {
-  val scope = rememberCoroutineScope()
-  val snackBarHostState = LocalSnackBarHostState.current
-  val focusRequester = remember { FocusRequester() }
-  val keyboardController = LocalSoftwareKeyboardController.current
-
-  LaunchedEffect(key1 = snackBarHostState, key2 = expenseAddedError) {
-    if (expenseAddedError) {
-      keyboardController?.hide()
-      scope.launch {
-        snackBarHostState.showSnackbar(
-          uiError.orEmpty()
-        )
-      }
-      onEvent(AddExpenseEvent.ClearError, "")
-    }
-  }
-
   CustomScaffold(
     topBar = {
       AppBar(
         title = stringResource(id = R.string.add_expense_add_expense),
-        buttonText = buttonText,
+        buttonText = stringResource(id = buttonText),
         onActionButtonClick = {
           if (expenseId.isEmpty()) {
             onEvent(AddExpenseEvent.AddExpense, null)
@@ -156,9 +154,12 @@ fun AddExpenseScreenContent(
         .verticalScroll(state = rememberScrollState()),
       verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-      // TODO create a component to get the list of cards
       when {
-        loading -> {
+        /*
+        If we don't set the loading state, the date dialog will set the date to 0L (i.e. wrong date)
+        It's necessary to make the screen to first show a loading state to let the date dialog get the correct date.
+         */
+        isLoading -> {
           CircularProgressIndicator()
         }
 
@@ -169,6 +170,18 @@ fun AddExpenseScreenContent(
             onConfirm = { formattedDate -> onEvent(AddExpenseEvent.UpdateDate, formattedDate) },
             modifier = Modifier.padding(start = 8.dp)
           )
+
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+          ) {
+            Text(text = "Recurrent Expense")
+            Checkbox(
+              checked = isMonthWithoutInterest,
+              onCheckedChange = { onEvent(AddExpenseEvent.IsMonthWithoutInterest, (!isMonthWithoutInterest).toString()) }
+            )
+          }
 
           AddExpenseRow {
             Icon(

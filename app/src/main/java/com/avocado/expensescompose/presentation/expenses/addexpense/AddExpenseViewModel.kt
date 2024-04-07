@@ -7,6 +7,7 @@ import com.avocado.CreateExpenseMutation
 import com.avocado.CreateFixedExpenseMutation
 import com.avocado.ExpenseByIdQuery
 import com.avocado.UpdateExpenseMutation
+import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.adapters.graphql.fragments.toExpense
 import com.avocado.expensescompose.data.adapters.graphql.scalar.Date
 import com.avocado.expensescompose.data.adapters.graphql.scalar.adaptDateForInput
@@ -18,6 +19,7 @@ import com.avocado.expensescompose.data.model.successOrError
 import com.avocado.expensescompose.presentation.util.convertDateToMillis
 import com.avocado.expensescompose.presentation.util.formatDateToISO
 import com.avocado.expensescompose.presentation.util.formatDateWithYear
+import com.avocado.expensescompose.presentation.util.logErrorWithThread
 import com.avocado.type.Category
 import com.avocado.type.CreateExpenseInput
 import com.avocado.type.CreateFixedExpenseInput
@@ -48,6 +50,7 @@ sealed class AddExpenseEvent {
   object CategoryListClose : AddExpenseEvent()
   object FixedFrequencyListOpen : AddExpenseEvent()
   object FixedFrequencyListClose : AddExpenseEvent()
+  object IsMonthWithoutInterest : AddExpenseEvent()
   object ClearError : AddExpenseEvent()
 }
 
@@ -61,15 +64,15 @@ data class AddExpensesState(
   val total: String = "",
   val date: String = "",
   val initialDate: Long = 0L,
-  val uiError: String? = "",
-  val buttonText: String = "Agregar",
+  val uiError: Int = R.string.general_error,
+  val buttonText: Int = R.string.add_text,
   val expenseAdded: Boolean = false,
   val expenseAddedError: Boolean = false,
   val openCategoryList: Boolean = false,
   val openFixedFrequencyList: Boolean = false,
   val openCardMenu: Boolean = false,
   val loadingCard: Boolean = true,
-  val loading: Boolean = false,
+  val isLoading: Boolean = false,
   val isAdded: Boolean = false,
   val isMonthWithoutInterest: Boolean = false,
   val recurrentExpenseFrequency: FixedExpenseFrequency = FixedExpenseFrequency.Monthly,
@@ -87,13 +90,7 @@ class AddExpenseViewModel @Inject constructor(
     when (event) {
       AddExpenseEvent.SelectCategory -> {
         _state.update {
-          when {
-            params == Category.MONTHS_WITHOUT_INTEREST.name || params == Category.FIXED_EXPENSE.name -> {
-              it.copy(category = Category.valueOf(params as String), isMonthWithoutInterest = true)
-            }
-
-            else -> it.copy(category = Category.valueOf(params as String), isMonthWithoutInterest = false)
-          }
+          it.copy(category = Category.valueOf(params as String))
         }
       }
 
@@ -150,13 +147,31 @@ class AddExpenseViewModel @Inject constructor(
       }
 
       AddExpenseEvent.ClearError -> {
-        _state.update { it.copy(expenseAddedError = false, uiError = "") }
+        _state.update { it.copy(expenseAddedError = false, uiError = R.string.general_error) }
       }
+
+      AddExpenseEvent.IsMonthWithoutInterest -> {
+        _state.update {
+          it.copy(isMonthWithoutInterest = (params as String).toBoolean())
+        }
+      }
+    }
+  }
+
+  private fun updateError(uiErrorText: String?) {
+    uiErrorText?.let { logErrorWithThread(it) }
+    _state.update {
+      it.copy(
+        expenseAddedError = true,
+        isLoading = false,
+        uiError = R.string.general_error
+      )
     }
   }
 
   private fun createExpense() {
     viewModelScope.launch {
+      _state.update { it.copy(isLoading = true) }
       val input = CreateExpenseInput(
         concept = _state.value.concept,
         comment = Optional.present(_state.value.comment.trim().replace(Regex("(?m)^[ \\t]*\\r?\\n"), "")),
@@ -165,7 +180,14 @@ class AddExpenseViewModel @Inject constructor(
         cardId = Optional.present(_state.value.selectedCard?.id),
         category = _state.value.category
       )
-      graphQlClientImpl.mutate(CreateExpenseMutation(input)).map { apolloResponse ->
+      graphQlClientImpl.mutate(
+        CreateExpenseMutation(
+          input
+        ),
+        onError = {
+          updateError(it.stackTraceToString())
+        }
+      ).map { apolloResponse ->
         validateData(apolloResponse)
       }.collect { result ->
         result.successOrError(
@@ -175,6 +197,7 @@ class AddExpenseViewModel @Inject constructor(
                 value = AddExpensesState(
                   expenseAdded = true,
                   isAdded = true,
+                  isLoading = false,
                   cardsList = _state.value.cardsList,
                   category = _state.value.category,
                   date = _state.value.date
@@ -183,8 +206,7 @@ class AddExpenseViewModel @Inject constructor(
             }
           },
           onError = { error ->
-            Timber.d(error.exception)
-            _state.update { it.copy(expenseAddedError = true, uiError = error.uiErrorText) }
+            updateError(error.uiErrorText)
           }
         )
       }
@@ -203,12 +225,15 @@ class AddExpenseViewModel @Inject constructor(
         numberOfMonthsOrWeeks = _state.value.numberOfMonthsOrWeeks.toInt(),
         frequency = Optional.present(_state.value.recurrentExpenseFrequency)
       )
-      graphQlClientImpl.mutate(CreateFixedExpenseMutation(Optional.present(input))).map { apolloResponse ->
+      graphQlClientImpl.mutate(
+        CreateFixedExpenseMutation(Optional.present(input)),
+        onError = {}
+      ).map { apolloResponse ->
         validateData(apolloResponse)
       }.collect { result ->
         result.successOrError(
           onSuccess = {
-            this.launch {
+            launch {
               _state.emit(
                 value = AddExpensesState(
                   expenseAdded = true,
@@ -222,7 +247,7 @@ class AddExpenseViewModel @Inject constructor(
           },
           onError = { error ->
             Timber.d(error.exception)
-            _state.update { it.copy(expenseAddedError = true, uiError = error.uiErrorText) }
+            _state.update { it.copy(expenseAddedError = true, uiError = R.string.general_error) }
           }
         )
       }
@@ -237,12 +262,15 @@ class AddExpenseViewModel @Inject constructor(
 
   fun getExpenseById(expenseId: String) {
     _state.update {
-      it.copy(buttonText = "Actualizar", loading = true, loadingCard = true)
+      it.copy(buttonText = R.string.update_text, isLoading = true, loadingCard = true)
     }
     viewModelScope.launch {
       graphQlClientImpl.query(
         ExpenseByIdQuery(expenseByIdId = expenseId),
-        onError = { _state.emit(AddExpensesState(uiError = "")) }
+        onError = {
+          logErrorWithThread("Error ${it.stackTrace}")
+          _state.emit(AddExpensesState(uiError = R.string.general_error))
+        }
       ).map {
         validateDataWithoutErrors(it)
       }
@@ -265,7 +293,7 @@ class AddExpenseViewModel @Inject constructor(
                   date = expense.payBefore.date.formatDateWithYear(),
                   initialDate = expense.payBefore.date.convertDateToMillis(),
                   selectedCard = expense.toExpense().card,
-                  loading = false
+                  isLoading = false
                 )
               }
             },
@@ -277,6 +305,7 @@ class AddExpenseViewModel @Inject constructor(
 
   private fun updateExpenseById(expenseId: String) {
     viewModelScope.launch {
+      _state.update { it.copy(isLoading = true) }
       val input = UpdateExpenseInput(
         id = expenseId,
         cardId = Optional.present(_state.value.selectedCard?.id.orEmpty()),
@@ -286,7 +315,10 @@ class AddExpenseViewModel @Inject constructor(
         total = _state.value.total.toDouble(),
         payBefore = Date(_state.value.date.formatDateToISO() ?: LocalDateTime.now())
       )
-      graphQlClientImpl.mutate(UpdateExpenseMutation(input = input)).map {
+      graphQlClientImpl.mutate(
+        UpdateExpenseMutation(input = input),
+        onError = {}
+      ).map {
         validateDataWithoutErrors(it)
       }.collect { collectResult ->
         collectResult.successOrError(
@@ -296,6 +328,7 @@ class AddExpenseViewModel @Inject constructor(
                 value = AddExpensesState(
                   expenseAdded = true,
                   isAdded = true,
+                  isLoading = false,
                   cardsList = _state.value.cardsList,
                   category = _state.value.category,
                   date = _state.value.date

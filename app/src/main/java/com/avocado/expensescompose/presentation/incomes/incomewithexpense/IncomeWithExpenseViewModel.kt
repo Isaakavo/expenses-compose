@@ -142,7 +142,12 @@ class IncomeWithExpenseViewModel @Inject constructor(
 
   private fun deleteIncome(incomeId: String) {
     viewModelScope.launch {
-      graphQlClientImpl.mutate(DeleteIncomeByIdMutation(deleteIncomeByIdId = incomeId)).map {
+      graphQlClientImpl.mutate(
+        DeleteIncomeByIdMutation(
+          deleteIncomeByIdId = incomeId
+        ),
+        onError = {}
+      ).map {
         validateDataWithoutErrors(it)
       }.collect { collectResult ->
         collectResult.successOrError(
@@ -167,7 +172,10 @@ class IncomeWithExpenseViewModel @Inject constructor(
       return
     }
     viewModelScope.launch {
-      graphQlClientImpl.mutate(DeleteExpenseMutation(deleteExpenseId = expenseId)).map {
+      graphQlClientImpl.mutate(
+        DeleteExpenseMutation(deleteExpenseId = expenseId),
+        onError = {}
+      ).map {
         validateDataWithoutErrors(it)
       }
         .collect { collectResult ->

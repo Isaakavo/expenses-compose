@@ -9,6 +9,7 @@ import com.avocado.expensescompose.data.model.auth.Auth
 import com.avocado.expensescompose.data.model.auth.AuthParameters
 import com.avocado.expensescompose.data.repositories.AuthRepository
 import com.avocado.expensescompose.data.repositories.TokenManagerRepository
+import com.avocado.expensescompose.presentation.util.logErrorWithThread
 import javax.inject.Inject
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -90,7 +91,7 @@ class AuthorizationInterceptor @Inject constructor(
         response
       }
     } catch (e: Exception) {
-      Timber.e(e)
+      logErrorWithThread(e.stackTraceToString())
     }
 
     return chain.proceed(request)

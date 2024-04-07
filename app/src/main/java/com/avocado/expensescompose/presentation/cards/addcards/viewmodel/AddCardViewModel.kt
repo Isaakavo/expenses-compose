@@ -67,7 +67,8 @@ class AddCardViewModel @Inject constructor(
             )
           )
 
-        )
+        ),
+        onError = {}
       ).map { apolloResponse ->
         validateData(apolloResponse)
       }.collect { myResult ->

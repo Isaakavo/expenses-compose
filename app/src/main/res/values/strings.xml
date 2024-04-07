@@ -9,6 +9,7 @@
     <string name="token_user_not_found">Username not found</string>
     <string name="token_user_error">An error occurred trying to get your info.</string>
     <string name="token_user_save_error">An error occurred trying to save your info</string>
+    <string name="http_error_message">Something went wrong when connecting to the server</string>
     <string name="expenses_list_transaction">%1d Transactions - %2s</string>
     <string name="expenses_list_filter">Filter By</string>
     <string name="expenses_list_filter_category">Category</string>
@@ -125,4 +126,6 @@
     <string name="fixed_expense_frequency_month">Monthly</string>
     <string name="fixed_expense_frequency_biweekly">Weekly</string>
     <string name="snackbar_undo">Undo</string>
+    <string name="add_text">Add</string>
+    <string name="update_text">Update</string>
 </resources>
