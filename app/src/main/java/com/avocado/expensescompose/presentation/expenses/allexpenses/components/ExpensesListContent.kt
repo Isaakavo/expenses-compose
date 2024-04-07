@@ -10,8 +10,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -22,6 +24,7 @@ import com.avocado.expensescompose.data.adapters.formatMoney
 import com.avocado.expensescompose.data.model.card.Card
 import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.presentation.expenses.allexpenses.viewmodel.AllExpensesListEvents
+import com.avocado.expensescompose.presentation.homescreen.components.FabNestedScrollConnection
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -33,6 +36,10 @@ fun AllExpensesListContent(
   onEdit: (expenseId: String) -> Unit = {},
   onEvent: (event: AllExpensesListEvents, expenseId: String, filterType: String?, filterName: String?) -> Unit = { one, two, three, four -> }
 ) {
+  val fabNestedScrollConnection = remember {
+    FabNestedScrollConnection
+  }
+
   when {
     isLoading -> {
       Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -78,7 +85,11 @@ fun AllExpensesListContent(
           }
         )
       }
-      LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+      // What will be required if i want to add more scroll connections
+      LazyColumn(
+        modifier = Modifier.nestedScroll(fabNestedScrollConnection),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+      ) {
         itemsIndexed(filteredList, key = { _, item -> item.id }) { index, expense ->
           ExpenseDateRow(payBefore = expense.payBefore, index = index, expenseList = filteredList)
           Row(modifier = Modifier.animateItemPlacement()) {

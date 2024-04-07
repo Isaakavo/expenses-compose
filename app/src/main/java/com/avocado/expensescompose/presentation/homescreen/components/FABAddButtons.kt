@@ -1,10 +1,13 @@
 package com.avocado.expensescompose.presentation.homescreen.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,19 +24,42 @@ import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.avocado.expensescompose.R
 import kotlinx.coroutines.launch
+
+object FabNestedScrollConnection : NestedScrollConnection {
+  var isVisible: MutableState<Boolean> = mutableStateOf(true)
+
+  override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+    // Hide FAB
+    if (available.y < -1) {
+      isVisible.value = false
+    }
+
+    // Show FAB
+    if (available.y > 1) {
+      isVisible.value = true
+    }
+
+    return Offset.Zero
+  }
+}
 
 @Composable
 fun FabAddButtons(
@@ -57,7 +83,9 @@ fun FabAddButtons(
       .padding(bottom = 8.dp, end = 4.dp),
     horizontalAlignment = Alignment.End
   ) {
-    if (expanded) {
+    val isVisible = rememberSaveable { FabNestedScrollConnection.isVisible }
+
+    if (expanded && isVisible.value) {
       ExtendedButtonWithIcon(
         icon = R.drawable.round_attach_money_24,
         text = R.string.fab_add_expense,
@@ -83,26 +111,32 @@ fun FabAddButtons(
 
     Spacer(modifier = Modifier.height(8.dp))
     Row(modifier = Modifier.wrapContentWidth(), horizontalArrangement = Arrangement.End) {
-      FloatingActionButton(
-        elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation(
-          defaultElevation = 2.dp
-        ),
-        onClick = {
-          expanded = !expanded
-          scope.launch {
-            if (expanded) {
-              animateRotation(rotation, 45f, 800)
-            } else {
-              animateRotation(rotation, 0f, 800)
+      AnimatedVisibility(
+        visible = isVisible.value,
+        enter = slideInVertically(initialOffsetY = { it * 2 }),
+        exit = slideOutVertically(targetOffsetY = { it * 2 })
+      ) {
+        FloatingActionButton(
+          elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation(
+            defaultElevation = 2.dp
+          ),
+          onClick = {
+            expanded = !expanded
+            scope.launch {
+              if (expanded) {
+                animateRotation(rotation, 45f, 800)
+              } else {
+                animateRotation(rotation, 0f, 800)
+              }
             }
           }
+        ) {
+          Icon(
+            Icons.Rounded.Add,
+            contentDescription = "",
+            modifier = Modifier.rotate(rotation.value)
+          )
         }
-      ) {
-        Icon(
-          Icons.Rounded.Add,
-          contentDescription = "",
-          modifier = Modifier.rotate(rotation.value)
-        )
       }
     }
   }
