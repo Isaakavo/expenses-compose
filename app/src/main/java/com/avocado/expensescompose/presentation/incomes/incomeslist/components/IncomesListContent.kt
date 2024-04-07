@@ -16,13 +16,16 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.model.total.Total
 import com.avocado.expensescompose.domain.income.models.Income
+import com.avocado.expensescompose.presentation.homescreen.components.FabNestedScrollConnection
 import com.avocado.expensescompose.presentation.util.getMonthTotal
 import java.time.LocalDateTime
 
@@ -34,6 +37,10 @@ fun IncomesListContent(
   totalByMonth: List<Total?>,
   onNavigate: (incomeId: LocalDateTime?) -> Unit
 ) {
+  val fabNestedScrollConnection = remember {
+    FabNestedScrollConnection
+  }
+
   when {
     isLoading -> {
       Column(
@@ -66,6 +73,7 @@ fun IncomesListContent(
 
     else -> {
       LazyColumn(
+        modifier = Modifier.nestedScroll(fabNestedScrollConnection),
         contentPadding = PaddingValues(start = 24.dp, end = 24.dp)
       ) {
         items(incomesMap.toList()) { year ->
