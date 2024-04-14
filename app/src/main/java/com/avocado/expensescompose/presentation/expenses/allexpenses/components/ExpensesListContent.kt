@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -46,12 +48,10 @@ fun AllExpensesListContent(
     isLoading -> {
       Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         repeat(15) {
-          Row(
+          Card(
             modifier = Modifier
               .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-
+            shape = RoundedCornerShape(12.dp)
           ) {
             ExpenseItemSkeleton()
           }
@@ -94,13 +94,14 @@ fun AllExpensesListContent(
       ) {
         itemsIndexed(filteredList, key = { _, item -> item.id }) { index, expense ->
           ExpenseDateRow(payBefore = expense.payBefore, index = index, expenseList = filteredList)
-          Row(
+          Card(
             modifier = Modifier.animateItemPlacement(
               animationSpec = tween(
                 durationMillis = 500,
                 easing = LinearOutSlowInEasing
               )
-            )
+            ),
+            shape = RoundedCornerShape(12.dp)
           ) {
             ExpenseItem(
               expense = expense,

@@ -40,16 +40,8 @@ fun ExpenseItem(
 ) {
   var expanded by remember { mutableStateOf(false) }
   val expandedTextFont = if (!expanded) FontWeight.Normal else FontWeight.Bold
-  val expandedPadding = if (!expanded) {
-    Modifier.padding(
-      start = 8.dp,
-      end = 8.dp,
-      top = 4.dp,
-      bottom = 4.dp
-    )
-  } else {
-    Modifier.padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 8.dp)
-  }
+  val expandedPadding = Modifier.padding(start = 12.dp, end = 12.dp, top = 12.dp, bottom = 12.dp)
+
   Box(
     modifier = Modifier
       .background(color = MaterialTheme.colorScheme.surfaceVariant)
