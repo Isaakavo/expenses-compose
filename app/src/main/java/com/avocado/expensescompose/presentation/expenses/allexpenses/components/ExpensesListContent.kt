@@ -1,5 +1,7 @@
 package com.avocado.expensescompose.presentation.expenses.allexpenses.components
 
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -92,7 +94,14 @@ fun AllExpensesListContent(
       ) {
         itemsIndexed(filteredList, key = { _, item -> item.id }) { index, expense ->
           ExpenseDateRow(payBefore = expense.payBefore, index = index, expenseList = filteredList)
-          Row(modifier = Modifier.animateItemPlacement()) {
+          Row(
+            modifier = Modifier.animateItemPlacement(
+              animationSpec = tween(
+                durationMillis = 500,
+                easing = LinearOutSlowInEasing
+              )
+            )
+          ) {
             ExpenseItem(
               expense = expense,
               onEdit = onEdit,

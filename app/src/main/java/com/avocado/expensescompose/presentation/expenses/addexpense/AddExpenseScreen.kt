@@ -12,7 +12,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
@@ -133,6 +132,7 @@ fun AddExpenseScreenContent(
       AppBar(
         title = stringResource(id = R.string.add_expense_add_expense),
         buttonText = stringResource(id = buttonText),
+        isButtonEnabled = !isLoading,
         onActionButtonClick = {
           if (expenseId.isEmpty()) {
             onEvent(AddExpenseEvent.AddExpense, null)
@@ -154,172 +154,161 @@ fun AddExpenseScreenContent(
         .verticalScroll(state = rememberScrollState()),
       verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-      when {
-        /*
-        If we don't set the loading state, the date dialog will set the date to 0L (i.e. wrong date)
-        It's necessary to make the screen to first show a loading state to let the date dialog get the correct date.
-         */
-        isLoading -> {
-          CircularProgressIndicator()
-        }
+      DateDialog(
+        initialSelectedDate = initialSelectedDate,
+        iconResource = R.drawable.baseline_calendar_month_24,
+        onConfirm = { formattedDate -> onEvent(AddExpenseEvent.UpdateDate, formattedDate) },
+        isReadyToRender = !isLoading,
+        modifier = Modifier.padding(start = 8.dp)
+      )
 
-        else -> {
-          DateDialog(
-            initialSelectedDate = initialSelectedDate,
-            iconResource = R.drawable.baseline_calendar_month_24,
-            onConfirm = { formattedDate -> onEvent(AddExpenseEvent.UpdateDate, formattedDate) },
-            modifier = Modifier.padding(start = 8.dp)
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        Text(text = "Recurrent Expense")
+        Checkbox(
+          checked = isMonthWithoutInterest,
+          onCheckedChange = { onEvent(AddExpenseEvent.IsMonthWithoutInterest, (!isMonthWithoutInterest).toString()) }
+        )
+      }
+
+      AddExpenseRow {
+        Icon(
+          painter = painterResource(id = R.drawable.round_description_24),
+          contentDescription = "Credit card"
+        )
+        OutlinedTextField(
+          value = concept,
+          onValueChange = { onEvent(AddExpenseEvent.UpdateConcept, it) },
+          label = { Text(text = stringResource(id = R.string.add_expense_concept)) },
+          modifier = Modifier.fillMaxWidth(),
+          keyboardOptions = KeyboardOptions(
+            imeAction = ImeAction.Next
           )
+        )
+      }
 
-          Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically
-          ) {
-            Text(text = "Recurrent Expense")
-            Checkbox(
-              checked = isMonthWithoutInterest,
-              onCheckedChange = { onEvent(AddExpenseEvent.IsMonthWithoutInterest, (!isMonthWithoutInterest).toString()) }
-            )
-          }
+      AddExpenseRow {
+        Icon(
+          painter = painterResource(id = R.drawable.round_attach_money_24),
+          contentDescription = "total"
+        )
+        OutlinedTextField(
+          value = total,
+          onValueChange = { onEvent(AddExpenseEvent.UpdateTotal, it) },
+          label = { Text(text = stringResource(id = R.string.add_expense_total)) },
+          modifier = Modifier.fillMaxWidth(),
+          keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Decimal,
+            imeAction = ImeAction.Next
+          ),
+          keyboardActions = KeyboardActions(
+            onNext = { focusRequester.requestFocus() }
+          )
+        )
+      }
 
-          AddExpenseRow {
-            Icon(
-              painter = painterResource(id = R.drawable.round_description_24),
-              contentDescription = "Credit card"
-            )
-            OutlinedTextField(
-              value = concept,
-              onValueChange = { onEvent(AddExpenseEvent.UpdateConcept, it) },
-              label = { Text(text = stringResource(id = R.string.add_expense_concept)) },
+      AddExpenseRow {
+        CardsInputText(selectedCard = selectedCard) { card ->
+          onCardSelect(card)
+        }
+      }
+
+      AddExpenseRow {
+        Icon(
+          painter = painterResource(id = R.drawable.round_sell_24),
+          contentDescription = "Tags"
+        )
+        DropDownMenu(
+          expanded = openCategoryList,
+          textFieldLabel = stringResource(id = R.string.add_expense_category),
+          textFieldValue = categories.name,
+          onOpenEvent = { onEvent(AddExpenseEvent.CategoryListOpen, null) },
+          onCloseEvent = { onEvent(AddExpenseEvent.CategoryListClose, null) }
+        ) {
+          Category.values().filter { it != Category.UNKNOWN__ }.map {
+            DropdownMenuItem(
+              text = {
+                Text(text = stringResource(it.adapt()))
+              },
               modifier = Modifier.fillMaxWidth(),
-              keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Next
-              )
-            )
-          }
-
-          AddExpenseRow {
-            Icon(
-              painter = painterResource(id = R.drawable.round_attach_money_24),
-              contentDescription = "total"
-            )
-            OutlinedTextField(
-              value = total,
-              onValueChange = { onEvent(AddExpenseEvent.UpdateTotal, it) },
-              label = { Text(text = stringResource(id = R.string.add_expense_total)) },
-              modifier = Modifier.fillMaxWidth(),
-              keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Decimal,
-                imeAction = ImeAction.Next
-              ),
-              keyboardActions = KeyboardActions(
-                onNext = { focusRequester.requestFocus() }
-              )
-            )
-          }
-
-          AddExpenseRow {
-            CardsInputText(selectedCard = selectedCard) { card ->
-              onCardSelect(card)
-            }
-          }
-
-          AddExpenseRow {
-            Icon(
-              painter = painterResource(id = R.drawable.round_sell_24),
-              contentDescription = "Tags"
-            )
-            DropDownMenu(
-              expanded = openCategoryList,
-              textFieldLabel = stringResource(id = R.string.add_expense_category),
-              textFieldValue = categories.name,
-              onOpenEvent = { onEvent(AddExpenseEvent.CategoryListOpen, null) },
-              onCloseEvent = { onEvent(AddExpenseEvent.CategoryListClose, null) }
-            ) {
-              Category.values().filter { it != Category.UNKNOWN__ }.map {
-                DropdownMenuItem(
-                  text = {
-                    Text(text = stringResource(it.adapt()))
-                  },
-                  modifier = Modifier.fillMaxWidth(),
-                  onClick = {
-                    onEvent(AddExpenseEvent.SelectCategory, it.name)
-                    onEvent(AddExpenseEvent.CategoryListClose, null)
-                  }
-                )
+              onClick = {
+                onEvent(AddExpenseEvent.SelectCategory, it.name)
+                onEvent(AddExpenseEvent.CategoryListClose, null)
               }
-            }
-          }
-
-          if (isMonthWithoutInterest) {
-            Row(
-              modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 34.dp, end = 20.dp)
-            ) {
-              DropDownMenu(
-                expanded = openFrequencyList,
-                textFieldLabel = stringResource(id = R.string.add_expense_frequency),
-                textFieldValue = recurrentExpenseFrequency.name,
-                onOpenEvent = { onEvent(AddExpenseEvent.FixedFrequencyListOpen, null) },
-                onCloseEvent = { onEvent(AddExpenseEvent.FixedFrequencyListClose, null) }
-              ) {
-                FixedExpenseFrequency.values().filter { it != FixedExpenseFrequency.UNKNOWN__ }.map {
-                  DropdownMenuItem(
-                    text = {
-                      Text(text = stringResource(it.adapt()))
-                    },
-                    onClick = {
-                      onEvent(AddExpenseEvent.SelectFrequency, it.name)
-                      onEvent(AddExpenseEvent.FixedFrequencyListClose, null)
-                    }
-                  )
-                }
-              }
-            }
-            Row(
-              modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 34.dp, end = 20.dp)
-            ) {
-              OutlinedTextField(
-                value = numberOfMonthsOrWeeks,
-                onValueChange = { onEvent(AddExpenseEvent.UpdateNumberOfMonthsOrWeeks, it) },
-                label = {
-                  Text(
-                    text = stringResource(id = if (recurrentExpenseFrequency.name == FixedExpenseFrequency.Monthly.name) R.string.add_expense_number_months else R.string.add_expense_number_weeks)
-                  )
-                },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(
-                  keyboardType = KeyboardType.Decimal,
-                  imeAction = ImeAction.Next
-                ),
-                keyboardActions = KeyboardActions(
-                  onNext = { focusRequester.requestFocus() }
-                )
-              )
-            }
-          }
-
-          AddExpenseRow {
-            Icon(
-              painter = painterResource(R.drawable.round_comment_24),
-              contentDescription = "Comment"
-            )
-            OutlinedTextField(
-              value = comment,
-              onValueChange = { onEvent(AddExpenseEvent.UpdateComment, it) },
-              label = { Text(text = stringResource(id = R.string.add_expense_comment)) },
-              modifier = Modifier
-                .focusRequester(focusRequester)
-                .fillMaxWidth()
-                .height(120.dp),
-              maxLines = 3
             )
           }
         }
+      }
+
+      if (isMonthWithoutInterest) {
+        Row(
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 34.dp, end = 20.dp)
+        ) {
+          DropDownMenu(
+            expanded = openFrequencyList,
+            textFieldLabel = stringResource(id = R.string.add_expense_frequency),
+            textFieldValue = recurrentExpenseFrequency.name,
+            onOpenEvent = { onEvent(AddExpenseEvent.FixedFrequencyListOpen, null) },
+            onCloseEvent = { onEvent(AddExpenseEvent.FixedFrequencyListClose, null) }
+          ) {
+            FixedExpenseFrequency.values().filter { it != FixedExpenseFrequency.UNKNOWN__ }.map {
+              DropdownMenuItem(
+                text = {
+                  Text(text = stringResource(it.adapt()))
+                },
+                onClick = {
+                  onEvent(AddExpenseEvent.SelectFrequency, it.name)
+                  onEvent(AddExpenseEvent.FixedFrequencyListClose, null)
+                }
+              )
+            }
+          }
+        }
+        Row(
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 34.dp, end = 20.dp)
+        ) {
+          OutlinedTextField(
+            value = numberOfMonthsOrWeeks,
+            onValueChange = { onEvent(AddExpenseEvent.UpdateNumberOfMonthsOrWeeks, it) },
+            label = {
+              Text(
+                text = stringResource(id = if (recurrentExpenseFrequency.name == FixedExpenseFrequency.Monthly.name) R.string.add_expense_number_months else R.string.add_expense_number_weeks)
+              )
+            },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(
+              keyboardType = KeyboardType.Decimal,
+              imeAction = ImeAction.Next
+            ),
+            keyboardActions = KeyboardActions(
+              onNext = { focusRequester.requestFocus() }
+            )
+          )
+        }
+      }
+
+      AddExpenseRow {
+        Icon(
+          painter = painterResource(R.drawable.round_comment_24),
+          contentDescription = "Comment"
+        )
+        OutlinedTextField(
+          value = comment,
+          onValueChange = { onEvent(AddExpenseEvent.UpdateComment, it) },
+          label = { Text(text = stringResource(id = R.string.add_expense_comment)) },
+          modifier = Modifier
+            .focusRequester(focusRequester)
+            .fillMaxWidth()
+            .height(120.dp),
+          maxLines = 3
+        )
       }
     }
   }

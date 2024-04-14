@@ -34,8 +34,17 @@ fun DateDialog(
   modifier: Modifier = Modifier,
   iconResource: Int? = null,
   initialSelectedDate: Long,
+  isReadyToRender: Boolean,
   onConfirm: (String) -> Unit
 ) {
+  /*
+    If we don't set the isReadyToRender state, the date dialog will set the date to 0L (i.e. wrong date)
+    It's necessary to make the screen to first show a loading state to let the date dialog get the correct date.
+ */
+  if (!isReadyToRender) {
+    return
+  }
+
   val calculatedInitialDate = if (initialSelectedDate != 0L) initialSelectedDate else LocalDateTime.now().convertDateToMillis()
   var date by remember { mutableStateOf(calculatedInitialDate.formatDateFromMillis()) }
   var openDateDialog by remember { mutableStateOf(false) }

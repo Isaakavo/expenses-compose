@@ -46,6 +46,7 @@ fun AppBar(
   title: String,
   navigationIcon: ImageVector = Icons.AutoMirrored.Rounded.ArrowBack,
   buttonText: String = "",
+  isButtonEnabled: Boolean = true,
   dropDownMenuItems: List<MenuItems> = emptyList(),
   onNavigationIconClick: () -> Unit = {},
   onActionButtonClick: () -> Unit = {}
@@ -64,7 +65,7 @@ fun AppBar(
     },
     actions = {
       if (buttonText.isNotEmpty()) {
-        Button(onClick = { onActionButtonClick() }) {
+        Button(onClick = { onActionButtonClick() }, enabled = isButtonEnabled) {
           Text(text = buttonText)
         }
       }
