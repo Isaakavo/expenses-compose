@@ -139,6 +139,9 @@ dependencies {
   // Timber
   implementation(libs.timber)
 
+  // YCharts
+  implementation(libs.ycharts)
+
   testImplementation(libs.junit)
   androidTestImplementation(libs.androidx.test.ext)
   androidTestImplementation(libs.androidx.test.espresso.core)
