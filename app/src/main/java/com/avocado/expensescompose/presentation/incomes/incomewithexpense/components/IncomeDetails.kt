@@ -1,5 +1,6 @@
 package com.avocado.expensescompose.presentation.incomes.incomewithexpense.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,9 +19,15 @@ import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.adapters.formatMoney
 
 @Composable
-fun IncomeDetails(incomesTotal: Double, remaining: Double, expended: Double, month: String) {
+fun IncomeDetails(
+  incomesTotal: Double,
+  remaining: Double,
+  expended: Double,
+  month: String,
+  onClick: () -> Unit
+) {
   Card(
-    modifier = Modifier.fillMaxWidth(),
+    modifier = Modifier.fillMaxWidth().clickable { onClick() },
     elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
   ) {
     Column(

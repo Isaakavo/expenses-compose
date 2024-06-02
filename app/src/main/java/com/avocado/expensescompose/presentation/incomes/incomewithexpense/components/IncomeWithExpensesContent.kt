@@ -112,7 +112,9 @@ fun IncomeWithExpensesContent(
           remaining = remaining,
           expended = expended,
           month = month
-        )
+        ) {
+          onNavigate()
+        }
         AllExpensesListScreen(payBeforeInput = paymentDate, onNavigate = onNavigate)
       }
     }

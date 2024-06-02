@@ -28,17 +28,17 @@ import com.avocado.expensescompose.presentation.util.Operations
 import timber.log.Timber
 
 sealed class NavigateEvent {
-  object NavigateLogin : NavigateEvent()
-  object NavigateHomeScreen : NavigateEvent()
-  object NavigateIncomeExpensesList : NavigateEvent()
-  object NavigationAddIncomeScreen : NavigateEvent()
-  object NavigationEditIncomeScreen : NavigateEvent()
-  object NavigateAddCardsScreen : NavigateEvent()
-  object NavigateEditCardsScreen : NavigateEvent()
-  object NavigateAddExpenseScreen : NavigateEvent()
-  object NavigateEditExpenseScreen : NavigateEvent()
-  object NavigateCardsWithExpenseScreen : NavigateEvent()
-  object NavigateExpensesByCardScreen : NavigateEvent()
+  data object NavigateLogin : NavigateEvent()
+  data object NavigateHomeScreen : NavigateEvent()
+  data object NavigateIncomeExpensesList : NavigateEvent()
+  data object NavigationAddIncomeScreen : NavigateEvent()
+  data object NavigationEditIncomeScreen : NavigateEvent()
+  data object NavigateAddCardsScreen : NavigateEvent()
+  data object NavigateEditCardsScreen : NavigateEvent()
+  data object NavigateAddExpenseScreen : NavigateEvent()
+  data object NavigateEditExpenseScreen : NavigateEvent()
+  data object NavigateCardsWithExpenseScreen : NavigateEvent()
+  data object NavigateExpensesByCardScreen : NavigateEvent()
 }
 
 private fun <T> navigate(navigateEvent: NavigateEvent, navController: NavController, param: T) {
@@ -252,7 +252,7 @@ fun ExpensesApplication() {
     // Cards Screen
     composable(
       route = RoutesConstants.CARDS_ADD
-    ) { navBackStackEntry ->
+    ) {
       AddCardScreen(
         onNavigate = { navigateEvent, operation ->
           navigate(navigateEvent, navController, operation)
@@ -269,8 +269,6 @@ fun ExpensesApplication() {
         }
       )
     ) { navBackStackEntry ->
-      val cardId = navBackStackEntry.arguments?.getString("cardId") ?: ""
-
       AddCardScreen(
         onNavigate = { navigateEvent, operation ->
           navigate(navigateEvent, navController, operation)
