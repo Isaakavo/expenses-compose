@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -80,7 +81,7 @@ fun AddIncomeContent(
     topBar = {
       AppBar(
         title = stringResource(id = R.string.add_income_add),
-        navigationIcon = Icons.Rounded.ArrowBack,
+        navigationIcon = Icons.AutoMirrored.Rounded.ArrowBack,
         buttonText = stringResource(R.string.add_income_save),
         isButtonEnabled = !loading,
         onNavigationIconClick = { onPopBackStack() },

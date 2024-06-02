@@ -47,7 +47,7 @@ fun AllExpensesListScreen(
         val snackBarResult = snackBarHostState.showSnackbar(
           context.resources.getString(R.string.expenses_list_delete_successful),
           actionLabel = context.resources.getString(R.string.snackbar_undo),
-          duration = SnackbarDuration.Long
+          duration = SnackbarDuration.Short
         )
 
         when (snackBarResult) {
