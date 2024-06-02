@@ -11,11 +11,16 @@ import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import co.yml.charts.common.model.PlotType
+import co.yml.charts.ui.piechart.models.PieChartData
 import com.avocado.expensescompose.R
+import com.avocado.expensescompose.presentation.charts.Charts
 import com.avocado.expensescompose.presentation.expenses.allexpenses.AllExpensesListScreen
 import com.avocado.expensescompose.presentation.incomes.incomewithexpense.IncomeWithExpenseEvent
+import com.avocado.expensescompose.presentation.incomes.incomewithexpense.IncomeWithExpenseScreenType
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.shared.CustomScaffold
 import com.avocado.expensescompose.presentation.shared.DeleteAlertDialog
@@ -36,6 +41,7 @@ fun IncomeWithExpensesContent(
   isLoading: Boolean = false,
   shouldDeleteIncome: Boolean = false,
   shouldDeleteExpense: Boolean = false,
+  screenType: IncomeWithExpenseScreenType,
   onNavigateBack: () -> Unit = {},
   onNavigate: (navigateEvent: NavigateEvent, operation: String) -> Unit = { one, two -> },
   onEditIncome: (navigateEvent: NavigateEvent, incomeId: String) -> Unit = { one, two -> },
@@ -75,47 +81,64 @@ fun IncomeWithExpensesContent(
       )
     }
   ) {
-    if (isLoading) {
-      Column(
-        modifier = Modifier
-          .fillMaxSize()
-          .padding(22.dp)
-      ) {
-        CircularProgressIndicator(strokeWidth = 6.dp)
-      }
-    } else {
-      DeleteAlertDialog(
-        shouldDisplay = shouldDeleteIncome || shouldDeleteExpense,
-        deleteMessage = stringResource(
-          id = if (shouldDeleteIncome) R.string.income_expense_delete_income else R.string.income_expense_delete_expense
-        ),
-        onConfirmRequest = {
-          if (shouldDeleteIncome) {
-            onEvent(
-              IncomeWithExpenseEvent.ConfirmDeleteIncome,
-              incomeId
-            )
-          } else {
-            onEvent(IncomeWithExpenseEvent.ConfirmDeleteExpense, "")
+    Column(
+      modifier = Modifier
+        .fillMaxSize()
+        .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 12.dp),
+      verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+      when {
+        isLoading -> {
+          Column(
+            modifier = Modifier
+              .fillMaxSize()
+              .padding(22.dp)
+          ) {
+            CircularProgressIndicator(strokeWidth = 6.dp)
           }
-        },
-        onDismissRequest = { onEvent(IncomeWithExpenseEvent.CancelDeleteIncome, "") }
-      )
-      Column(
-        modifier = Modifier
-          .fillMaxSize()
-          .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-      ) {
-        IncomeDetails(
-          incomesTotal = incomesTotal,
-          remaining = remaining,
-          expended = expended,
-          month = month
-        ) {
-          onNavigate()
         }
-        AllExpensesListScreen(payBeforeInput = paymentDate, onNavigate = onNavigate)
+
+        screenType == IncomeWithExpenseScreenType.CHART -> {
+          val incomeData = PieChartData(
+            plotType = PlotType.Donut,
+            slices = listOf(
+              PieChartData.Slice(label = "Income", incomesTotal.toFloat(), Color(0xFF5F0A87)),
+              PieChartData.Slice(label = "Remaining", remaining.toFloat(), Color(0xFFF53844))
+            )
+          )
+          Charts(incomeData)
+          AllExpensesListScreen(payBeforeInput = paymentDate, onNavigate = onNavigate)
+        }
+
+        screenType == IncomeWithExpenseScreenType.LIST -> {
+          DeleteAlertDialog(
+            shouldDisplay = shouldDeleteIncome || shouldDeleteExpense,
+            deleteMessage = stringResource(
+              id = if (shouldDeleteIncome) R.string.income_expense_delete_income else R.string.income_expense_delete_expense
+            ),
+            onConfirmRequest = {
+              if (shouldDeleteIncome) {
+                onEvent(
+                  IncomeWithExpenseEvent.ConfirmDeleteIncome,
+                  incomeId
+                )
+              } else {
+                onEvent(IncomeWithExpenseEvent.ConfirmDeleteExpense, "")
+              }
+            },
+            onDismissRequest = { onEvent(IncomeWithExpenseEvent.CancelDeleteIncome, "") }
+          )
+
+          IncomeDetails(
+            incomesTotal = incomesTotal,
+            remaining = remaining,
+            expended = expended,
+            month = month
+          ) {
+            onEvent(IncomeWithExpenseEvent.Charts, IncomeWithExpenseScreenType.CHART.name)
+          }
+          AllExpensesListScreen(payBeforeInput = paymentDate, onNavigate = onNavigate)
+        }
       }
     }
   }

@@ -41,6 +41,7 @@ fun IncomeExpensesScreen(
     expended = state.expensesTotal,
     paymentDate = paymentDate,
     isLoading = state.isLoading,
+    screenType = state.screenType,
     onNavigate = onNavigate,
     onNavigateBack = onNavigateBack,
     onEditIncome = onEditIncome,

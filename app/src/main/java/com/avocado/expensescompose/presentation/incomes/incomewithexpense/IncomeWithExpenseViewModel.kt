@@ -29,11 +29,17 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 
 sealed class IncomeWithExpenseEvent {
-  object DeleteIncome : IncomeWithExpenseEvent()
-  object CancelDeleteIncome : IncomeWithExpenseEvent()
-  object ConfirmDeleteIncome : IncomeWithExpenseEvent()
-  object ConfirmDeleteExpense : IncomeWithExpenseEvent()
-  object DeleteExpense : IncomeWithExpenseEvent()
+  data object DeleteIncome : IncomeWithExpenseEvent()
+  data object CancelDeleteIncome : IncomeWithExpenseEvent()
+  data object ConfirmDeleteIncome : IncomeWithExpenseEvent()
+  data object ConfirmDeleteExpense : IncomeWithExpenseEvent()
+  data object DeleteExpense : IncomeWithExpenseEvent()
+  data object Charts : IncomeWithExpenseEvent()
+}
+
+enum class IncomeWithExpenseScreenType {
+  LIST,
+  CHART
 }
 
 data class IncomeWithExpenseState(
@@ -48,7 +54,8 @@ data class IncomeWithExpenseState(
   val shouldDeleteIncome: Boolean = false,
   val shouldDeleteExpense: Boolean = false,
   val expenseToDeleteId: String = "",
-  val uiError: Int = 0
+  val uiError: Int = 0,
+  val screenType: IncomeWithExpenseScreenType = IncomeWithExpenseScreenType.LIST
 )
 
 @HiltViewModel
@@ -84,6 +91,15 @@ class IncomeWithExpenseViewModel @Inject constructor(
 
       IncomeWithExpenseEvent.ConfirmDeleteExpense -> {
         deleteExpense(_state.value.expenseToDeleteId)
+      }
+
+      IncomeWithExpenseEvent.Charts -> {
+        val screenType = IncomeWithExpenseScreenType.valueOf(param)
+        _state.update {
+          it.copy(
+            screenType = screenType
+          )
+        }
       }
     }
   }
