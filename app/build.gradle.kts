@@ -1,7 +1,7 @@
 plugins {
   id("com.android.application")
   id("org.jetbrains.kotlin.android")
-  id("com.apollographql.apollo3").version("3.8.2")
+  id("com.apollographql.apollo3").version("3.8.4")
   id("com.google.dagger.hilt.android")
   id("org.jlleitschuh.gradle.ktlint").version("12.1.0")
   kotlin("kapt")
@@ -71,19 +71,24 @@ android {
       buildConfigField("String", "GRAPHQL_ENDPOINT", "\"http://192.168.100.5:4000/graphql\"")
     }
   }
+
   compileOptions {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
   }
+
   kotlinOptions {
     jvmTarget = "17"
   }
+
   buildFeatures {
     compose = true
   }
+
   composeOptions {
-    kotlinCompilerExtensionVersion = "1.4.3"
+    kotlinCompilerExtensionVersion = "1.5.14"
   }
+
   packaging {
     resources {
       excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -113,12 +118,12 @@ dependencies {
   implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
 
   // Grapqhl
-  implementation("com.apollographql.apollo3:apollo-runtime:3.8.2")
+  implementation("com.apollographql.apollo3:apollo-runtime:3.8.4")
 
   // Hilt
-  implementation("com.google.dagger:hilt-android:2.50")
+  implementation("com.google.dagger:hilt-android:2.51.1")
   implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
-  kapt("com.google.dagger:hilt-android-compiler:2.50")
+  kapt("com.google.dagger:hilt-android-compiler:2.51.1")
   kapt("androidx.hilt:hilt-compiler:1.2.0")
 
   // Retrofit
