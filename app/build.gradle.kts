@@ -1,10 +1,11 @@
 plugins {
-  id("com.android.application")
-  id("org.jetbrains.kotlin.android")
-  id("com.apollographql.apollo3").version("3.8.4")
-  id("com.google.dagger.hilt.android")
-  id("org.jlleitschuh.gradle.ktlint").version("12.1.0")
-  kotlin("kapt")
+  alias(libs.plugins.android.application)
+  alias(libs.plugins.kotlin.android)
+  alias(libs.plugins.apollographql)
+  alias(libs.plugins.ktlint)
+  alias(libs.plugins.compose.compiler)
+  alias(libs.plugins.ksp)
+  alias(libs.plugins.hilt)
 }
 
 apollo {
@@ -22,10 +23,6 @@ ktlint {
   android = true
   ignoreFailures = false
   version = "0.47.1"
-}
-
-kapt {
-  correctErrorTypes = true
 }
 
 android {
@@ -85,8 +82,8 @@ android {
     compose = true
   }
 
-  composeOptions {
-    kotlinCompilerExtensionVersion = "1.5.14"
+  composeCompiler {
+    enableStrongSkippingMode = true
   }
 
   packaging {
@@ -105,47 +102,48 @@ tasks.register("lintKotlin") {
 }
 
 dependencies {
+  val composeBom = platform(libs.androidx.compose.bom)
+  implementation(composeBom)
 
-  implementation("androidx.core:core-ktx:1.12.0")
-  implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
-  implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
-  implementation("androidx.activity:activity-compose:1.8.2")
-  implementation(platform("androidx.compose:compose-bom:2024.03.00"))
-  implementation("androidx.compose.ui:ui")
-  implementation("androidx.compose.ui:ui-graphics")
-  implementation("androidx.compose.ui:ui-tooling-preview")
-  implementation("androidx.compose.material3:material3:1.2.1")
-  implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
+  implementation(libs.androidx.core.ktx)
+  implementation(libs.androidx.lifecycle.runtime)
+  implementation(libs.androidx.lifecycle.runtime.compose)
+  implementation(libs.androidx.lifecycle.viewModelCompose)
+  implementation(libs.androidx.activity.compose)
+  implementation(libs.androidx.compose.ui)
+  implementation(libs.androidx.compose.ui.graphics)
+  implementation(libs.androidx.compose.ui.tooling.preview)
+  implementation(libs.androidx.compose.material3)
 
   // Grapqhl
-  implementation("com.apollographql.apollo3:apollo-runtime:3.8.4")
+  implementation(libs.apollo.graphql)
 
   // Hilt
-  implementation("com.google.dagger:hilt-android:2.51.1")
-  implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
-  kapt("com.google.dagger:hilt-android-compiler:2.51.1")
-  kapt("androidx.hilt:hilt-compiler:1.2.0")
+  implementation(libs.androidx.hilt.navigation.compose)
+  implementation(libs.hilt.android)
+  ksp(libs.hilt.compiler)
+  ksp(libs.hilt.ext.compiler)
 
   // Retrofit
-  implementation("com.squareup.retrofit2:retrofit:2.9.0")
-  implementation("com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.12")
+  implementation(libs.squareup.retrofit2)
+  implementation(libs.squareup.okhttp3)
   // GSON converter
-  implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+  implementation(libs.squareup.retrofit2.converter.gson)
 
   // DataStore
-  implementation("androidx.datastore:datastore-preferences:1.0.0")
+  implementation(libs.androidx.datastore.preferences)
 
   // Navigation
-  implementation("androidx.navigation:navigation-compose:2.7.7")
+  implementation(libs.androidx.navigation.compose)
 
   // Timber
-  implementation("com.jakewharton.timber:timber:5.0.1")
+  implementation(libs.timber)
 
-  testImplementation("junit:junit:4.13.2")
-  androidTestImplementation("androidx.test.ext:junit:1.1.5")
-  androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-  androidTestImplementation(platform("androidx.compose:compose-bom:2024.03.00"))
-  androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-  debugImplementation("androidx.compose.ui:ui-tooling")
-  debugImplementation("androidx.compose.ui:ui-test-manifest")
+  testImplementation(libs.junit)
+  androidTestImplementation(libs.androidx.test.ext)
+  androidTestImplementation(libs.androidx.test.espresso.core)
+  androidTestImplementation(composeBom)
+  androidTestImplementation(libs.androidx.compose.ui.test)
+  debugImplementation(libs.androidx.compose.ui.tooling.debug)
+  debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
