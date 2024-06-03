@@ -122,7 +122,7 @@ fun IncomeWithExpensesContent(
                 PieChartData.Slice(label = "Remaining", remaining.toFloat(), Color(0xFFF53844))
               )
             )
-            Charts(data = incomeData, donutChartConfig = defaultDonutChartConfig(MaterialTheme.colorScheme.background))
+            Charts(data = incomeData, donutChartConfig = defaultDonutChartConfig(backgroundColor = MaterialTheme.colorScheme.background, textColor = MaterialTheme.colorScheme.primary))
             AllExpensesListScreen(payBeforeInput = paymentDate, onNavigate = onNavigate)
           }
 
@@ -140,7 +140,7 @@ fun IncomeWithExpensesContent(
                   )
                 }
               )
-              Charts(data = expensesCategoryData, donutChartConfig = defaultDonutChartConfig(MaterialTheme.colorScheme.background))
+              Charts(data = expensesCategoryData, donutChartConfig = defaultDonutChartConfig(backgroundColor = MaterialTheme.colorScheme.background, textColor = MaterialTheme.colorScheme.primary))
             }
             AllExpensesListScreen(payBeforeInput = paymentDate, onNavigate = onNavigate) {
               expensesListState = it
