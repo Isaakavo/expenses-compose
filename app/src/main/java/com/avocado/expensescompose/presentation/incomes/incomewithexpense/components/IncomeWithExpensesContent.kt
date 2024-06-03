@@ -1,6 +1,5 @@
 package com.avocado.expensescompose.presentation.incomes.incomewithexpense.components
 
-import android.graphics.Typeface
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,17 +11,25 @@ import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import co.yml.charts.common.model.PlotType
-import co.yml.charts.ui.piechart.models.PieChartConfig
 import co.yml.charts.ui.piechart.models.PieChartData
 import com.avocado.expensescompose.R
+import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.presentation.charts.Charts
+import com.avocado.expensescompose.presentation.charts.configs.defaultDonutChartConfig
+import com.avocado.expensescompose.presentation.charts.generateColorMaterialDesign
 import com.avocado.expensescompose.presentation.expenses.allexpenses.AllExpensesListScreen
+import com.avocado.expensescompose.presentation.expenses.allexpenses.LocalExpensesListState
 import com.avocado.expensescompose.presentation.incomes.incomewithexpense.IncomeWithExpenseEvent
 import com.avocado.expensescompose.presentation.incomes.incomewithexpense.IncomeWithExpenseScreenType
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
@@ -51,6 +58,10 @@ fun IncomeWithExpensesContent(
   onEditIncome: (navigateEvent: NavigateEvent, incomeId: String) -> Unit = { one, two -> },
   onEvent: (event: IncomeWithExpenseEvent, param: String) -> Unit = { one, two -> }
 ) {
+  var expensesListState by remember<MutableState<List<Expense>>> {
+    mutableStateOf(emptyList())
+  }
+
   CustomScaffold(
     topBar = {
       AppBar(
@@ -85,81 +96,100 @@ fun IncomeWithExpensesContent(
       )
     }
   ) {
-    Column(
-      modifier = Modifier
-        .fillMaxSize()
-        .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 12.dp),
-      verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-      when {
-        isLoading -> {
-          Column(
-            modifier = Modifier
-              .fillMaxSize()
-              .padding(22.dp)
-          ) {
-            CircularProgressIndicator(strokeWidth = 6.dp)
+    CompositionLocalProvider(value = LocalExpensesListState provides expensesListState) {
+      Column(
+        modifier = Modifier
+          .fillMaxSize()
+          .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+      ) {
+        when {
+          isLoading -> {
+            Column(
+              modifier = Modifier
+                .fillMaxSize()
+                .padding(22.dp)
+            ) {
+              CircularProgressIndicator(strokeWidth = 6.dp)
+            }
           }
-        }
 
-        screenType == IncomeWithExpenseScreenType.INCOME_CHART -> {
-          val incomeData = PieChartData(
-            plotType = PlotType.Donut,
-            slices = listOf(
-              PieChartData.Slice(label = "Income", incomesTotal.toFloat(), Color(0xFF5F0A87)),
-              PieChartData.Slice(label = "Remaining", remaining.toFloat(), Color(0xFFF53844))
+          screenType == IncomeWithExpenseScreenType.INCOME_CHART -> {
+            val incomeData = PieChartData(
+              plotType = PlotType.Donut,
+              slices = listOf(
+                PieChartData.Slice(label = "Income", incomesTotal.toFloat(), Color(0xFF5F0A87)),
+                PieChartData.Slice(label = "Remaining", remaining.toFloat(), Color(0xFFF53844))
+              )
             )
-          )
-          val donutChartConfig = PieChartConfig(
-            strokeWidth = 65f,
-            activeSliceAlpha = .9f,
-            isAnimationEnable = true,
-            labelColor = Color.Black,
-            sliceLabelTextColor = Color.Black,
-            sliceLabelTextSize = 28.sp,
-            labelFontSize = 24.sp,
-            labelVisible = true,
-            backgroundColor = MaterialTheme.colorScheme.background,
-            labelType = PieChartConfig.LabelType.PERCENTAGE,
-            sliceLabelTypeface = Typeface.DEFAULT_BOLD
-          )
-          Charts(data = incomeData, donutChartConfig = donutChartConfig)
-          AllExpensesListScreen(payBeforeInput = paymentDate, onNavigate = onNavigate)
-        }
-
-        screenType == IncomeWithExpenseScreenType.EXPENSES_CHART -> {
-        }
-
-        screenType == IncomeWithExpenseScreenType.LIST -> {
-          DeleteAlertDialog(
-            shouldDisplay = shouldDeleteIncome || shouldDeleteExpense,
-            deleteMessage = stringResource(
-              id = if (shouldDeleteIncome) R.string.income_expense_delete_income else R.string.income_expense_delete_expense
-            ),
-            onConfirmRequest = {
-              if (shouldDeleteIncome) {
-                onEvent(
-                  IncomeWithExpenseEvent.ConfirmDeleteIncome,
-                  incomeId
-                )
-              } else {
-                onEvent(IncomeWithExpenseEvent.ConfirmDeleteExpense, "")
-              }
-            },
-            onDismissRequest = { onEvent(IncomeWithExpenseEvent.CancelDeleteIncome, "") }
-          )
-
-          IncomeDetails(
-            incomesTotal = incomesTotal,
-            remaining = remaining,
-            expended = expended,
-            month = month
-          ) {
-            onEvent(IncomeWithExpenseEvent.Charts, IncomeWithExpenseScreenType.INCOME_CHART.name)
+            Charts(data = incomeData, donutChartConfig = defaultDonutChartConfig(MaterialTheme.colorScheme.background))
+            AllExpensesListScreen(payBeforeInput = paymentDate, onNavigate = onNavigate)
           }
-          AllExpensesListScreen(payBeforeInput = paymentDate, onNavigate = onNavigate)
+
+          // TODO add logic to switch screen type, add a button to switch between expenses charts and incomes charts
+          screenType == IncomeWithExpenseScreenType.EXPENSES_CHART -> {
+            if (expensesListState.isNotEmpty()) {
+              val expensesListForChart = generateExpensesMap(expensesListState)
+              val expensesCategoryData = PieChartData(
+                plotType = PlotType.Donut,
+                slices = expensesListForChart.map {
+                  PieChartData.Slice(
+                    label = it.key,
+                    value = it.value,
+                    color = generateColorMaterialDesign()
+                  )
+                }
+              )
+              Charts(data = expensesCategoryData, donutChartConfig = defaultDonutChartConfig(MaterialTheme.colorScheme.background))
+            }
+            AllExpensesListScreen(payBeforeInput = paymentDate, onNavigate = onNavigate) {
+              expensesListState = it
+            }
+          }
+
+          screenType == IncomeWithExpenseScreenType.LIST -> {
+            DeleteAlertDialog(
+              shouldDisplay = shouldDeleteIncome || shouldDeleteExpense,
+              deleteMessage = stringResource(
+                id = if (shouldDeleteIncome) R.string.income_expense_delete_income else R.string.income_expense_delete_expense
+              ),
+              onConfirmRequest = {
+                if (shouldDeleteIncome) {
+                  onEvent(
+                    IncomeWithExpenseEvent.ConfirmDeleteIncome,
+                    incomeId
+                  )
+                } else {
+                  onEvent(IncomeWithExpenseEvent.ConfirmDeleteExpense, "")
+                }
+              },
+              onDismissRequest = { onEvent(IncomeWithExpenseEvent.CancelDeleteIncome, "") }
+            )
+
+            IncomeDetails(
+              incomesTotal = incomesTotal,
+              remaining = remaining,
+              expended = expended,
+              month = month
+            ) {
+              onEvent(IncomeWithExpenseEvent.Charts, IncomeWithExpenseScreenType.EXPENSES_CHART.name)
+            }
+            AllExpensesListScreen(payBeforeInput = paymentDate, onNavigate = onNavigate) {
+              expensesListState = it
+            }
+          }
         }
       }
     }
   }
+}
+
+fun generateExpensesMap(expensesListState: List<Expense>): Map<String, Float> {
+  val expensesMap = mutableMapOf<String, Float>()
+  for (expense in expensesListState) {
+    val previousExpense = expensesMap[expense.category.name]
+    expensesMap[expense.category.name] = if (previousExpense != null) (expense.total + previousExpense).toFloat() else expense.total.toFloat()
+  }
+
+  return expensesMap
 }

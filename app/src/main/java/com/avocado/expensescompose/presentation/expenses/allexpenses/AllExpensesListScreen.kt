@@ -4,12 +4,14 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.avocado.expensescompose.R
+import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.presentation.expenses.allexpenses.components.AllExpensesListContent
 import com.avocado.expensescompose.presentation.expenses.allexpenses.viewmodel.AllExpensesListEvents
 import com.avocado.expensescompose.presentation.expenses.allexpenses.viewmodel.AllExpensesListViewModel
@@ -17,12 +19,15 @@ import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.ui.theme.LocalSnackBarHostState
 import kotlinx.coroutines.launch
 
+val LocalExpensesListState = compositionLocalOf<List<Expense>> { error("No State provided for Expenses List") }
+
 @Composable
 fun AllExpensesListScreen(
   viewModel: AllExpensesListViewModel = hiltViewModel(),
   payBeforeInput: String? = null,
   dateRange: LongRange? = null,
-  onNavigate: (navigateEvent: NavigateEvent, operation: String) -> Unit = { one, two -> }
+  onNavigate: (navigateEvent: NavigateEvent, operation: String) -> Unit = { one, two -> },
+  onSetData: (expenseList: List<Expense>) -> Unit = {}
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
   val scope = rememberCoroutineScope()
@@ -74,6 +79,10 @@ fun AllExpensesListScreen(
         duration = SnackbarDuration.Short
       )
     }
+  }
+
+  LaunchedEffect(key1 = state.filteredExpenses) {
+    onSetData(state.filteredExpenses)
   }
 
   AllExpensesListContent(
