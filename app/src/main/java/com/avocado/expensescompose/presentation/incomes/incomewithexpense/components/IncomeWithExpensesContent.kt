@@ -1,5 +1,6 @@
 package com.avocado.expensescompose.presentation.incomes.incomewithexpense.components
 
+import android.graphics.Typeface
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,12 +10,15 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import co.yml.charts.common.model.PlotType
+import co.yml.charts.ui.piechart.models.PieChartConfig
 import co.yml.charts.ui.piechart.models.PieChartData
 import com.avocado.expensescompose.R
 import com.avocado.expensescompose.presentation.charts.Charts
@@ -98,7 +102,7 @@ fun IncomeWithExpensesContent(
           }
         }
 
-        screenType == IncomeWithExpenseScreenType.CHART -> {
+        screenType == IncomeWithExpenseScreenType.INCOME_CHART -> {
           val incomeData = PieChartData(
             plotType = PlotType.Donut,
             slices = listOf(
@@ -106,8 +110,24 @@ fun IncomeWithExpensesContent(
               PieChartData.Slice(label = "Remaining", remaining.toFloat(), Color(0xFFF53844))
             )
           )
-          Charts(incomeData)
+          val donutChartConfig = PieChartConfig(
+            strokeWidth = 65f,
+            activeSliceAlpha = .9f,
+            isAnimationEnable = true,
+            labelColor = Color.Black,
+            sliceLabelTextColor = Color.Black,
+            sliceLabelTextSize = 28.sp,
+            labelFontSize = 24.sp,
+            labelVisible = true,
+            backgroundColor = MaterialTheme.colorScheme.background,
+            labelType = PieChartConfig.LabelType.PERCENTAGE,
+            sliceLabelTypeface = Typeface.DEFAULT_BOLD
+          )
+          Charts(data = incomeData, donutChartConfig = donutChartConfig)
           AllExpensesListScreen(payBeforeInput = paymentDate, onNavigate = onNavigate)
+        }
+
+        screenType == IncomeWithExpenseScreenType.EXPENSES_CHART -> {
         }
 
         screenType == IncomeWithExpenseScreenType.LIST -> {
@@ -135,7 +155,7 @@ fun IncomeWithExpensesContent(
             expended = expended,
             month = month
           ) {
-            onEvent(IncomeWithExpenseEvent.Charts, IncomeWithExpenseScreenType.CHART.name)
+            onEvent(IncomeWithExpenseEvent.Charts, IncomeWithExpenseScreenType.INCOME_CHART.name)
           }
           AllExpensesListScreen(payBeforeInput = paymentDate, onNavigate = onNavigate)
         }

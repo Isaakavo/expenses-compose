@@ -39,7 +39,8 @@ sealed class IncomeWithExpenseEvent {
 
 enum class IncomeWithExpenseScreenType {
   LIST,
-  CHART
+  INCOME_CHART,
+  EXPENSES_CHART
 }
 
 data class IncomeWithExpenseState(
