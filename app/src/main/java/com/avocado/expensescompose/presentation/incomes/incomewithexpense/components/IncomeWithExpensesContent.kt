@@ -2,18 +2,27 @@ package com.avocado.expensescompose.presentation.incomes.incomewithexpense.compo
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -24,10 +33,11 @@ import androidx.compose.ui.unit.dp
 import co.yml.charts.common.model.PlotType
 import co.yml.charts.ui.piechart.models.PieChartData
 import com.avocado.expensescompose.R
+import com.avocado.expensescompose.data.adapters.adapt
 import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.presentation.charts.Charts
+import com.avocado.expensescompose.presentation.charts.color
 import com.avocado.expensescompose.presentation.charts.configs.defaultDonutChartConfig
-import com.avocado.expensescompose.presentation.charts.generateColorMaterialDesign
 import com.avocado.expensescompose.presentation.expenses.allexpenses.AllExpensesListScreen
 import com.avocado.expensescompose.presentation.expenses.allexpenses.LocalExpensesListState
 import com.avocado.expensescompose.presentation.incomes.incomewithexpense.IncomeWithExpenseEvent
@@ -38,6 +48,7 @@ import com.avocado.expensescompose.presentation.shared.DeleteAlertDialog
 import com.avocado.expensescompose.presentation.shared.topbar.AppBar
 import com.avocado.expensescompose.presentation.shared.topbar.MenuItems
 import com.avocado.expensescompose.presentation.util.Operations
+import com.avocado.type.Category
 import timber.log.Timber
 
 @Composable
@@ -60,6 +71,11 @@ fun IncomeWithExpensesContent(
 ) {
   var expensesListState by remember<MutableState<List<Expense>>> {
     mutableStateOf(emptyList())
+  }
+
+  val listState = rememberLazyListState()
+  val selectedItem = remember {
+    mutableIntStateOf(0)
   }
 
   CustomScaffold(
@@ -130,20 +146,45 @@ fun IncomeWithExpensesContent(
           screenType == IncomeWithExpenseScreenType.EXPENSES_CHART -> {
             if (expensesListState.isNotEmpty()) {
               val expensesListForChart = generateExpensesMap(expensesListState)
+
+              val chartSlices = expensesListForChart.map {
+                PieChartData.Slice(
+                  label = stringResource(it.key.adapt()),
+                  value = it.value,
+                  color = it.key.color()
+                )
+              }
               val expensesCategoryData = PieChartData(
                 plotType = PlotType.Donut,
-                slices = expensesListForChart.map {
-                  PieChartData.Slice(
-                    label = it.key,
-                    value = it.value,
-                    color = generateColorMaterialDesign()
-                  )
-                }
+                slices = chartSlices
               )
-              Charts(data = expensesCategoryData, donutChartConfig = defaultDonutChartConfig(backgroundColor = MaterialTheme.colorScheme.background, textColor = MaterialTheme.colorScheme.primary))
+              Charts(
+                data = expensesCategoryData,
+                donutChartConfig = defaultDonutChartConfig(backgroundColor = MaterialTheme.colorScheme.background, textColor = MaterialTheme.colorScheme.primary)
+              ) { clickSlice ->
+                selectedItem.intValue = chartSlices.indexOf(clickSlice)
+              }
+              LazyRow(horizontalArrangement = Arrangement.spacedBy(4.dp), state = listState) {
+                itemsIndexed(chartSlices) { index, slice ->
+                  Row {
+                    AssistChip(
+                      onClick = { /*TODO*/ },
+                      label = {
+                        Text(text = "${slice.label}, $${slice.value}", color = Color.White)
+                      },
+                      colors = AssistChipDefaults.assistChipColors(containerColor = slice.color),
+                      elevation = if (index == selectedItem.intValue) AssistChipDefaults.assistChipElevation(elevation = 8.dp) else AssistChipDefaults.assistChipElevation(elevation = 2.dp)
+                    )
+                  }
+                }
+              }
             }
             AllExpensesListScreen(payBeforeInput = paymentDate, onNavigate = onNavigate) {
               expensesListState = it
+            }
+
+            LaunchedEffect(key1 = selectedItem.intValue) {
+              listState.animateScrollToItem(selectedItem.intValue)
             }
           }
 
@@ -184,11 +225,11 @@ fun IncomeWithExpensesContent(
   }
 }
 
-fun generateExpensesMap(expensesListState: List<Expense>): Map<String, Float> {
-  val expensesMap = mutableMapOf<String, Float>()
+fun generateExpensesMap(expensesListState: List<Expense>): Map<Category, Float> {
+  val expensesMap = mutableMapOf<Category, Float>()
   for (expense in expensesListState) {
-    val previousExpense = expensesMap[expense.category.name]
-    expensesMap[expense.category.name] = if (previousExpense != null) (expense.total + previousExpense).toFloat() else expense.total.toFloat()
+    val previousExpense = expensesMap[expense.category]
+    expensesMap[expense.category] = if (previousExpense != null) (expense.total + previousExpense).toFloat() else expense.total.toFloat()
   }
 
   return expensesMap
