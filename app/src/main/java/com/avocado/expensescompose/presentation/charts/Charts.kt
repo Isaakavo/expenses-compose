@@ -17,10 +17,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import co.yml.charts.common.components.Legends
 import co.yml.charts.common.model.PlotData
-import co.yml.charts.common.utils.DataUtils
-import co.yml.charts.ui.piechart.charts.DonutPieChart
+import co.yml.charts.common.model.PlotType
+import co.yml.charts.ui.piechart.charts.PieChart
 import co.yml.charts.ui.piechart.models.PieChartConfig
 import co.yml.charts.ui.piechart.models.PieChartData
 import com.avocado.type.Category
@@ -28,8 +27,7 @@ import com.avocado.type.Category
 @Composable
 fun Charts(
   data: PlotData,
-  donutChartConfig: PieChartConfig?,
-  displayNativeLegends: Boolean = false,
+  chartConfig: PieChartConfig?,
   displayChipsLegends: Boolean = false,
   listState: LazyListState = rememberLazyListState(),
   onSlideClick: (slice: PieChartData.Slice) -> Unit = {}
@@ -38,27 +36,26 @@ fun Charts(
     mutableIntStateOf(0)
   }
 
+  val chartType = data.plotType
+
   LaunchedEffect(key1 = selectedItem.intValue) {
     listState.animateScrollToItem(selectedItem.intValue)
   }
 
-  when (data) {
-    is PieChartData -> {
-      DonutPieChart(
+  when (chartType) {
+    is PlotType.Pie -> {
+      PieChart(
         modifier = Modifier
           .fillMaxWidth(),
-        data,
-        donutChartConfig ?: PieChartConfig()
+        pieChartData = data as PieChartData,
+        pieChartConfig = chartConfig ?: PieChartConfig()
       ) {
         // TODO improve logic to handle when custom lambda is there
         onSlideClick(it)
         selectedItem.intValue = data.slices.indexOf(it)
       }
-      if (displayNativeLegends && !displayChipsLegends) {
-        Legends(
-          legendsConfig = DataUtils.getLegendsConfigFromPieChartData(pieChartData = data, gridSize = data.slices.size / 3)
-        )
-      } else {
+
+      if (displayChipsLegends) {
         LazyRow(horizontalArrangement = Arrangement.spacedBy(4.dp), state = listState) {
           itemsIndexed(data.slices) { index, slice ->
             Row {
@@ -75,29 +72,31 @@ fun Charts(
         }
       }
     }
+
+    else -> {}
   }
 }
 
 fun Category.color(): Color = when (this) {
-  Category.SAVINGS -> Color(0xFFFF9800)
-  Category.COMMUNICATION -> Color(0xFFF44336)
-  Category.BILLS -> Color(0xFF8BC34A)
-  Category.FOOD -> Color(0xFF03A9F4)
-  Category.CAR -> Color(0xFF00BCD4)
-  Category.CLOTHES -> Color(0xFF22E059)
-  Category.EATING_OUT -> Color(0xFF673AB7)
-  Category.ENTERTAINMENT -> Color(0xFF3F51B5)
-  Category.GIFTS -> Color(0xFFFF9800)
-  Category.HANG_OUT -> Color(0xFF03A9F4)
-  Category.HEALTH -> Color(0xFFE91E63)
-  Category.HOUSE -> Color(0xFF795548)
-  Category.INSURANCE -> Color(0xFFE91E63)
-  Category.PETS -> Color(0xFFD8E1E6)
-  Category.SPORTS -> Color(0xFF3F51B5)
-  Category.SUPER_MARKET -> Color(0xFF2196F3)
-  Category.TRANSPORT -> Color(0xFFF44336)
-  Category.SUBSCRIPTION -> Color(0xFFC26A4A)
-  Category.FIXED_EXPENSE -> Color(0xFF009688)
-  Category.MONTHS_WITHOUT_INTEREST -> Color(0xFF815E2B)
+  Category.SAVINGS -> Color(0xFFFFA726) // Deep Orange 300
+  Category.COMMUNICATION -> Color(0xFFE57373) // Red 300
+  Category.BILLS -> Color(0xFFAED581) // Light Green 300
+  Category.FOOD -> Color(0xFF4FC3F7) // Light Blue 300
+  Category.CAR -> Color(0xFF4DD0E1) // Cyan 300
+  Category.CLOTHES -> Color(0xFF66BB6A) // Green 400
+  Category.EATING_OUT -> Color(0xFF9575CD) // Deep Purple 300
+  Category.ENTERTAINMENT -> Color(0xFF7986CB) // Indigo 300
+  Category.GIFTS -> Color(0xFFFFA726) // Deep Orange 300
+  Category.HANG_OUT -> Color(0xFF4FC3F7) // Light Blue 300
+  Category.HEALTH -> Color(0xFFF06292) // Pink 300
+  Category.HOUSE -> Color(0xFF8D6E63) // Brown 300
+  Category.INSURANCE -> Color(0xFFF06292) // Pink 300
+  Category.PETS -> Color(0xFFCFD8DC) // Blue Grey 200
+  Category.SPORTS -> Color(0xFF7986CB) // Indigo 300
+  Category.SUPER_MARKET -> Color(0xFF64B5F6) // Blue 300
+  Category.TRANSPORT -> Color(0xFFE57373) // Red 300
+  Category.SUBSCRIPTION -> Color(0xFFBA8B67) // Brown 400
+  Category.FIXED_EXPENSE -> Color(0xFF4DB6AC) // Teal 300
+  Category.MONTHS_WITHOUT_INTEREST -> Color(0xFFA1887F)
   else -> Color.Black
 }

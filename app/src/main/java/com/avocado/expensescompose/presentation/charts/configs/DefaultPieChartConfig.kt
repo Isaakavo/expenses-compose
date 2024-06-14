@@ -11,11 +11,12 @@ fun defaultDonutChartConfig(backgroundColor: Color, textColor: Color) = PieChart
   isAnimationEnable = true,
   labelColor = textColor,
   sliceLabelTextColor = textColor,
-  sliceLabelTextSize = 28.sp,
+  sliceLabelTextSize = 14.sp,
   labelFontSize = 24.sp,
   labelVisible = true,
   backgroundColor = backgroundColor,
   labelType = PieChartConfig.LabelType.PERCENTAGE,
   sliceLabelTypeface = Typeface.DEFAULT_BOLD,
-  isSumVisible = true
+  isSumVisible = true,
+  showSliceLabels = true
 )

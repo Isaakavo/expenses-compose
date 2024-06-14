@@ -127,7 +127,7 @@ fun IncomeWithExpensesContent(
                 PieChartData.Slice(label = "Remaining", remaining.toFloat(), Color(0xFFF53844))
               )
             )
-            Charts(data = incomeData, donutChartConfig = defaultDonutChartConfig(backgroundColor = MaterialTheme.colorScheme.background, textColor = MaterialTheme.colorScheme.primary))
+            Charts(data = incomeData, chartConfig = defaultDonutChartConfig(backgroundColor = MaterialTheme.colorScheme.background, textColor = MaterialTheme.colorScheme.primary))
             AllExpensesListScreen(payBeforeInput = paymentDate, onNavigate = onNavigate)
           }
 
@@ -135,25 +135,23 @@ fun IncomeWithExpensesContent(
           screenType == IncomeWithExpenseScreenType.EXPENSES_CHART -> {
             if (expensesListState.isNotEmpty()) {
               val expensesListForChart = generateExpensesMap(expensesListState)
-
-              val chartSlices = expensesListForChart.map {
-                PieChartData.Slice(
-                  label = stringResource(it.key.adapt()),
-                  value = it.value,
-                  color = it.key.color()
-                )
-              }
               val expensesCategoryData = PieChartData(
-                plotType = PlotType.Donut,
-                slices = chartSlices
+                plotType = PlotType.Pie,
+                slices = expensesListForChart.map {
+                  PieChartData.Slice(
+                    label = stringResource(it.key.adapt()),
+                    value = it.value,
+                    color = it.key.color()
+                  )
+                }
               )
               Charts(
                 data = expensesCategoryData,
                 listState = listState,
                 displayChipsLegends = true,
-                donutChartConfig = defaultDonutChartConfig(
+                chartConfig = defaultDonutChartConfig(
                   backgroundColor = MaterialTheme.colorScheme.background,
-                  textColor = MaterialTheme.colorScheme.primary
+                  textColor = Color.White
                 )
               )
             }
