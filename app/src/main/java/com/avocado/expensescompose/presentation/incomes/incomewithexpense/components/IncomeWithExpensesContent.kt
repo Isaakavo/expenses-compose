@@ -2,27 +2,19 @@ package com.avocado.expensescompose.presentation.incomes.incomewithexpense.compo
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -74,9 +66,6 @@ fun IncomeWithExpensesContent(
   }
 
   val listState = rememberLazyListState()
-  val selectedItem = remember {
-    mutableIntStateOf(0)
-  }
 
   CustomScaffold(
     topBar = {
@@ -160,31 +149,16 @@ fun IncomeWithExpensesContent(
               )
               Charts(
                 data = expensesCategoryData,
-                donutChartConfig = defaultDonutChartConfig(backgroundColor = MaterialTheme.colorScheme.background, textColor = MaterialTheme.colorScheme.primary)
-              ) { clickSlice ->
-                selectedItem.intValue = chartSlices.indexOf(clickSlice)
-              }
-              LazyRow(horizontalArrangement = Arrangement.spacedBy(4.dp), state = listState) {
-                itemsIndexed(chartSlices) { index, slice ->
-                  Row {
-                    AssistChip(
-                      onClick = { /*TODO*/ },
-                      label = {
-                        Text(text = "${slice.label}, $${slice.value}", color = Color.White)
-                      },
-                      colors = AssistChipDefaults.assistChipColors(containerColor = slice.color),
-                      elevation = if (index == selectedItem.intValue) AssistChipDefaults.assistChipElevation(elevation = 8.dp) else AssistChipDefaults.assistChipElevation(elevation = 2.dp)
-                    )
-                  }
-                }
-              }
+                listState = listState,
+                displayChipsLegends = true,
+                donutChartConfig = defaultDonutChartConfig(
+                  backgroundColor = MaterialTheme.colorScheme.background,
+                  textColor = MaterialTheme.colorScheme.primary
+                )
+              )
             }
             AllExpensesListScreen(payBeforeInput = paymentDate, onNavigate = onNavigate) {
               expensesListState = it
-            }
-
-            LaunchedEffect(key1 = selectedItem.intValue) {
-              listState.animateScrollToItem(selectedItem.intValue)
             }
           }
 
