@@ -28,7 +28,7 @@ import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.adapters.adapt
 import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.presentation.charts.Charts
-import com.avocado.expensescompose.presentation.charts.color
+import com.avocado.expensescompose.presentation.charts.configs.color
 import com.avocado.expensescompose.presentation.charts.configs.defaultDonutChartConfig
 import com.avocado.expensescompose.presentation.expenses.allexpenses.AllExpensesListScreen
 import com.avocado.expensescompose.presentation.expenses.allexpenses.LocalExpensesListState
