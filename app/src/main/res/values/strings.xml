@@ -128,4 +128,5 @@
     <string name="snackbar_undo">Undo</string>
     <string name="add_text">Add</string>
     <string name="update_text">Update</string>
+    <string name="charts_screen">All Expenses Chart</string>
 </resources>

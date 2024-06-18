@@ -34,13 +34,6 @@ sealed class IncomeWithExpenseEvent {
   data object ConfirmDeleteIncome : IncomeWithExpenseEvent()
   data object ConfirmDeleteExpense : IncomeWithExpenseEvent()
   data object DeleteExpense : IncomeWithExpenseEvent()
-  data object Charts : IncomeWithExpenseEvent()
-}
-
-enum class IncomeWithExpenseScreenType {
-  LIST,
-  INCOME_CHART,
-  EXPENSES_CHART
 }
 
 data class IncomeWithExpenseState(
@@ -55,8 +48,7 @@ data class IncomeWithExpenseState(
   val shouldDeleteIncome: Boolean = false,
   val shouldDeleteExpense: Boolean = false,
   val expenseToDeleteId: String = "",
-  val uiError: Int = 0,
-  val screenType: IncomeWithExpenseScreenType = IncomeWithExpenseScreenType.LIST
+  val uiError: Int = 0
 )
 
 @HiltViewModel
@@ -92,15 +84,6 @@ class IncomeWithExpenseViewModel @Inject constructor(
 
       IncomeWithExpenseEvent.ConfirmDeleteExpense -> {
         deleteExpense(_state.value.expenseToDeleteId)
-      }
-
-      IncomeWithExpenseEvent.Charts -> {
-        val screenType = IncomeWithExpenseScreenType.valueOf(param)
-        _state.update {
-          it.copy(
-            screenType = screenType
-          )
-        }
       }
     }
   }

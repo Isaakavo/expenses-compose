@@ -1,31 +1,42 @@
 package com.avocado.expensescompose.presentation.expenses.allexpenses
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.presentation.expenses.allexpenses.components.AllExpensesListContent
+import com.avocado.expensescompose.presentation.expenses.allexpenses.components.ExpensesCharts
 import com.avocado.expensescompose.presentation.expenses.allexpenses.viewmodel.AllExpensesListEvents
 import com.avocado.expensescompose.presentation.expenses.allexpenses.viewmodel.AllExpensesListViewModel
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
+import com.avocado.expensescompose.presentation.shared.CustomScaffold
+import com.avocado.expensescompose.presentation.shared.topbar.AppBar
 import com.avocado.expensescompose.ui.theme.LocalSnackBarHostState
 import kotlinx.coroutines.launch
 
-val LocalExpensesListState = compositionLocalOf<List<Expense>> { error("No State provided for Expenses List") }
+// val LocalExpensesListState = compositionLocalOf<List<Expense>> { error("No State provided for Expenses List") }
 
 @Composable
 fun AllExpensesListScreen(
   viewModel: AllExpensesListViewModel = hiltViewModel(),
   payBeforeInput: String? = null,
   dateRange: LongRange? = null,
+  isChartScreen: Boolean = false,
+  onNavigateBack: () -> Unit = {},
   onNavigate: (navigateEvent: NavigateEvent, operation: String) -> Unit = { one, two -> },
   onSetData: (expenseList: List<Expense>) -> Unit = {}
 ) {
@@ -85,12 +96,38 @@ fun AllExpensesListScreen(
     onSetData(state.filteredExpenses)
   }
 
-  AllExpensesListContent(
-    filteredList = state.filteredExpenses,
-    totalExpenses = state.totalExpenses,
-    cards = state.cards,
-    isLoading = state.isLoading,
-    onEdit = { onNavigate(NavigateEvent.NavigateEditExpenseScreen, it) },
-    onEvent = viewModel::onEvent
-  )
+  val allExpensesListContentComposable: @Composable () -> Unit = {
+    AllExpensesListContent(
+      filteredList = state.filteredExpenses,
+      totalExpenses = state.totalExpenses,
+      cards = state.cards,
+      isLoading = state.isLoading,
+      onEdit = { onNavigate(NavigateEvent.NavigateEditExpenseScreen, it) },
+      onEvent = viewModel::onEvent
+    )
+  }
+
+  if (isChartScreen) {
+    CustomScaffold(
+      topBar = {
+        AppBar(
+          title = stringResource(id = R.string.charts_screen),
+          onNavigationIconClick = { onNavigateBack() }
+        )
+      }
+    ) {
+      Column(
+        modifier = Modifier
+          .fillMaxSize()
+          .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+      ) {
+        ExpensesCharts(filteredList = state.filteredExpenses)
+        allExpensesListContentComposable()
+      }
+    }
+    return
+  }
+
+  allExpensesListContentComposable()
 }

@@ -20,6 +20,7 @@ import com.avocado.expensescompose.presentation.cards.expensesbycard.ExpensesByC
 import com.avocado.expensescompose.presentation.cards.expensestotalbycard.ExpensesTotalByCardScreen
 import com.avocado.expensescompose.presentation.cards.expensestotalbycard.viewmodel.DataSelector
 import com.avocado.expensescompose.presentation.expenses.addexpense.AddExpenseScreen
+import com.avocado.expensescompose.presentation.expenses.allexpenses.AllExpensesListScreen
 import com.avocado.expensescompose.presentation.homescreen.HomeScreen
 import com.avocado.expensescompose.presentation.incomes.addscreen.AddIncomeScreen
 import com.avocado.expensescompose.presentation.incomes.incomewithexpense.IncomeExpensesScreen
@@ -39,6 +40,7 @@ sealed class NavigateEvent {
   data object NavigateEditExpenseScreen : NavigateEvent()
   data object NavigateCardsWithExpenseScreen : NavigateEvent()
   data object NavigateExpensesByCardScreen : NavigateEvent()
+  data object NavigateExpensesListChart : NavigateEvent()
 }
 
 private fun <T> navigate(navigateEvent: NavigateEvent, navController: NavController, param: T) {
@@ -116,6 +118,12 @@ private fun <T> navigate(navigateEvent: NavigateEvent, navController: NavControl
 
     NavigateEvent.NavigateExpensesByCardScreen -> {
       navController.navigate("${RoutesConstants.EXPENSES_CARD_SCREEN}/$param")
+    }
+
+    NavigateEvent.NavigateExpensesListChart -> {
+      navController.navigate(
+        "${RoutesConstants.EXPENSES_LIST_CHART}/$param"
+      )
     }
   }
 }
@@ -320,6 +328,23 @@ fun ExpensesApplication() {
         onPopBackStack = { navController.popBackStack() },
         onNavigate = { event, param ->
           navigate(event, navController, param)
+        }
+      )
+    }
+
+    // All Expenses with Chart
+    composable(
+      "${RoutesConstants.EXPENSES_LIST_CHART}/{paymentDate}",
+      arguments = listOf(
+        navArgument("paymentDate") { type = NavType.StringType }
+      )
+    ) { navBackStackEntry ->
+      val payBefore = navBackStackEntry.arguments?.getString("paymentDate").orEmpty()
+      AllExpensesListScreen(
+        payBeforeInput = payBefore,
+        isChartScreen = true,
+        onNavigateBack = {
+          navController.popBackStack()
         }
       )
     }
