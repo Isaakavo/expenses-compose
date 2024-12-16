@@ -7,8 +7,14 @@
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
+**/.idea/*
+!**/.idea/codeStyles
+!**/.idea/icon.png
+!**/.idea/runConfigurations
+!**/.idea/scopes
 .DS_Store
 /build
+**/build
 /captures
 .externalNativeBuild
 .cxx
