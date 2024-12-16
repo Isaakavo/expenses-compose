@@ -7,6 +7,8 @@ import androidx.compose.ui.window.rememberWindowState
 import androidx.compose.material.*
 import com.avocado.expenses.shared.Greeting
 
+
+// TODO migrate the app to be usable in desktop environments, maybe Ill be also add the web version.
 fun main() {
   application {
     val windowState = rememberWindowState()
