@@ -105,6 +105,8 @@ dependencies {
   val composeBom = platform(libs.androidx.compose.bom)
   implementation(composeBom)
 
+  implementation(project(":shared"))
+
   implementation(libs.androidx.core.ktx)
   implementation(libs.androidx.lifecycle.runtime)
   implementation(libs.androidx.lifecycle.runtime.compose)

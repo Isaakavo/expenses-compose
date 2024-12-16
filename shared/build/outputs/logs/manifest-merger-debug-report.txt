@@ -1,0 +1,16 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /home/isaak/Documents/projects/expenses-app/expenses-compose/shared/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest17488862581083809373.xml:2:13-83
+INJECTED from /home/isaak/Documents/projects/expenses-app/expenses-compose/shared/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest17488862581083809373.xml:2:13-83
+	package
+		INJECTED from /home/isaak/Documents/projects/expenses-app/expenses-compose/shared/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest17488862581083809373.xml
+	xmlns:android
+		ADDED from /home/isaak/Documents/projects/expenses-app/expenses-compose/shared/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest17488862581083809373.xml:2:23-81
+uses-sdk
+INJECTED from /home/isaak/Documents/projects/expenses-app/expenses-compose/shared/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest17488862581083809373.xml reason: use-sdk injection requested
+INJECTED from /home/isaak/Documents/projects/expenses-app/expenses-compose/shared/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest17488862581083809373.xml
+INJECTED from /home/isaak/Documents/projects/expenses-app/expenses-compose/shared/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest17488862581083809373.xml
+	android:targetSdkVersion
+		INJECTED from /home/isaak/Documents/projects/expenses-app/expenses-compose/shared/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest17488862581083809373.xml
+	android:minSdkVersion
+		INJECTED from /home/isaak/Documents/projects/expenses-app/expenses-compose/shared/build/intermediates/tmp/ProcessLibraryManifest/debug/tempAndroidManifest17488862581083809373.xml

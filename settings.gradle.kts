@@ -15,4 +15,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Expenses Compose"
 include(":app")
- 
+include(":shared")
