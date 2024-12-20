@@ -2,6 +2,7 @@ package com.avocado.expensescompose.presentation.charts
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
@@ -17,15 +18,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import co.yml.charts.common.model.PlotData
+import co.yml.charts.axis.AxisData
 import co.yml.charts.common.model.PlotType
+import co.yml.charts.ui.barchart.BarChart
+import co.yml.charts.ui.barchart.models.BarChartData
+import co.yml.charts.ui.barchart.models.BarData
 import co.yml.charts.ui.piechart.charts.PieChart
 import co.yml.charts.ui.piechart.models.PieChartConfig
 import co.yml.charts.ui.piechart.models.PieChartData
+import timber.log.Timber
 
 @Composable
 fun Charts(
-  data: PlotData,
+  data: Any,
+  chartType: PlotType = PlotType.Bar,
   chartConfig: PieChartConfig?,
   displayChipsLegends: Boolean = false,
   listState: LazyListState = rememberLazyListState(),
@@ -35,7 +41,7 @@ fun Charts(
     mutableIntStateOf(0)
   }
 
-  val chartType = data.plotType
+//  val chartType = data.plotType
 
   LaunchedEffect(key1 = selectedItem.intValue) {
     listState.animateScrollToItem(selectedItem.intValue)
@@ -71,7 +77,34 @@ fun Charts(
         }
       }
     }
+    is PlotType.Bar -> {
+      val castedData = data as? List<BarData> ?: return
 
+      Timber.d(castedData.toString())
+
+//      val barChartDataVal = DataUtils.getBarChartData(10, 20, BarChartType.VERTICAL, DataCategoryOptions())
+      val xAxisData = AxisData
+        .Builder()
+        .axisLabelAngle(45f)
+        .bottomPadding(100.dp)
+        .labelData { index -> castedData.getOrNull(index)?.label ?: "Not Available" }
+        .build()
+
+      val yAxisData = AxisData.Builder()
+        .steps(2)
+        .labelAndAxisLinePadding(20.dp)
+        .axisOffset(20.dp)
+        .labelData { index -> "$${castedData.getOrNull(index)?.point?.y}" ?: "0" }
+        .build()
+
+      val barChartData = BarChartData(
+        chartData = castedData,
+        xAxisData = xAxisData,
+        yAxisData = yAxisData
+      )
+
+      BarChart(modifier = Modifier.fillMaxHeight(), barChartData = barChartData)
+    }
     else -> {}
   }
 }

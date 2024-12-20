@@ -12,10 +12,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import co.yml.charts.common.model.PlotType
 import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.presentation.expenses.allexpenses.components.AllExpensesListContent
@@ -23,8 +23,6 @@ import com.avocado.expensescompose.presentation.expenses.allexpenses.components.
 import com.avocado.expensescompose.presentation.expenses.allexpenses.viewmodel.AllExpensesListEvents
 import com.avocado.expensescompose.presentation.expenses.allexpenses.viewmodel.AllExpensesListViewModel
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
-import com.avocado.expensescompose.presentation.shared.CustomScaffold
-import com.avocado.expensescompose.presentation.shared.topbar.AppBar
 import com.avocado.expensescompose.ui.theme.LocalSnackBarHostState
 import kotlinx.coroutines.launch
 
@@ -108,23 +106,13 @@ fun AllExpensesListScreen(
   }
 
   if (isChartScreen) {
-    CustomScaffold(
-      topBar = {
-        AppBar(
-          title = stringResource(id = R.string.charts_screen),
-          onNavigationIconClick = { onNavigateBack() }
-        )
-      }
+    Column(
+      modifier = Modifier
+        .fillMaxSize()
+        .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 12.dp),
+      verticalArrangement = Arrangement.Center
     ) {
-      Column(
-        modifier = Modifier
-          .fillMaxSize()
-          .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-      ) {
-        ExpensesCharts(filteredList = state.filteredExpenses)
-        allExpensesListContentComposable()
-      }
+      ExpensesCharts(filteredList = state.filteredExpenses, plotType = PlotType.Bar)
     }
     return
   }
