@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -144,11 +143,6 @@ fun HomeScreenContent(
                 iconResource = R.drawable.baseline_calendar_month_24,
                 onConfirm = { date = it }
               )
-              Button(
-                onClick = { chartScreen = !chartScreen }
-              ) {
-                Text(text = "Chart")
-              }
             }
             AllExpensesListScreen(
               dateRange = date,

@@ -6,14 +6,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import co.yml.charts.axis.DataCategoryOptions
 import co.yml.charts.common.model.PlotType
 import co.yml.charts.common.model.Point
 import co.yml.charts.ui.barchart.models.BarChartType
 import co.yml.charts.ui.barchart.models.BarData
-import co.yml.charts.ui.piechart.models.PieChartData
-import com.avocado.expensescompose.data.adapters.adapt
 import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.presentation.charts.Charts
 import com.avocado.expensescompose.presentation.charts.configs.color
@@ -31,30 +28,30 @@ fun ExpensesCharts(
   }
 
   val listState = rememberLazyListState()
-  val expensesListForChart = generateExpensesMap(filteredList)
-  val expensesCategoryData = when (plotType) {
-    is PlotType.Pie -> PieChartData(
-      plotType = PlotType.Pie,
-      slices = expensesListForChart.map {
-        PieChartData.Slice(
-          label = stringResource(it.key.adapt()),
-          value = it.value,
-          color = it.key.color()
-        )
-      }
-    )
-
-    is PlotType.Bar -> {
-//      activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-      generateBarChartData(expensesListForChart, BarChartType.VERTICAL)
-    }
-    PlotType.Donut -> {}
-    PlotType.Line -> {}
-    PlotType.Wave -> {}
-  }
+  val expensesDataForChart = generateExpensesMap(filteredList)
+//  val expensesCategoryData = when (plotType) {
+//    is PlotType.Pie -> PieChartData(
+//      plotType = PlotType.Pie,
+//      slices = expensesListForChart.map {
+//        PieChartData.Slice(
+//          label = stringResource(it.key.adapt()),
+//          value = it.value,
+//          color = it.key.color()
+//        )
+//      }
+//    )
+//
+//    is PlotType.Bar -> {
+// //      activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+//      generateBarChartData(expensesListForChart, BarChartType.VERTICAL)
+//    }
+//    PlotType.Donut -> {}
+//    PlotType.Line -> {}
+//    PlotType.Wave -> {}
+//  }
 
   Charts(
-    data = expensesCategoryData,
+    data = expensesDataForChart,
     listState = listState,
     displayChipsLegends = true,
     chartConfig = defaultDonutChartConfig(
