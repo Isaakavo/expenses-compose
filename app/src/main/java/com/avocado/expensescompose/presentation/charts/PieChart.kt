@@ -17,18 +17,16 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import co.yml.charts.common.model.PlotType
 import co.yml.charts.ui.piechart.models.PieChartData
-import com.avocado.expensescompose.data.adapters.adapt
 import com.avocado.expensescompose.presentation.charts.configs.color
 import com.avocado.expensescompose.presentation.charts.configs.defaultDonutChartConfig
 import com.avocado.type.Category
 
 @Composable
 fun PieChart(
-  data: Map<Category, Float>,
+  data: Map<String, Float>,
   listState: LazyListState = rememberLazyListState(),
   displayChipsLegends: Boolean = false,
   onSlideClick: (
@@ -44,10 +42,11 @@ fun PieChart(
   val pieChartData = PieChartData(
     plotType = PlotType.Pie,
     slices = data.map {
+      val color = Category.safeValueOf(it.key).color()
       PieChartData.Slice(
-        label = stringResource(it.key.adapt()),
+        label = it.key,
         value = it.value,
-        color = it.key.color()
+        color = color
       )
     }
   )

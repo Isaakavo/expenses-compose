@@ -7,7 +7,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.avocado.type.Category
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
@@ -31,7 +30,7 @@ import java.text.DateFormatSymbols
 import java.util.Locale
 
 @Composable
-fun LineChart(data: Map<Category, Float>) {
+fun LineChart(data: Map<String, Float>) {
   val modelProducer = remember { CartesianChartModelProducer() }
   LaunchedEffect(data) {
     modelProducer.runTransaction { columnSeries { series(data.values) } }

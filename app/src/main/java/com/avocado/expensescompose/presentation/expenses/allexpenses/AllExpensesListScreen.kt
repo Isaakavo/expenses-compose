@@ -1,17 +1,31 @@
 package com.avocado.expensescompose.presentation.expenses.allexpenses
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowDropDown
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -19,14 +33,13 @@ import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.presentation.charts.ChartType
 import com.avocado.expensescompose.presentation.expenses.allexpenses.components.AllExpensesListContent
+import com.avocado.expensescompose.presentation.expenses.allexpenses.components.ChartDataEntityType
 import com.avocado.expensescompose.presentation.expenses.allexpenses.components.ExpensesCharts
 import com.avocado.expensescompose.presentation.expenses.allexpenses.viewmodel.AllExpensesListEvents
 import com.avocado.expensescompose.presentation.expenses.allexpenses.viewmodel.AllExpensesListViewModel
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.ui.theme.LocalSnackBarHostState
 import kotlinx.coroutines.launch
-
-// val LocalExpensesListState = compositionLocalOf<List<Expense>> { error("No State provided for Expenses List") }
 
 @Composable
 fun AllExpensesListScreen(
@@ -95,28 +108,65 @@ fun AllExpensesListScreen(
     onSetData(state.filteredExpenses)
   }
 
-  val allExpensesListContentComposable: @Composable () -> Unit = {
-    AllExpensesListContent(
-      filteredList = state.filteredExpenses,
-      totalExpenses = state.totalExpenses,
-      cards = state.cards,
-      isLoading = state.isLoading,
-      onEdit = { onNavigate(NavigateEvent.NavigateEditExpenseScreen, it) },
-      onEvent = viewModel::onEvent
-    )
-  }
-
   if (isChartScreen) {
+    var entityType by remember {
+      mutableStateOf(ChartDataEntityType.CATEGORY)
+    }
     Column(
       modifier = Modifier
         .fillMaxSize()
         .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 12.dp),
       verticalArrangement = Arrangement.Center
     ) {
-      ExpensesCharts(filteredList = state.filteredExpenses, chartType = chartType)
+      Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+        ChartDatFilterMenu { filter -> entityType = ChartDataEntityType.valueOf(filter) }
+      }
+      ExpensesCharts(filteredList = state.filteredExpenses, chartType = chartType, entityType = entityType)
     }
     return
   }
 
-  allExpensesListContentComposable()
+  AllExpensesListContent(
+    filteredList = state.filteredExpenses,
+    totalExpenses = state.totalExpenses,
+    cards = state.cards,
+    isLoading = state.isLoading,
+    onEdit = { onNavigate(NavigateEvent.NavigateEditExpenseScreen, it) },
+    onEvent = viewModel::onEvent
+  )
+}
+
+// TODO move this to own component and use events to handle data selection
+@Composable
+fun ChartDatFilterMenu(onFilterSelect: (String) -> Unit) {
+  var expanded by remember { mutableStateOf(false) }
+
+  OutlinedButton(onClick = { expanded = !expanded }) {
+    Text(text = stringResource(id = R.string.expenses_list_filter_data), modifier = Modifier)
+    Icon(imageVector = Icons.Rounded.ArrowDropDown, contentDescription = "")
+  }
+
+  Box {
+    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = !expanded }) {
+      DropdownMenuItem(
+        text = {
+          Text(text = "Category")
+        },
+        onClick = {
+          expanded = !expanded
+          onFilterSelect(ChartDataEntityType.CATEGORY.name)
+        }
+      )
+
+      DropdownMenuItem(
+        text = {
+          Text(text = "Months")
+        },
+        onClick = {
+          expanded = !expanded
+          onFilterSelect(ChartDataEntityType.MONTH.name)
+        }
+      )
+    }
+  }
 }
