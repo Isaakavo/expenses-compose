@@ -33,7 +33,7 @@ import java.util.Locale
 @Composable
 fun LineChart(data: Map<Category, Float>) {
   val modelProducer = remember { CartesianChartModelProducer() }
-  LaunchedEffect(Unit) {
+  LaunchedEffect(data) {
     modelProducer.runTransaction { columnSeries { series(data.values) } }
   }
 
@@ -50,7 +50,7 @@ fun LineChart(data: Map<Category, Float>) {
       ),
       startAxis = VerticalAxis.rememberStart(),
       bottomAxis = HorizontalAxis.rememberBottom(
-        valueFormatter = { _, x, _ -> "${data.keys.toList()[x.toInt()]}" },
+        valueFormatter = { _, x, _ -> "${data.keys.toList().getOrNull(x.toInt())}" },
         itemPlacer = remember {
           HorizontalAxis.ItemPlacer.aligned(spacing = 1, addExtremeLabelPadding = false)
         }
