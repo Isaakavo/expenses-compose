@@ -142,6 +142,10 @@ dependencies {
   // YCharts
   implementation(libs.ycharts)
 
+  // Vico
+  implementation(libs.vico.compose)
+  implementation(libs.vico.compose.m3)
+
   testImplementation(libs.junit)
   androidTestImplementation(libs.androidx.test.ext)
   androidTestImplementation(libs.androidx.test.espresso.core)

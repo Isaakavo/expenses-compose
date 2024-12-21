@@ -91,9 +91,9 @@ fun Charts(
         .build()
 
       val yAxisData = AxisData.Builder()
-        .steps(2)
-        .labelAndAxisLinePadding(20.dp)
-        .axisOffset(20.dp)
+        .steps(10)
+        .labelAndAxisLinePadding(5.dp)
+        .axisOffset(5.dp)
         .labelData { index -> "$${castedData.getOrNull(index)?.point?.y}" ?: "0" }
         .build()
 
