@@ -15,9 +15,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import co.yml.charts.common.model.PlotType
 import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.model.expense.Expense
+import com.avocado.expensescompose.presentation.charts.ChartType
 import com.avocado.expensescompose.presentation.expenses.allexpenses.components.AllExpensesListContent
 import com.avocado.expensescompose.presentation.expenses.allexpenses.components.ExpensesCharts
 import com.avocado.expensescompose.presentation.expenses.allexpenses.viewmodel.AllExpensesListEvents
@@ -34,6 +34,7 @@ fun AllExpensesListScreen(
   payBeforeInput: String? = null,
   dateRange: LongRange? = null,
   isChartScreen: Boolean = false,
+  chartType: ChartType = ChartType.BAR,
   onNavigateBack: () -> Unit = {},
   onNavigate: (navigateEvent: NavigateEvent, operation: String) -> Unit = { one, two -> },
   onSetData: (expenseList: List<Expense>) -> Unit = {}
@@ -112,7 +113,7 @@ fun AllExpensesListScreen(
         .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 12.dp),
       verticalArrangement = Arrangement.Center
     ) {
-      ExpensesCharts(filteredList = state.filteredExpenses, plotType = PlotType.Bar)
+      ExpensesCharts(filteredList = state.filteredExpenses, chartType = chartType)
     }
     return
   }
