@@ -3,7 +3,10 @@ package com.avocado.expensescompose.presentation.charts
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -20,20 +23,22 @@ import com.patrykandpatrick.vico.compose.common.fill
 import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
-import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
 import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
 import com.patrykandpatrick.vico.core.cartesian.decoration.HorizontalLine
 import com.patrykandpatrick.vico.core.cartesian.layer.ColumnCartesianLayer
 import com.patrykandpatrick.vico.core.common.Fill
 import com.patrykandpatrick.vico.core.common.shape.CorneredShape
-import java.text.DateFormatSymbols
-import java.util.Locale
 
 @Composable
 fun LineChart(data: Map<String, Float>) {
   val modelProducer = remember { CartesianChartModelProducer() }
+  var average by remember {
+    mutableStateOf(0.0)
+  }
+
   LaunchedEffect(data) {
     modelProducer.runTransaction { columnSeries { series(data.values) } }
+    average = (data.values.sum() / data.values.size).toDouble()
   }
 
   CartesianChartHost(
@@ -53,8 +58,8 @@ fun LineChart(data: Map<String, Float>) {
         itemPlacer = remember {
           HorizontalAxis.ItemPlacer.aligned(spacing = 1, addExtremeLabelPadding = false)
         }
-      )
-//      decorations = listOf(rememberComposeHorizontalLine()),
+      ),
+      decorations = listOf(rememberComposeHorizontalLine(average))
     ),
     modelProducer = modelProducer,
     modifier = Modifier.fillMaxHeight()
@@ -62,7 +67,7 @@ fun LineChart(data: Map<String, Float>) {
 }
 
 @Composable
-private fun rememberComposeHorizontalLine(): HorizontalLine {
+private fun rememberComposeHorizontalLine(average: Double): HorizontalLine {
   val fill = Fill(HORIZONTAL_LINE_COLOR)
   val line = rememberLineComponent(fill, HORIZONTAL_LINE_THICKNESS_DP.dp)
   val labelComponent =
@@ -75,17 +80,11 @@ private fun rememberComposeHorizontalLine(): HorizontalLine {
       ),
       background = shapeComponent(fill, CorneredShape.Pill)
     )
-  return remember { HorizontalLine({ 0.0 }, line, labelComponent) }
+  return HorizontalLine({ average }, line, labelComponent)
 }
 
-private const val HORIZONTAL_LINE_Y = 14.0
 private const val HORIZONTAL_LINE_COLOR = -2893786
 private const val HORIZONTAL_LINE_THICKNESS_DP = 2f
 private const val HORIZONTAL_LINE_LABEL_HORIZONTAL_PADDING_DP = 8f
 private const val HORIZONTAL_LINE_LABEL_VERTICAL_PADDING_DP = 2f
 private const val HORIZONTAL_LINE_LABEL_MARGIN_DP = 4f
-
-private val monthNames = DateFormatSymbols.getInstance(Locale.US).shortMonths
-private val bottomAxisValueFormatter = CartesianValueFormatter { _, x, _ ->
-  "${monthNames[x.toInt() % 12]} ’${20 + x.toInt() / 12}"
-}
