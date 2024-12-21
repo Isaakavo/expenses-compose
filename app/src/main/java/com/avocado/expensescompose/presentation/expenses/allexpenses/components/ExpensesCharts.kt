@@ -17,7 +17,7 @@ fun ExpensesCharts(
   }
 
   val listState = rememberLazyListState()
-  val expensesDataForChart = generateExpensesMap(filteredList)
+  val expensesDataForChart = generateExpensesMapByCategory(filteredList)
   Charts(
     data = expensesDataForChart,
     chartType = chartType,
@@ -26,12 +26,11 @@ fun ExpensesCharts(
   )
 }
 
-fun generateExpensesMap(expensesListState: List<Expense>): Map<Category, Float> {
-  val expensesMap = mutableMapOf<Category, Float>()
-  for (expense in expensesListState) {
-    val previousExpense = expensesMap[expense.category]
-    expensesMap[expense.category] = if (previousExpense != null) (expense.total + previousExpense).toFloat() else expense.total.toFloat()
+fun generateExpensesMapByCategory(expensesListState: List<Expense>): Map<Category, Float> {
+  return mutableMapOf<Category, Float>().apply {
+    for (expense in expensesListState) {
+      val previousExpense = this[expense.category]
+      this[expense.category] = if (previousExpense != null) (expense.total + previousExpense).toFloat() else expense.total.toFloat()
+    }
   }
-
-  return expensesMap
 }
