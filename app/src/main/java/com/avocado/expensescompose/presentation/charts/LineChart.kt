@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -33,7 +33,7 @@ import com.patrykandpatrick.vico.core.common.shape.CorneredShape
 fun LineChart(data: Map<String, Float>) {
   val modelProducer = remember { CartesianChartModelProducer() }
   var average by remember {
-    mutableStateOf(0.0)
+    mutableDoubleStateOf(0.0)
   }
 
   LaunchedEffect(data) {
@@ -59,6 +59,7 @@ fun LineChart(data: Map<String, Float>) {
           HorizontalAxis.ItemPlacer.aligned(spacing = 1, addExtremeLabelPadding = false)
         }
       ),
+      marker = rememberMarker(),
       decorations = listOf(rememberComposeHorizontalLine(average))
     ),
     modelProducer = modelProducer,

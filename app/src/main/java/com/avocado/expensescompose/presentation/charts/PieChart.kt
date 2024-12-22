@@ -22,7 +22,6 @@ import co.yml.charts.common.model.PlotType
 import co.yml.charts.ui.piechart.models.PieChartData
 import com.avocado.expensescompose.presentation.charts.configs.color
 import com.avocado.expensescompose.presentation.charts.configs.defaultDonutChartConfig
-import com.avocado.type.Category
 
 @Composable
 fun PieChart(
@@ -41,12 +40,11 @@ fun PieChart(
   }
   val pieChartData = PieChartData(
     plotType = PlotType.Pie,
-    slices = data.map {
-      val color = Category.safeValueOf(it.key).color()
+    slices = data.entries.mapIndexed { index, entry ->
       PieChartData.Slice(
-        label = it.key,
-        value = it.value,
-        color = color
+        label = entry.key,
+        value = entry.value,
+        color = color(index)
       )
     }
   )

@@ -167,6 +167,16 @@ fun ChartDatFilterMenu(onFilterSelect: (String) -> Unit) {
           onFilterSelect(ChartDataEntityType.MONTH.name)
         }
       )
+
+      DropdownMenuItem(
+        text = {
+          Text(text = "Concept")
+        },
+        onClick = {
+          expanded = !expanded
+          onFilterSelect(ChartDataEntityType.CONCEPT.name)
+        }
+      )
     }
   }
 }

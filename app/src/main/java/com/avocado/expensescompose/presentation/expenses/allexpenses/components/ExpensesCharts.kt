@@ -11,7 +11,8 @@ import java.time.LocalDateTime
 
 enum class ChartDataEntityType {
   MONTH,
-  CATEGORY
+  CATEGORY,
+  CONCEPT
 }
 
 @Composable
@@ -28,6 +29,7 @@ fun ExpensesCharts(
   val expensesDataForChart = when (entityType) {
     ChartDataEntityType.MONTH -> generateExpensesMapByMonth(expensesListState = filteredList)
     ChartDataEntityType.CATEGORY -> generateExpensesMapByCategory(expensesListState = filteredList)
+    ChartDataEntityType.CONCEPT -> generateExpensesByConcept(expensesListState = filteredList)
   }
 
   Charts(
@@ -37,6 +39,23 @@ fun ExpensesCharts(
     displayChipsLegends = true
   )
 }
+
+// class DataGeneration(private val expensesListState: List<Expense>) {
+//  fun <T : Comparable<T>> generateData(keyToAnalyze: T, sortBy: Expense.() -> T): Map<String, Float> {
+//    return mutableMapOf<String, Float>().apply {
+//      val sortedList = expensesListState.sortedBy(sortBy)
+//      for (expense in sortedList) {
+//        val key = when(keyToAnalyze) {
+//          is Category -> keyToAnalyze.adapt()
+//          is LocalDateTime ->
+//          else -> {}
+//        }
+//        val previousExpense = this[keyToAnalyze]
+//        this[keyToAnalyze] = if (previousExpense!=null) (expense.total + previousExpense).toFloat() else expense.total.toFloat()
+//      }
+//    }
+//  }
+// }
 
 @Composable
 internal fun generateExpensesMapByCategory(expensesListState: List<Expense>): Map<String, Float> {
@@ -57,5 +76,14 @@ internal fun generateExpensesMapByMonth(expensesListState: List<Expense>, yearTo
       val date = expense.payBefore?.month?.name ?: continue
       val previousExpense = this[date]
       this[date] = if (previousExpense != null) (expense.total + previousExpense).toFloat() else expense.total.toFloat()
+    }
+  }
+
+internal fun generateExpensesByConcept(expensesListState: List<Expense>): Map<String, Float> =
+  mutableMapOf<String, Float>().apply {
+    for (expense in expensesListState) {
+      val concept = expense.concept.lowercase()
+      val previousExpense = this[concept]
+      this[concept] = if (previousExpense != null) (expense.total + previousExpense).toFloat() else expense.total.toFloat()
     }
   }
