@@ -37,6 +37,7 @@ fun AllExpensesListContent(
   totalExpenses: Double,
   cards: Set<Card> = setOf(),
   isLoading: Boolean,
+  modifier: Modifier = Modifier,
   onEdit: (expenseId: String) -> Unit = {},
   onEvent: (event: AllExpensesListEvents, expenseId: String, filterType: String?, filterName: String?) -> Unit = { one, two, three, four -> }
 ) {
@@ -89,7 +90,7 @@ fun AllExpensesListContent(
       }
       // What will be required if i want to add more scroll connections
       LazyColumn(
-        modifier = Modifier.nestedScroll(fabNestedScrollConnection),
+        modifier = modifier.nestedScroll(fabNestedScrollConnection),
         verticalArrangement = Arrangement.spacedBy(12.dp)
       ) {
         itemsIndexed(filteredList, key = { _, item -> item.id }) { index, expense ->

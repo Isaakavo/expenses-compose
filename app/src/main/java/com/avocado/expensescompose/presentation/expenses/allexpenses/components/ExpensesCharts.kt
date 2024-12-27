@@ -2,6 +2,7 @@ package com.avocado.expensescompose.presentation.expenses.allexpenses.components
 
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.avocado.expensescompose.data.adapters.adapt
 import com.avocado.expensescompose.data.model.expense.Expense
@@ -13,14 +14,16 @@ import java.time.LocalDateTime
 enum class ChartDataEntityType {
   MONTH,
   CATEGORY,
-  CONCEPT
+  CONCEPT,
+  CONCEPT_QUANTITY
 }
 
 @Composable
 fun ExpensesCharts(
   filteredList: List<Expense>,
   chartType: ChartType = ChartType.BAR,
-  entityType: ChartDataEntityType = ChartDataEntityType.CATEGORY
+  entityType: ChartDataEntityType = ChartDataEntityType.CATEGORY,
+  modifier: Modifier = Modifier
 ) {
   if (filteredList.isEmpty()) {
     return
@@ -46,10 +49,16 @@ fun ExpensesCharts(
         sumBy = { it.total.toFloat() }
       )
 
-    ChartDataEntityType.CONCEPT -> ChartDataProcessor(filteredList)
+    ChartDataEntityType.CONCEPT -> ChartDataProcessor(filteredList.sortedByDescending { it.total }.take(50))
       .groupExpenseBy(
-        groupBy = { it.concept },
+        groupBy = { it.concept.lowercase() },
         sumBy = { it.total.toFloat() }
+      )
+
+    ChartDataEntityType.CONCEPT_QUANTITY -> ChartDataProcessor(filteredList.take(10))
+      .groupExpenseListBy(
+        groupBy = { it.concept.lowercase() },
+        sumListBy = { it.size }
       )
   }
 
@@ -57,6 +66,7 @@ fun ExpensesCharts(
     data = expensesDataForChart,
     chartType = chartType,
     listState = listState,
+    modifier = modifier,
     displayChipsLegends = true
   )
 }

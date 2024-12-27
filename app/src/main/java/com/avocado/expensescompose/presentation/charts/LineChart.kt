@@ -1,6 +1,5 @@
 package com.avocado.expensescompose.presentation.charts
 
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,7 +29,7 @@ import com.patrykandpatrick.vico.core.common.Fill
 import com.patrykandpatrick.vico.core.common.shape.CorneredShape
 
 @Composable
-fun LineChart(data: Map<String, Float>) {
+fun LineChart(data: Map<String, Float>, modifier: Modifier = Modifier) {
   val modelProducer = remember { CartesianChartModelProducer() }
   var average by remember {
     mutableDoubleStateOf(0.0)
@@ -63,7 +62,7 @@ fun LineChart(data: Map<String, Float>) {
       decorations = listOf(rememberComposeHorizontalLine(average))
     ),
     modelProducer = modelProducer,
-    modifier = Modifier.fillMaxHeight()
+    modifier = modifier
   )
 }
 

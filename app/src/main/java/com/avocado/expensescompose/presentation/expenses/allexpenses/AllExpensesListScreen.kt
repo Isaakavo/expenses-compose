@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -25,7 +26,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -34,7 +34,6 @@ import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.presentation.charts.ChartType
 import com.avocado.expensescompose.presentation.expenses.allexpenses.components.AllExpensesListContent
 import com.avocado.expensescompose.presentation.expenses.allexpenses.components.ChartDataEntityType
-import com.avocado.expensescompose.presentation.expenses.allexpenses.components.ExpenseFilterMenu
 import com.avocado.expensescompose.presentation.expenses.allexpenses.components.ExpensesCharts
 import com.avocado.expensescompose.presentation.expenses.allexpenses.viewmodel.AllExpensesListEvents
 import com.avocado.expensescompose.presentation.expenses.allexpenses.viewmodel.AllExpensesListViewModel
@@ -117,15 +116,28 @@ fun AllExpensesListScreen(
       modifier = Modifier
         .fillMaxSize()
         .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 12.dp),
-      verticalArrangement = Arrangement.Center
+      verticalArrangement = Arrangement.spacedBy(15.dp)
     ) {
-      Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
-        ExpenseFilterMenu(cards = state.cards) { type, name ->
-          viewModel.onEvent(AllExpensesListEvents.ApplyFilter, "", type, name)
-        }
+      Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
         ChartDatFilterMenu { filter -> entityType = ChartDataEntityType.valueOf(filter) }
       }
-      ExpensesCharts(filteredList = state.filteredExpenses, chartType = chartType, entityType = entityType)
+      ExpensesCharts(
+        filteredList = state.filteredExpenses,
+        chartType = chartType,
+        entityType = entityType,
+        modifier = Modifier
+          .fillMaxHeight()
+          .weight(2f)
+      )
+      AllExpensesListContent(
+        filteredList = state.filteredExpenses,
+        totalExpenses = state.totalExpenses,
+        cards = state.cards,
+        isLoading = state.isLoading,
+        modifier = Modifier.weight(1f),
+        onEdit = { onNavigate(NavigateEvent.NavigateEditExpenseScreen, it) },
+        onEvent = viewModel::onEvent
+      )
     }
     return
   }
@@ -143,10 +155,14 @@ fun AllExpensesListScreen(
 // TODO move this to own component and use events to handle data selection
 @Composable
 fun ChartDatFilterMenu(onFilterSelect: (String) -> Unit) {
+  val context = LocalContext.current
   var expanded by remember { mutableStateOf(false) }
+  var buttonText by remember {
+    mutableStateOf(context.resources.getString(R.string.expenses_list_filter_data))
+  }
 
   OutlinedButton(onClick = { expanded = !expanded }) {
-    Text(text = stringResource(id = R.string.expenses_list_filter_data), modifier = Modifier)
+    Text(text = buttonText, modifier = Modifier)
     Icon(imageVector = Icons.Rounded.ArrowDropDown, contentDescription = "")
   }
 
@@ -158,6 +174,7 @@ fun ChartDatFilterMenu(onFilterSelect: (String) -> Unit) {
         },
         onClick = {
           expanded = !expanded
+          buttonText = "Category"
           onFilterSelect(ChartDataEntityType.CATEGORY.name)
         }
       )
@@ -168,6 +185,7 @@ fun ChartDatFilterMenu(onFilterSelect: (String) -> Unit) {
         },
         onClick = {
           expanded = !expanded
+          buttonText = "Months"
           onFilterSelect(ChartDataEntityType.MONTH.name)
         }
       )
@@ -178,7 +196,19 @@ fun ChartDatFilterMenu(onFilterSelect: (String) -> Unit) {
         },
         onClick = {
           expanded = !expanded
+          buttonText = "Concept"
           onFilterSelect(ChartDataEntityType.CONCEPT.name)
+        }
+      )
+
+      DropdownMenuItem(
+        text = {
+          Text(text = "Concept quantity")
+        },
+        onClick = {
+          expanded = !expanded
+          buttonText = "Concept quantity"
+          onFilterSelect(ChartDataEntityType.CONCEPT_QUANTITY.name)
         }
       )
     }

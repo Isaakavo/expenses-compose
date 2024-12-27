@@ -5,4 +5,9 @@ class ChartDataProcessor<T>(private val expensesList: List<T>) {
     expensesList.groupBy(groupBy).mapValues { (_, expenses) ->
       expenses.fold(0f) { acc, it -> acc + sumBy(it) }
     }
+
+  fun groupExpenseListBy(groupBy: (T) -> String, sumListBy: (List<T>) -> Int): Map<String, Float> =
+    expensesList.groupBy(groupBy).mapValues { (_, expenses) ->
+      sumListBy(expenses).toFloat()
+    }
 }
