@@ -49,13 +49,13 @@ fun ExpensesCharts(
         sumBy = { it.total.toFloat() }
       )
 
-    ChartDataEntityType.CONCEPT -> ChartDataProcessor(filteredList.sortedByDescending { it.total }.take(50))
+    ChartDataEntityType.CONCEPT -> ChartDataProcessor(filteredList.sortedByDescending { it.total })
       .groupExpenseBy(
         groupBy = { it.concept.lowercase() },
         sumBy = { it.total.toFloat() }
       )
 
-    ChartDataEntityType.CONCEPT_QUANTITY -> ChartDataProcessor(filteredList.take(10))
+    ChartDataEntityType.CONCEPT_QUANTITY -> ChartDataProcessor(filteredList)
       .groupExpenseListBy(
         groupBy = { it.concept.lowercase() },
         sumListBy = { it.size }
