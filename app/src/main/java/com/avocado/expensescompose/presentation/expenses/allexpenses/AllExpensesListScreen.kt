@@ -34,6 +34,7 @@ import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.presentation.charts.ChartType
 import com.avocado.expensescompose.presentation.expenses.allexpenses.components.AllExpensesListContent
 import com.avocado.expensescompose.presentation.expenses.allexpenses.components.ChartDataEntityType
+import com.avocado.expensescompose.presentation.expenses.allexpenses.components.ExpenseFilterMenu
 import com.avocado.expensescompose.presentation.expenses.allexpenses.components.ExpensesCharts
 import com.avocado.expensescompose.presentation.expenses.allexpenses.viewmodel.AllExpensesListEvents
 import com.avocado.expensescompose.presentation.expenses.allexpenses.viewmodel.AllExpensesListViewModel
@@ -118,7 +119,10 @@ fun AllExpensesListScreen(
         .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 12.dp),
       verticalArrangement = Arrangement.Center
     ) {
-      Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+      Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
+        ExpenseFilterMenu(cards = state.cards) { type, name ->
+          viewModel.onEvent(AllExpensesListEvents.ApplyFilter, "", type, name)
+        }
         ChartDatFilterMenu { filter -> entityType = ChartDataEntityType.valueOf(filter) }
       }
       ExpensesCharts(filteredList = state.filteredExpenses, chartType = chartType, entityType = entityType)

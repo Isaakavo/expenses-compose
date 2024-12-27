@@ -24,7 +24,7 @@ fun ExpenseCategoryList(
     },
     modifier = Modifier.height(250.dp)
   ) {
-    Category.values().filter { it != Category.UNKNOWN__ }.forEach { category ->
+    Category.entries.filter { it != Category.UNKNOWN__ }.forEach { category ->
       DropdownMenuItem(
         text = {
           category.adapt().takeIf { it != 0 }?.let {
