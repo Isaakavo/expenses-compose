@@ -56,7 +56,7 @@ fun LineChart(data: Map<String, Float>) {
       bottomAxis = HorizontalAxis.rememberBottom(
         valueFormatter = { _, x, _ -> "${data.keys.toList().getOrNull(x.toInt())}" },
         itemPlacer = remember {
-          HorizontalAxis.ItemPlacer.aligned(spacing = 1, addExtremeLabelPadding = false)
+          HorizontalAxis.ItemPlacer.aligned(addExtremeLabelPadding = false, shiftExtremeLines = false)
         }
       ),
       marker = rememberMarker(),

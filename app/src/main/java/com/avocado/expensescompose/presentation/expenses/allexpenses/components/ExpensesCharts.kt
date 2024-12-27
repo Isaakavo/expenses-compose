@@ -8,6 +8,7 @@ import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.data.repositories.ChartDataProcessor
 import com.avocado.expensescompose.presentation.charts.ChartType
 import com.avocado.expensescompose.presentation.charts.Charts
+import java.time.LocalDateTime
 
 enum class ChartDataEntityType {
   MONTH,
@@ -28,7 +29,12 @@ fun ExpensesCharts(
   val listState = rememberLazyListState()
   val context = LocalContext.current
   val expensesDataForChart = when (entityType) {
-    ChartDataEntityType.MONTH -> ChartDataProcessor(filteredList)
+    // TODO move this logic to viewmodel to handle the filters and sorts
+    ChartDataEntityType.MONTH -> ChartDataProcessor(
+      filteredList
+        .filter { it.payBefore?.year == LocalDateTime.now().year }
+        .sortedBy { it.payBefore?.month }
+    )
       .groupExpenseBy(
         groupBy = { it.payBefore?.month?.name ?: "Unknown" },
         sumBy = { it.total.toFloat() }
