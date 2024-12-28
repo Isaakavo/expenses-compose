@@ -19,6 +19,7 @@ import com.avocado.expensescompose.presentation.cards.addcards.AddCardScreen
 import com.avocado.expensescompose.presentation.cards.expensesbycard.ExpensesByCardScreen
 import com.avocado.expensescompose.presentation.cards.expensestotalbycard.ExpensesTotalByCardScreen
 import com.avocado.expensescompose.presentation.cards.expensestotalbycard.viewmodel.DataSelector
+import com.avocado.expensescompose.presentation.charts.ChartType
 import com.avocado.expensescompose.presentation.expenses.addexpense.AddExpenseScreen
 import com.avocado.expensescompose.presentation.expenses.allexpenses.AllExpensesListScreen
 import com.avocado.expensescompose.presentation.homescreen.HomeScreen
@@ -343,6 +344,7 @@ fun ExpensesApplication() {
       AllExpensesListScreen(
         payBeforeInput = payBefore,
         isChartScreen = true,
+        chartType = ChartType.PIE,
         onNavigateBack = {
           navController.popBackStack()
         }

@@ -127,7 +127,7 @@ fun AllExpensesListScreen(
         entityType = entityType,
         modifier = Modifier
           .fillMaxHeight()
-          .weight(2f)
+          .weight(1f)
       )
       AllExpensesListContent(
         filteredList = state.filteredExpenses,
