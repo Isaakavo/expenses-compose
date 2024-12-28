@@ -80,6 +80,7 @@ fun AllExpensesListContent(
           fontSize = 14.sp
         )
         FilterAndSortMenu(
+          list = filteredList,
           cards = cards
         ) { filters ->
           onEvent(AllExpensesListEvents.ApplyFilter, "", filters)

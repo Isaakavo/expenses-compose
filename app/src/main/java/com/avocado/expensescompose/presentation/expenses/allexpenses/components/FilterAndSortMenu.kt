@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.avocado.expensescompose.data.adapters.adapt
 import com.avocado.expensescompose.data.model.card.Card
+import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.type.Category
 
 enum class Filters {
@@ -47,6 +48,7 @@ enum class Filters {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FilterAndSortMenu(
+  list: List<Expense> = emptyList(),
   cards: Set<Card> = emptySet(),
   onFilterSelect: (Map<Filters, List<String>>) -> Unit
 ) {
@@ -139,7 +141,7 @@ fun FilterAndSortMenu(
             rememberCashSelected = !rememberCashSelected
             rememberFilterToApply = rememberFilterToApply + mapOf(Filters.CASH to listOf(selected.toString()))
           }
-          CategoryCheckBox(rememberSelectedCategories) { category ->
+          CategoryCheckBox(list = list, selectedList = rememberSelectedCategories) { category ->
             rememberSelectedCategories = if (rememberSelectedCategories.contains(category)) {
               rememberSelectedCategories.filter { it != category }
             } else {
@@ -148,7 +150,7 @@ fun FilterAndSortMenu(
             rememberFilterToApply = rememberFilterToApply + mapOf(Filters.CATEGORY to rememberSelectedCategories)
           }
           cards.takeIf { it.isNotEmpty() }?.let {
-            CardsCheckBox(cards = cards, selectedList = rememberSelectedCards) { card ->
+            CardsCheckBox(list = list, cards = cards, selectedList = rememberSelectedCards) { card ->
               rememberSelectedCards = if (rememberSelectedCards.contains(card)) {
                 rememberSelectedCards.filter { it != card }
               } else {
@@ -165,6 +167,7 @@ fun FilterAndSortMenu(
 
 @Composable
 fun CategoryCheckBox(
+  list: List<Expense>,
   selectedList: List<String>,
   onSelected: (String) -> Unit
 ) {
@@ -172,6 +175,7 @@ fun CategoryCheckBox(
     Text(text = "Category")
     LazyVerticalGrid(columns = GridCells.Fixed(2)) {
       items(Category.knownValues()) { category ->
+        val numberOfCategoryInList = list.filter { it.category == category }.size
         Row(
           modifier = Modifier.fillMaxWidth(),
           horizontalArrangement = Arrangement.Start
@@ -183,7 +187,7 @@ fun CategoryCheckBox(
           category.adapt().takeIf { it != 0 }?.let {
             Text(
               modifier = Modifier.align(Alignment.CenterVertically),
-              text = stringResource(it),
+              text = "${stringResource(it)} ($numberOfCategoryInList)",
               textAlign = TextAlign.End
             )
           }
@@ -195,6 +199,7 @@ fun CategoryCheckBox(
 
 @Composable
 fun CardsCheckBox(
+  list: List<Expense>,
   cards: Set<Card>,
   selectedList: List<String>,
   onSelected: (String) -> Unit
@@ -203,6 +208,7 @@ fun CardsCheckBox(
     Text(text = "Cards")
     Column {
       cards.map { card ->
+        val numberOfCardsInList = list.filter { it.card?.bank == card.bank }.size
         Row(
           modifier = Modifier.fillMaxWidth(),
           horizontalArrangement = Arrangement.Start
@@ -213,7 +219,7 @@ fun CardsCheckBox(
           )
           Text(
             modifier = Modifier.align(Alignment.CenterVertically),
-            text = card.bank,
+            text = "${card.bank} ($numberOfCardsInList)",
             textAlign = TextAlign.End
           )
         }
@@ -249,7 +255,7 @@ fun CashOnlyCheckBox(
 @Composable
 fun ShowBottomSheet() {
   Surface {
-    FilterAndSortMenu() { type ->
+    FilterAndSortMenu(list = emptyList()) { type ->
     }
   }
 }
