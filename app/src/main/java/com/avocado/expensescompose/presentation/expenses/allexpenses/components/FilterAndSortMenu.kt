@@ -70,7 +70,7 @@ fun FilterAndSortMenu(
     mutableStateOf(false)
   }
 
-  Button(onClick = { showBottomSheet = !showBottomSheet }) {
+  TextButton(onClick = { showBottomSheet = !showBottomSheet }) {
     Text(text = "Sort & Filter")
   }
 

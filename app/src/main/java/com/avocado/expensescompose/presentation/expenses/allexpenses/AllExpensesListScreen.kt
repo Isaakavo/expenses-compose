@@ -1,13 +1,6 @@
 package com.avocado.expensescompose.presentation.expenses.allexpenses
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowDropDown
 import androidx.compose.material3.DropdownMenu
@@ -26,7 +19,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.avocado.expensescompose.R
@@ -34,7 +26,6 @@ import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.presentation.charts.ChartType
 import com.avocado.expensescompose.presentation.expenses.allexpenses.components.AllExpensesListContent
 import com.avocado.expensescompose.presentation.expenses.allexpenses.components.ChartDataEntityType
-import com.avocado.expensescompose.presentation.expenses.allexpenses.components.ExpensesCharts
 import com.avocado.expensescompose.presentation.expenses.allexpenses.viewmodel.AllExpensesListEvents
 import com.avocado.expensescompose.presentation.expenses.allexpenses.viewmodel.AllExpensesListViewModel
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
@@ -108,45 +99,12 @@ fun AllExpensesListScreen(
     onSetData(state.filteredExpenses)
   }
 
-  if (isChartScreen) {
-    var entityType by remember {
-      mutableStateOf(ChartDataEntityType.CATEGORY)
-    }
-    Column(
-      modifier = Modifier
-        .fillMaxSize()
-        .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 12.dp),
-      verticalArrangement = Arrangement.spacedBy(15.dp)
-    ) {
-      Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
-        ChartDatFilterMenu { filter -> entityType = ChartDataEntityType.valueOf(filter) }
-      }
-      ExpensesCharts(
-        filteredList = state.filteredExpenses,
-        chartType = chartType,
-        entityType = entityType,
-        modifier = Modifier
-          .fillMaxHeight()
-          .weight(1f)
-      )
-      AllExpensesListContent(
-        filteredList = state.filteredExpenses,
-        totalExpenses = state.totalExpenses,
-        cards = state.cards,
-        isLoading = state.isLoading,
-        modifier = Modifier.weight(1f),
-        onEdit = { onNavigate(NavigateEvent.NavigateEditExpenseScreen, it) },
-        onEvent = viewModel::onEvent
-      )
-    }
-    return
-  }
-
   AllExpensesListContent(
     filteredList = state.filteredExpenses,
     totalExpenses = state.totalExpenses,
     cards = state.cards,
     isLoading = state.isLoading,
+    isChartScreen = isChartScreen,
     onEdit = { onNavigate(NavigateEvent.NavigateEditExpenseScreen, it) },
     onEvent = viewModel::onEvent
   )
