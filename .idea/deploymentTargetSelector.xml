@@ -16,7 +16,7 @@
       <SelectionState runConfigName="Expenses_Compose">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="ChartsPreview">
+      <SelectionState runConfigName="ShowBottomSheet">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

@@ -39,7 +39,7 @@ fun AllExpensesListContent(
   isLoading: Boolean,
   modifier: Modifier = Modifier,
   onEdit: (expenseId: String) -> Unit = {},
-  onEvent: (event: AllExpensesListEvents, expenseId: String, filterType: String?, filterName: String?) -> Unit = { one, two, three, four -> }
+  onEvent: (event: AllExpensesListEvents, expenseId: String, filters: Map<Filters, List<String>>?) -> Unit = { one, two, three -> }
 ) {
   val fabNestedScrollConnection = remember {
     FabNestedScrollConnection
@@ -81,12 +81,11 @@ fun AllExpensesListContent(
           fontWeight = FontWeight.Bold,
           fontSize = 14.sp
         )
-        ExpenseFilterMenu(
-          cards = cards,
-          onFilterSelect = { type, name ->
-            onEvent(AllExpensesListEvents.ApplyFilter, "", type, name)
-          }
-        )
+        FilterAndSortMenu(
+          cards = cards
+        ) { filters ->
+          onEvent(AllExpensesListEvents.ApplyFilter, "", filters)
+        }
       }
       // What will be required if i want to add more scroll connections
       LazyColumn(
@@ -107,7 +106,7 @@ fun AllExpensesListContent(
             ExpenseItem(
               expense = expense,
               onEdit = onEdit,
-              onDelete = { onEvent(AllExpensesListEvents.DeleteExpense, it, null, null) }
+              onDelete = { onEvent(AllExpensesListEvents.DeleteExpense, it, null) }
             )
           }
         }

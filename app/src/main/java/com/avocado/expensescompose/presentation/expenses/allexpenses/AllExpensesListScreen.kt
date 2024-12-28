@@ -80,9 +80,9 @@ fun AllExpensesListScreen(
 
         when (snackBarResult) {
           SnackbarResult.ActionPerformed -> {
-            viewModel.onEvent(AllExpensesListEvents.UpdateSuccessDelete, "", null, null)
-            viewModel.onEvent(AllExpensesListEvents.UpdateDeleteExpenseId, "", null, null)
-            viewModel.onEvent(AllExpensesListEvents.RestoreLists, "", null, null)
+            viewModel.onEvent(AllExpensesListEvents.UpdateSuccessDelete, "", null)
+            viewModel.onEvent(AllExpensesListEvents.UpdateDeleteExpenseId, "", null)
+            viewModel.onEvent(AllExpensesListEvents.RestoreLists, "", null)
           }
 
           SnackbarResult.Dismissed -> {
@@ -90,7 +90,7 @@ fun AllExpensesListScreen(
           }
         }
 
-        viewModel.onEvent(AllExpensesListEvents.UpdateSuccessDelete, "", null, null)
+        viewModel.onEvent(AllExpensesListEvents.UpdateSuccessDelete, "", null)
       }
     }
   }

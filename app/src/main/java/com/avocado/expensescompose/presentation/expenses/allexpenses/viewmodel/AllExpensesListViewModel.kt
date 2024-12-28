@@ -14,6 +14,7 @@ import com.avocado.expensescompose.data.adapters.graphql.utils.validateData
 import com.avocado.expensescompose.data.apolloclients.GraphQlClientImpl
 import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.data.model.successOrError
+import com.avocado.expensescompose.presentation.expenses.allexpenses.components.Filters
 import com.avocado.expensescompose.presentation.util.formatDateForRequest
 import com.avocado.expensescompose.presentation.util.formatDateFromMillis
 import com.avocado.expensescompose.presentation.util.formatDateToISO
@@ -39,7 +40,11 @@ class AllExpensesListViewModel @Inject constructor(
   private val _state = MutableStateFlow(AllExpensesListState())
   val state = _state.asStateFlow()
 
-  fun onEvent(event: AllExpensesListEvents, expenseId: String, filterType: String?, filterName: String?) {
+  fun onEvent(
+    event: AllExpensesListEvents,
+    expenseId: String,
+    filters: Map<Filters, List<String>>?
+  ) {
     when (event) {
       AllExpensesListEvents.DeleteExpense -> {
         _state.update { it.copy(successDelete = true, expenseToDelete = expenseId) }
@@ -47,7 +52,7 @@ class AllExpensesListViewModel @Inject constructor(
       }
 
       AllExpensesListEvents.ApplyFilter -> {
-        filterList(filterType, filterName)
+        filterList(filters)
       }
 
       AllExpensesListEvents.UpdateDeleteExpenseId -> {
@@ -79,16 +84,25 @@ class AllExpensesListViewModel @Inject constructor(
 
   private fun reduceExpenses(filteredList: List<Expense>): Double = filteredList.fold(0.0) { acc, item -> acc + item.total }
 
-  private fun filterList(type: String?, name: String?) {
+  private fun filterList(filters: Map<Filters, List<String>>?) {
+    if (filters == null) {
+      return
+    }
     viewModelScope.launch(Dispatchers.Default) {
       val expenses = _state.value.expenses
       logWithThread("Filtering expenses")
-      val filteredList = when (type) {
-        "CATEGORY" -> expenses.filter { it.category.name == name }
-        "CARDS" -> expenses.filter { it.card?.bank == name }
-        "CASH" -> expenses.filter { it.card == null }
-        "RESET" -> expenses
-        else -> return@launch
+
+      val predicates = filters.mapNotNull { (type, values) ->
+        when (type) {
+          Filters.CATEGORY -> { expense: Expense -> expense.category.name in values }
+          Filters.CARDS -> { expense: Expense -> expense.card?.bank in values }
+          Filters.CASH -> { expense: Expense -> expense.card == null }
+          else -> null
+        }
+      }
+
+      val filteredList = expenses.filter { expense ->
+        predicates.all { predicate -> predicate(expense) }
       }
       updateFilteredList(filteredList, reduceExpenses(filteredList))
     }
