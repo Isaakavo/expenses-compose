@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -93,47 +92,42 @@ fun AllExpensesListContent(
           onEvent(AllExpensesListEvents.ApplyFilter, "", filters)
         }
       }
-      Column(
-        modifier = Modifier
-          .fillMaxSize()
+      // What will be required if i want to add more scroll connections
+      LazyColumn(
+        modifier = modifier
+          .nestedScroll(fabNestedScrollConnection)
           .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(15.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
       ) {
-        if (isChartScreen) {
-          var entityType by remember {
-            mutableStateOf(ChartDataEntityType.CATEGORY)
-          }
-
-          Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
-            ChartDatFilterMenu { filter -> entityType = ChartDataEntityType.valueOf(filter) }
-          }
-          ExpensesCharts(
-            filteredList = filteredList,
-            chartType = chartType,
-            entityType = entityType,
-            modifier = Modifier
-              .fillMaxHeight()
-              .weight(1f)
-          )
-        }
-
-        // What will be required if i want to add more scroll connections
-        LazyColumn(
-          modifier = modifier.nestedScroll(fabNestedScrollConnection).weight(1f),
-          verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-          itemsIndexed(filteredList, key = { _, item -> item.id }) { index, expense ->
-            ExpenseDateRow(payBefore = expense.payBefore, index = index, expenseList = filteredList)
-            Card(
-              modifier = Modifier.animateItem(),
-              shape = RoundedCornerShape(12.dp)
-            ) {
-              ExpenseItem(
-                expense = expense,
-                onEdit = onEdit,
-                onDelete = { onEvent(AllExpensesListEvents.DeleteExpense, it, null) }
-              )
+        item {
+          if (isChartScreen) {
+            var entityType by remember {
+              mutableStateOf(ChartDataEntityType.CATEGORY)
             }
+
+            Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+              ChartDatFilterMenu { filter -> entityType = ChartDataEntityType.valueOf(filter) }
+            }
+            ExpensesCharts(
+              filteredList = filteredList,
+              chartType = chartType,
+              entityType = entityType,
+              modifier = Modifier
+                .fillMaxHeight()
+            )
+          }
+        }
+        itemsIndexed(filteredList, key = { _, item -> item.id }) { index, expense ->
+          ExpenseDateRow(payBefore = expense.payBefore, index = index, expenseList = filteredList)
+          Card(
+            modifier = Modifier.animateItem(),
+            shape = RoundedCornerShape(12.dp)
+          ) {
+            ExpenseItem(
+              expense = expense,
+              onEdit = onEdit,
+              onDelete = { onEvent(AllExpensesListEvents.DeleteExpense, it, null) }
+            )
           }
         }
       }

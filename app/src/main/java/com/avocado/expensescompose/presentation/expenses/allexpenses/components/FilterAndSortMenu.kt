@@ -106,6 +106,7 @@ fun FilterAndSortMenu(
       ) { padding ->
         Column(
           modifier = Modifier
+            .fillMaxSize()
             .padding(start = 20.dp, end = 20.dp),
           verticalArrangement = Arrangement.spacedBy(15.dp)
         ) {
