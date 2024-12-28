@@ -103,7 +103,7 @@ class AllExpensesListViewModel @Inject constructor(
 
       val filteredList = expenses.filter { expense ->
         predicates.all { predicate -> predicate(expense) }
-      }
+      }.takeIf { !filters.containsKey(Filters.RESET) } ?: expenses
       updateFilteredList(filteredList, reduceExpenses(filteredList))
     }
   }

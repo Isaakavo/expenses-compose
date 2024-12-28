@@ -16,7 +16,9 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.avocado.expensescompose.data.adapters.adapt
@@ -61,6 +64,9 @@ fun FilterAndSortMenu(
   var rememberSelectedCards by remember {
     mutableStateOf(emptyList<String>())
   }
+  var rememberCashSelected by remember {
+    mutableStateOf(false)
+  }
 
   Button(onClick = { showBottomSheet = !showBottomSheet }) {
     Text(text = "Sort & Filter")
@@ -76,12 +82,18 @@ fun FilterAndSortMenu(
         bottomBar = {
           Row(
             modifier = Modifier
-              .fillMaxWidth()
+              .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
           ) {
             Button(
-              modifier = Modifier.fillMaxWidth(),
+              modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
               onClick = {
                 showBottomSheet = false
+                if (rememberFilterToApply.containsKey(Filters.RESET)) {
+                  rememberFilterToApply = rememberFilterToApply.filter { it.key != Filters.RESET }
+                }
                 onFilterSelect(rememberFilterToApply)
               }
             ) {
@@ -96,7 +108,25 @@ fun FilterAndSortMenu(
           verticalArrangement = Arrangement.spacedBy(15.dp)
         ) {
           // Sort By
-          Text(text = "Sort by", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+          ) {
+            Text(text = "Sort by", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            TextButton(
+              modifier = Modifier,
+              onClick = {
+                rememberCashSelected = false
+                rememberSelectedCategories = emptyList()
+                rememberSelectedCards = emptyList()
+                rememberFilterToApply = mapOf(Filters.RESET to emptyList())
+                showBottomSheet = false
+                onFilterSelect(rememberFilterToApply)
+              }
+            ) {
+              Text(text = "Reset")
+            }
+          }
           OutlinedButton(modifier = Modifier.fillMaxWidth(), onClick = { /*TODO*/ }) {
             Text(text = "Name (A-Z)")
           }
@@ -105,6 +135,10 @@ fun FilterAndSortMenu(
 
           // Filter By
           Text(text = "Filter by", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+          CashOnlyCheckBox(selected = rememberCashSelected) { selected ->
+            rememberCashSelected = !rememberCashSelected
+            rememberFilterToApply = rememberFilterToApply + mapOf(Filters.CASH to listOf(selected.toString()))
+          }
           CategoryCheckBox(rememberSelectedCategories) { category ->
             rememberSelectedCategories = if (rememberSelectedCategories.contains(category)) {
               rememberSelectedCategories.filter { it != category }
@@ -188,11 +222,34 @@ fun CardsCheckBox(
   }
 }
 
-// @Preview
-// @Composable
-// fun ShowBottomSheet() {
-//  Surface {
-//    FilterAndSortMenu() { type, name ->
-//    }
-//  }
-// }
+@Composable
+fun CashOnlyCheckBox(
+  selected: Boolean,
+  onSelected: (Boolean) -> Unit
+) {
+  Column {
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.Start
+    ) {
+      Checkbox(
+        checked = selected,
+        onCheckedChange = { onSelected(it) }
+      )
+      Text(
+        modifier = Modifier.align(Alignment.CenterVertically),
+        text = "Only Cash",
+        textAlign = TextAlign.End
+      )
+    }
+  }
+}
+
+@Preview
+@Composable
+fun ShowBottomSheet() {
+  Surface {
+    FilterAndSortMenu() { type ->
+    }
+  }
+}
