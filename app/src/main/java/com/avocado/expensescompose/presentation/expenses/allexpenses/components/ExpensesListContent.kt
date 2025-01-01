@@ -65,41 +65,20 @@ fun AllExpensesListContent(
     }
 
     else -> {
-      Row(
-        modifier = Modifier
-          .fillMaxWidth()
-          .padding(end = 24.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-      ) {
-        Text(
-          text = stringResource(
-            R.string.expenses_list_transaction,
-            filteredList.size,
-            totalExpenses.formatMoney()
-          ),
-          modifier = Modifier
-            .padding(start = 8.dp)
-            .weight(0.5f),
-          textAlign = TextAlign.Start,
-          fontWeight = FontWeight.Bold,
-          fontSize = 14.sp
-        )
-        FilterAndSortMenu(
-          list = filteredList,
-          cards = cards
-        ) { filters ->
-          onEvent(AllExpensesListEvents.ApplyFilter, "", filters)
-        }
-      }
       // What will be required if i want to add more scroll connections
       LazyColumn(
         modifier = modifier
           .nestedScroll(fabNestedScrollConnection)
-          .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 12.dp),
+          .padding(top = 8.dp, bottom = 12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
       ) {
         item {
+          MenuRow(
+            filteredList = filteredList,
+            totalExpenses = totalExpenses,
+            cards = cards,
+            onEvent = onEvent
+          )
           if (isChartScreen) {
             var entityType by remember {
               mutableStateOf(ChartDataEntityType.CATEGORY)
@@ -131,6 +110,42 @@ fun AllExpensesListContent(
           }
         }
       }
+    }
+  }
+}
+
+@Composable
+fun MenuRow(
+  filteredList: List<Expense>,
+  totalExpenses: Double,
+  cards: Set<Card>,
+  onEvent: (event: AllExpensesListEvents, expenseId: String, filters: Map<Filters, List<String>>?) -> Unit
+) {
+  Row(
+    modifier = Modifier
+      .fillMaxWidth()
+      .padding(end = 24.dp),
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.SpaceBetween
+  ) {
+    Text(
+      text = stringResource(
+        R.string.expenses_list_transaction,
+        filteredList.size,
+        totalExpenses.formatMoney()
+      ),
+      modifier = Modifier
+        .padding(start = 8.dp)
+        .weight(0.5f),
+      textAlign = TextAlign.Start,
+      fontWeight = FontWeight.Bold,
+      fontSize = 14.sp
+    )
+    FilterAndSortMenu(
+      list = filteredList,
+      cards = cards
+    ) { filters ->
+      onEvent(AllExpensesListEvents.ApplyFilter, "", filters)
     }
   }
 }

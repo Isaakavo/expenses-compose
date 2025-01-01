@@ -23,7 +23,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.model.expense.Expense
-import com.avocado.expensescompose.presentation.charts.ChartType
 import com.avocado.expensescompose.presentation.expenses.allexpenses.components.AllExpensesListContent
 import com.avocado.expensescompose.presentation.expenses.allexpenses.components.ChartDataEntityType
 import com.avocado.expensescompose.presentation.expenses.allexpenses.viewmodel.AllExpensesListEvents
@@ -38,8 +37,6 @@ fun AllExpensesListScreen(
   payBeforeInput: String? = null,
   dateRange: LongRange? = null,
   isChartScreen: Boolean = false,
-  chartType: ChartType = ChartType.BAR,
-  onNavigateBack: () -> Unit = {},
   onNavigate: (navigateEvent: NavigateEvent, operation: String) -> Unit = { one, two -> },
   onSetData: (expenseList: List<Expense>) -> Unit = {}
 ) {

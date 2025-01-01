@@ -178,7 +178,6 @@ fun HomeScreenContent(
             AllExpensesListScreen(
               dateRange = date,
               isChartScreen = isChartScreen,
-              chartType = ChartType.valueOf(chartType),
               onNavigate = onNavigateCardsScreen
             )
           }
