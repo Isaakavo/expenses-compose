@@ -3,9 +3,10 @@ package com.avocado.expensescompose.presentation.expenses.allexpenses.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -76,7 +77,6 @@ fun FilterAndSortMenu(
 
   if (showBottomSheet) {
     ModalBottomSheet(
-      modifier = Modifier.fillMaxSize(),
       sheetState = sheetState,
       onDismissRequest = { showBottomSheet = false }
     ) {
@@ -104,60 +104,60 @@ fun FilterAndSortMenu(
           }
         }
       ) { padding ->
-        Column(
-          modifier = Modifier
-            .fillMaxSize()
-            .padding(start = 20.dp, end = 20.dp),
-          verticalArrangement = Arrangement.spacedBy(15.dp)
+        LazyColumn(
+          modifier = Modifier.padding(padding),
+          verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-          // Sort By
-          Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-          ) {
-            Text(text = "Sort by", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-            TextButton(
-              modifier = Modifier,
-              onClick = {
-                rememberCashSelected = false
-                rememberSelectedCategories = emptyList()
-                rememberSelectedCards = emptyList()
-                rememberFilterToApply = mapOf(Filters.RESET to emptyList())
-                showBottomSheet = false
-                onFilterSelect(rememberFilterToApply)
-              }
+          item {
+            // Sort By
+            Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.SpaceBetween
             ) {
-              Text(text = "Reset")
-            }
-          }
-          OutlinedButton(modifier = Modifier.fillMaxWidth(), onClick = { /*TODO*/ }) {
-            Text(text = "Name (A-Z)")
-          }
-
-          HorizontalDivider()
-
-          // Filter By
-          Text(text = "Filter by", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-          CashOnlyCheckBox(selected = rememberCashSelected) { selected ->
-            rememberCashSelected = !rememberCashSelected
-            rememberFilterToApply = rememberFilterToApply + mapOf(Filters.CASH to listOf(selected.toString()))
-          }
-          CategoryCheckBox(list = list, selectedList = rememberSelectedCategories) { category ->
-            rememberSelectedCategories = if (rememberSelectedCategories.contains(category)) {
-              rememberSelectedCategories.filter { it != category }
-            } else {
-              listOf(category) + rememberSelectedCategories
-            }
-            rememberFilterToApply = rememberFilterToApply + mapOf(Filters.CATEGORY to rememberSelectedCategories)
-          }
-          cards.takeIf { it.isNotEmpty() }?.let {
-            CardsCheckBox(list = list, cards = cards, selectedList = rememberSelectedCards) { card ->
-              rememberSelectedCards = if (rememberSelectedCards.contains(card)) {
-                rememberSelectedCards.filter { it != card }
-              } else {
-                listOf(card) + rememberSelectedCards
+              Text(text = "Sort by", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+              TextButton(
+                modifier = Modifier,
+                onClick = {
+                  rememberCashSelected = false
+                  rememberSelectedCategories = emptyList()
+                  rememberSelectedCards = emptyList()
+                  rememberFilterToApply = mapOf(Filters.RESET to emptyList())
+                  showBottomSheet = false
+                  onFilterSelect(rememberFilterToApply)
+                }
+              ) {
+                Text(text = "Reset")
               }
-              rememberFilterToApply = rememberFilterToApply + mapOf(Filters.CARDS to rememberSelectedCards)
+            }
+            OutlinedButton(modifier = Modifier.fillMaxWidth(), onClick = { /*TODO*/ }) {
+              Text(text = "Name (A-Z)")
+            }
+
+            HorizontalDivider()
+
+            // Filter By
+            Text(text = "Filter by", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            CashOnlyCheckBox(selected = rememberCashSelected) { selected ->
+              rememberCashSelected = !rememberCashSelected
+              rememberFilterToApply = rememberFilterToApply + mapOf(Filters.CASH to listOf(selected.toString()))
+            }
+            CategoryCheckBox(list = list, selectedList = rememberSelectedCategories) { category ->
+              rememberSelectedCategories = if (rememberSelectedCategories.contains(category)) {
+                rememberSelectedCategories.filter { it != category }
+              } else {
+                listOf(category) + rememberSelectedCategories
+              }
+              rememberFilterToApply = rememberFilterToApply + mapOf(Filters.CATEGORY to rememberSelectedCategories)
+            }
+            cards.takeIf { it.isNotEmpty() }?.let {
+              CardsCheckBox(list = list, cards = cards, selectedList = rememberSelectedCards) { card ->
+                rememberSelectedCards = if (rememberSelectedCards.contains(card)) {
+                  rememberSelectedCards.filter { it != card }
+                } else {
+                  listOf(card) + rememberSelectedCards
+                }
+                rememberFilterToApply = rememberFilterToApply + mapOf(Filters.CARDS to rememberSelectedCards)
+              }
             }
           }
         }
@@ -173,8 +173,12 @@ fun CategoryCheckBox(
   onSelected: (String) -> Unit
 ) {
   Column {
-    Text(text = "Category")
-    LazyVerticalGrid(columns = GridCells.Fixed(2)) {
+    Text(text = "Category", fontWeight = FontWeight.Bold)
+    LazyVerticalGrid(
+      modifier = Modifier.heightIn(min = 400.dp, max = 800.dp),
+      columns = GridCells.Fixed(2),
+      userScrollEnabled = false
+    ) {
       items(Category.knownValues()) { category ->
         val numberOfCategoryInList = list.filter { it.category == category }.size
         Row(
@@ -206,9 +210,13 @@ fun CardsCheckBox(
   onSelected: (String) -> Unit
 ) {
   Column {
-    Text(text = "Cards")
-    Column {
-      cards.map { card ->
+    Text(text = "Cards", fontWeight = FontWeight.Bold)
+    LazyVerticalGrid(
+      modifier = Modifier.heightIn(min = 300.dp, max = 600.dp),
+      columns = GridCells.Fixed(2),
+      userScrollEnabled = false
+    ) {
+      items(items = cards.toTypedArray()) { card ->
         val numberOfCardsInList = list.filter { it.card?.bank == card.bank }.size
         Row(
           modifier = Modifier.fillMaxWidth(),
@@ -256,7 +264,14 @@ fun CashOnlyCheckBox(
 @Composable
 fun ShowBottomSheet() {
   Surface {
-    FilterAndSortMenu(list = emptyList()) { type ->
+    FilterAndSortMenu(
+      list = emptyList(),
+      cards = setOf(
+        Card(bank = "one"),
+        Card(bank = "two"),
+        Card(bank = "three")
+      )
+    ) { type ->
     }
   }
 }
