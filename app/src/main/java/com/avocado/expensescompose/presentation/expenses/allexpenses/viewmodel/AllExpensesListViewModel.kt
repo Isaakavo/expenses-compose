@@ -95,7 +95,7 @@ class AllExpensesListViewModel @Inject constructor(
       val predicates = filters.mapNotNull { (type, values) ->
         when (type) {
           Filters.CATEGORY -> { expense: Expense -> expense.category.name in values }
-          Filters.CARDS -> { expense: Expense -> expense.card?.bank in values }
+          Filters.CARDS -> { expense: Expense -> expense.card?.alias in values }
           Filters.CASH -> { expense: Expense -> expense.card == null }
           else -> null
         }

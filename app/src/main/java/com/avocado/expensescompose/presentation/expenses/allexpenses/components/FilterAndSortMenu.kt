@@ -193,7 +193,7 @@ fun CategoryCheckBox(
             Text(
               modifier = Modifier.align(Alignment.CenterVertically),
               text = "${stringResource(it)} ($numberOfCategoryInList)",
-              textAlign = TextAlign.End
+              textAlign = TextAlign.Start
             )
           }
         }
@@ -212,24 +212,25 @@ fun CardsCheckBox(
   Column {
     Text(text = "Cards", fontWeight = FontWeight.Bold)
     LazyVerticalGrid(
-      modifier = Modifier.heightIn(min = 300.dp, max = 600.dp),
+      modifier = Modifier.heightIn(min = 150.dp, max = 600.dp),
       columns = GridCells.Fixed(2),
-      userScrollEnabled = false
+      userScrollEnabled = false,
+      horizontalArrangement = Arrangement.Start
     ) {
       items(items = cards.toTypedArray()) { card ->
-        val numberOfCardsInList = list.filter { it.card?.bank == card.bank }.size
+        val numberOfCardsInList = list.filter { it.card?.alias == card.alias }.size
         Row(
           modifier = Modifier.fillMaxWidth(),
           horizontalArrangement = Arrangement.Start
         ) {
           Checkbox(
-            checked = selectedList.contains(card.bank),
-            onCheckedChange = { onSelected(card.bank) }
+            checked = selectedList.contains(card.alias),
+            onCheckedChange = { onSelected(card.alias.orEmpty()) }
           )
           Text(
             modifier = Modifier.align(Alignment.CenterVertically),
-            text = "${card.bank} ($numberOfCardsInList)",
-            textAlign = TextAlign.End
+            text = "${card.alias}-${card.bank} ($numberOfCardsInList)",
+            textAlign = TextAlign.Start
           )
         }
       }
@@ -254,7 +255,7 @@ fun CashOnlyCheckBox(
       Text(
         modifier = Modifier.align(Alignment.CenterVertically),
         text = "Only Cash",
-        textAlign = TextAlign.End
+        textAlign = TextAlign.Start
       )
     }
   }
