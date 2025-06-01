@@ -342,7 +342,8 @@ fun ExpensesApplication() {
       val payBefore = navBackStackEntry.arguments?.getString("paymentDate").orEmpty()
       AllExpensesListScreen(
         payBeforeInput = payBefore,
-        isChartScreen = true
+        isChartScreen = true,
+        isSingleScreen = true
       )
     }
   }

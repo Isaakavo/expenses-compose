@@ -28,6 +28,7 @@ import com.avocado.expensescompose.presentation.expenses.allexpenses.components.
 import com.avocado.expensescompose.presentation.expenses.allexpenses.viewmodel.AllExpensesListEvents
 import com.avocado.expensescompose.presentation.expenses.allexpenses.viewmodel.AllExpensesListViewModel
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
+import com.avocado.expensescompose.presentation.shared.CustomScaffold
 import com.avocado.expensescompose.ui.theme.LocalSnackBarHostState
 import kotlinx.coroutines.launch
 
@@ -37,6 +38,7 @@ fun AllExpensesListScreen(
   payBeforeInput: String? = null,
   dateRange: LongRange? = null,
   isChartScreen: Boolean = false,
+  isSingleScreen: Boolean = false,
   onNavigate: (navigateEvent: NavigateEvent, operation: String) -> Unit = { one, two -> },
   onSetData: (expenseList: List<Expense>) -> Unit = {}
 ) {
@@ -96,15 +98,30 @@ fun AllExpensesListScreen(
     onSetData(state.filteredExpenses)
   }
 
-  AllExpensesListContent(
-    filteredList = state.filteredExpenses,
-    totalExpenses = state.totalExpenses,
-    cards = state.cards,
-    isLoading = state.isLoading,
-    isChartScreen = isChartScreen,
-    onEdit = { onNavigate(NavigateEvent.NavigateEditExpenseScreen, it) },
-    onEvent = viewModel::onEvent
-  )
+  // TODO handle in a better way this logic
+  if (isSingleScreen) {
+    CustomScaffold {
+      AllExpensesListContent(
+        filteredList = state.filteredExpenses,
+        totalExpenses = state.totalExpenses,
+        cards = state.cards,
+        isLoading = state.isLoading,
+        isChartScreen = isChartScreen,
+        onEdit = { onNavigate(NavigateEvent.NavigateEditExpenseScreen, it) },
+        onEvent = viewModel::onEvent
+      )
+    }
+  } else {
+    AllExpensesListContent(
+      filteredList = state.filteredExpenses,
+      totalExpenses = state.totalExpenses,
+      cards = state.cards,
+      isLoading = state.isLoading,
+      isChartScreen = isChartScreen,
+      onEdit = { onNavigate(NavigateEvent.NavigateEditExpenseScreen, it) },
+      onEvent = viewModel::onEvent
+    )
+  }
 }
 
 // TODO move this to own component and use events to handle data selection
