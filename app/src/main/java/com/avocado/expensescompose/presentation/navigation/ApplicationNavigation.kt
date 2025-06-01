@@ -1,13 +1,15 @@
 package com.avocado.expensescompose.presentation.navigation
 
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.core.EaseIn
-import androidx.compose.animation.core.EaseOut
-import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.background
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -131,30 +133,22 @@ private fun <T> navigate(navigateEvent: NavigateEvent, navController: NavControl
 @Composable
 fun ExpensesApplication() {
   val navController = rememberNavController()
+  val animationTime = 450
   NavHost(
     navController = navController,
     startDestination = "login_screen",
+    modifier = Modifier.background(MaterialTheme.colorScheme.background),
     enterTransition = {
-      fadeIn(
-        animationSpec = tween(
-          300,
-          easing = LinearEasing
-        )
-      ) + slideIntoContainer(
-        animationSpec = tween(350, easing = EaseIn),
-        towards = AnimatedContentTransitionScope.SlideDirection.Start
-      )
+      slideInHorizontally(
+        initialOffsetX = { fullWidth -> fullWidth },
+        animationSpec = tween(animationTime, easing = FastOutSlowInEasing)
+      ) + fadeIn(tween(animationTime))
     },
     exitTransition = {
-      fadeOut(
-        animationSpec = tween(
-          300,
-          easing = LinearEasing
-        )
-      ) + slideOutOfContainer(
-        animationSpec = tween(350, easing = EaseOut),
-        towards = AnimatedContentTransitionScope.SlideDirection.End
-      )
+      slideOutHorizontally(
+        targetOffsetX = { fullWidth -> -fullWidth },
+        animationSpec = tween(animationTime, easing = FastOutSlowInEasing)
+      ) + fadeOut(tween(animationTime))
     }
   ) {
     // Login Screen
