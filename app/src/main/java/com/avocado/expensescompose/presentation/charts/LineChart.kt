@@ -17,8 +17,8 @@ import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
 import com.patrykandpatrick.vico.compose.common.component.shapeComponent
-import com.patrykandpatrick.vico.compose.common.dimensions
 import com.patrykandpatrick.vico.compose.common.fill
+import com.patrykandpatrick.vico.compose.common.insets
 import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
@@ -72,9 +72,9 @@ private fun rememberComposeHorizontalLine(average: Double): HorizontalLine {
   val line = rememberLineComponent(fill, HORIZONTAL_LINE_THICKNESS_DP.dp)
   val labelComponent =
     rememberTextComponent(
-      margins = dimensions(HORIZONTAL_LINE_LABEL_MARGIN_DP.dp),
+      margins = insets(HORIZONTAL_LINE_LABEL_MARGIN_DP.dp),
       padding =
-      dimensions(
+      insets(
         HORIZONTAL_LINE_LABEL_HORIZONTAL_PADDING_DP.dp,
         HORIZONTAL_LINE_LABEL_VERTICAL_PADDING_DP.dp
       ),
