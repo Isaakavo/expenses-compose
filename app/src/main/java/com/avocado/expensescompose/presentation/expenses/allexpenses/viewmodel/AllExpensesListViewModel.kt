@@ -46,25 +46,28 @@ class AllExpensesListViewModel @Inject constructor(
     filters: Map<Filters, List<String>>?
   ) {
     when (event) {
-      AllExpensesListEvents.DeleteExpense -> {
+      is AllExpensesListEvents.DeleteExpense -> {
         _state.update { it.copy(successDelete = true, expenseToDelete = expenseId) }
         updateListsForDelete()
       }
 
-      AllExpensesListEvents.ApplyFilter -> {
+      is AllExpensesListEvents.ApplyFilter -> {
         filterList(filters)
       }
 
-      AllExpensesListEvents.UpdateDeleteExpenseId -> {
+      is AllExpensesListEvents.UpdateDeleteExpenseId -> {
         _state.update { it.copy(expenseToDelete = expenseId) }
       }
 
-      AllExpensesListEvents.UpdateSuccessDelete -> {
+      is AllExpensesListEvents.UpdateSuccessDelete -> {
         _state.update { it.copy(successDelete = false) }
       }
 
-      AllExpensesListEvents.RestoreLists -> {
+      is AllExpensesListEvents.RestoreLists -> {
         restoreLists()
+      }
+
+      is AllExpensesListEvents.SelectChartType -> {
       }
     }
   }
