@@ -41,22 +41,20 @@ class AllExpensesListViewModel @Inject constructor(
   val state = _state.asStateFlow()
 
   fun onEvent(
-    event: AllExpensesListEvents,
-    expenseId: String,
-    filters: Map<Filters, List<String>>?
+    event: AllExpensesListEvents
   ) {
     when (event) {
       is AllExpensesListEvents.DeleteExpense -> {
-        _state.update { it.copy(successDelete = true, expenseToDelete = expenseId) }
+        _state.update { it.copy(successDelete = true, expenseToDelete = event.expenseId) }
         updateListsForDelete()
       }
 
       is AllExpensesListEvents.ApplyFilter -> {
-        filterList(filters)
+        filterList(event.filters)
       }
 
       is AllExpensesListEvents.UpdateDeleteExpenseId -> {
-        _state.update { it.copy(expenseToDelete = expenseId) }
+        _state.update { it.copy(expenseToDelete = event.expenseId) }
       }
 
       is AllExpensesListEvents.UpdateSuccessDelete -> {

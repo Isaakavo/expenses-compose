@@ -50,7 +50,7 @@ fun AllExpensesListContent(
   isChartScreen: Boolean = false,
   modifier: Modifier = Modifier,
   onEdit: (expenseId: String) -> Unit = {},
-  onEvent: (event: AllExpensesListEvents, expenseId: String, filters: Map<Filters, List<String>>?) -> Unit = { one, two, three -> }
+  onEvent: (event: AllExpensesListEvents) -> Unit = { }
 ) {
   val fabNestedScrollConnection = remember {
     FabNestedScrollConnection
@@ -92,7 +92,7 @@ fun AllExpensesListContent(
             }
 
             Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
-              ChartTypeMenu { chartType -> onEvent(AllExpensesListEvents.SelectChartType(chartType), "", null) }
+              ChartTypeMenu { chartType -> onEvent(AllExpensesListEvents.SelectChartType(chartType)) }
               ChartDatFilterMenu { filter -> entityType = ChartDataEntityType.valueOf(filter) }
             }
             ExpensesCharts(
@@ -113,7 +113,7 @@ fun AllExpensesListContent(
             ExpenseItem(
               expense = expense,
               onEdit = onEdit,
-              onDelete = { onEvent(AllExpensesListEvents.DeleteExpense, it, null) }
+              onDelete = { onEvent(AllExpensesListEvents.DeleteExpense(it)) }
             )
           }
         }
@@ -127,7 +127,7 @@ fun MenuRow(
   filteredList: List<Expense>,
   totalExpenses: Double,
   cards: Set<Card>,
-  onEvent: (event: AllExpensesListEvents, expenseId: String, filters: Map<Filters, List<String>>?) -> Unit
+  onEvent: (event: AllExpensesListEvents) -> Unit
 ) {
   Row(
     modifier = Modifier
@@ -153,7 +153,7 @@ fun MenuRow(
       list = filteredList,
       cards = cards
     ) { filters ->
-      onEvent(AllExpensesListEvents.ApplyFilter, "", filters)
+      onEvent(AllExpensesListEvents.ApplyFilter(filters))
     }
   }
 }
