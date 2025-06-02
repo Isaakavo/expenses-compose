@@ -30,6 +30,7 @@ import com.avocado.expensescompose.data.model.card.Card
 import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.presentation.charts.ChartType
 import com.avocado.expensescompose.presentation.expenses.allexpenses.ChartDatFilterMenu
+import com.avocado.expensescompose.presentation.expenses.allexpenses.ChartTypeMenu
 import com.avocado.expensescompose.presentation.expenses.allexpenses.viewmodel.AllExpensesListEvents
 import com.avocado.expensescompose.presentation.homescreen.components.FabNestedScrollConnection
 
@@ -84,7 +85,8 @@ fun AllExpensesListContent(
               mutableStateOf(ChartDataEntityType.CATEGORY)
             }
 
-            Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+            Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
+              ChartTypeMenu { chartType -> onEvent(AllExpensesListEvents.SelectChartType(chartType), "", null) }
               ChartDatFilterMenu { filter -> entityType = ChartDataEntityType.valueOf(filter) }
             }
             ExpensesCharts(

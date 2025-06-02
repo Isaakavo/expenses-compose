@@ -68,6 +68,7 @@ class AllExpensesListViewModel @Inject constructor(
       }
 
       is AllExpensesListEvents.SelectChartType -> {
+        _state.update { it.copy(chartType = event.chartType) }
       }
     }
   }

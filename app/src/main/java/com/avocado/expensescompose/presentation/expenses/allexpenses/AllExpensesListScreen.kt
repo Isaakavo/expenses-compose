@@ -23,6 +23,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.model.expense.Expense
+import com.avocado.expensescompose.presentation.charts.ChartType
 import com.avocado.expensescompose.presentation.expenses.allexpenses.components.AllExpensesListContent
 import com.avocado.expensescompose.presentation.expenses.allexpenses.components.ChartDataEntityType
 import com.avocado.expensescompose.presentation.expenses.allexpenses.viewmodel.AllExpensesListEvents
@@ -107,6 +108,7 @@ fun AllExpensesListScreen(
         cards = state.cards,
         isLoading = state.isLoading,
         isChartScreen = isChartScreen,
+        chartType = state.chartType,
         onEdit = { onNavigate(NavigateEvent.NavigateEditExpenseScreen, it) },
         onEvent = viewModel::onEvent
       )
@@ -124,7 +126,6 @@ fun AllExpensesListScreen(
   }
 }
 
-// TODO move this to own component and use events to handle data selection
 @Composable
 fun ChartDatFilterMenu(onFilterSelect: (String) -> Unit) {
   val context = LocalContext.current
@@ -181,6 +182,46 @@ fun ChartDatFilterMenu(onFilterSelect: (String) -> Unit) {
           expanded = !expanded
           buttonText = "Concept quantity"
           onFilterSelect(ChartDataEntityType.CONCEPT_QUANTITY.name)
+        }
+      )
+    }
+  }
+}
+
+@Composable
+fun ChartTypeMenu(onChartSelected: (chartType: ChartType) -> Unit) {
+  val context = LocalContext.current
+  var expanded by remember { mutableStateOf(false) }
+  var buttonText by remember {
+    mutableStateOf(context.resources.getString(R.string.expenses_list_chart_type))
+  }
+
+  OutlinedButton(onClick = { expanded = !expanded }) {
+    Text(text = buttonText, modifier = Modifier)
+    Icon(imageVector = Icons.Rounded.ArrowDropDown, contentDescription = "")
+  }
+
+  Box {
+    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = !expanded }) {
+      DropdownMenuItem(
+        text = {
+          Text(text = "Bar")
+        },
+        onClick = {
+          expanded = !expanded
+          buttonText = "Bar"
+          onChartSelected(ChartType.BAR)
+        }
+      )
+
+      DropdownMenuItem(
+        text = {
+          Text(text = "Pie")
+        },
+        onClick = {
+          expanded = !expanded
+          buttonText = "Pie"
+          onChartSelected(ChartType.PIE)
         }
       )
     }
