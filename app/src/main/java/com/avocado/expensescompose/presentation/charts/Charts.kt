@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import co.yml.charts.ui.piechart.models.PieChartData
 
 enum class ChartType {
+  NONE,
   BAR,
   PIE
 }
@@ -23,5 +24,6 @@ fun Charts(
   when (chartType) {
     ChartType.PIE -> PieChart(data = data, listState = listState, displayChipsLegends = displayChipsLegends, onSlideClick)
     ChartType.BAR -> LineChart(data, modifier)
+    ChartType.NONE -> return
   }
 }

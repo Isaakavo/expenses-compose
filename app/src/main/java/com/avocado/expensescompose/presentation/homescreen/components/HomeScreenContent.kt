@@ -31,7 +31,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.avocado.expensescompose.R
 import com.avocado.expensescompose.presentation.cards.cardsscreen.CardsScreen
-import com.avocado.expensescompose.presentation.charts.ChartType
 import com.avocado.expensescompose.presentation.expenses.allexpenses.AllExpensesListScreen
 import com.avocado.expensescompose.presentation.homescreen.viewmodel.BackPress
 import com.avocado.expensescompose.presentation.homescreen.viewmodel.HomeScreenEvents
@@ -41,8 +40,6 @@ import com.avocado.expensescompose.presentation.incomes.incomeslist.IncomesList
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
 import com.avocado.expensescompose.presentation.shared.CustomScaffold
 import com.avocado.expensescompose.presentation.shared.DateRangeDialog
-import com.avocado.expensescompose.presentation.shared.topbar.MenuItems
-import com.avocado.expensescompose.presentation.shared.topbar.ToolBarDropDownMenu
 import java.time.LocalDateTime
 import kotlinx.coroutines.delay
 
@@ -63,12 +60,6 @@ fun HomeScreenContent(
   var allExpensesScreen by remember {
     mutableStateOf(false)
   }
-  var isChartScreen by remember {
-    mutableStateOf(false)
-  }
-  var chartType by remember {
-    mutableStateOf(ChartType.BAR.name)
-  }
   CustomScaffold(
     modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
     topBar = {
@@ -78,26 +69,7 @@ fun HomeScreenContent(
         colors = TopAppBarDefaults.topAppBarColors(
           containerColor = MaterialTheme.colorScheme.primaryContainer,
           titleContentColor = MaterialTheme.colorScheme.primary
-        ),
-        actions = {
-          if (allExpensesScreen) {
-            ToolBarDropDownMenu(
-              actionsList = listOf(
-                MenuItems(text = "Bar Chart") {
-                  isChartScreen = true
-                  chartType = ChartType.BAR.name
-                },
-                MenuItems(text = "Pie Chart") {
-                  isChartScreen = true
-                  chartType = ChartType.PIE.name
-                },
-                MenuItems(text = "List") {
-                  isChartScreen = false
-                }
-              )
-            )
-          }
-        }
+        )
       )
     },
     floatingActionButton = {
@@ -177,7 +149,6 @@ fun HomeScreenContent(
             }
             AllExpensesListScreen(
               dateRange = date,
-              isChartScreen = isChartScreen,
               onNavigate = onNavigateCardsScreen
             )
           }

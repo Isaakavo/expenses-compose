@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -39,16 +40,17 @@ import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.presentation.charts.ChartType
 import com.avocado.expensescompose.presentation.expenses.allexpenses.viewmodel.AllExpensesListEvents
 import com.avocado.expensescompose.presentation.homescreen.components.FabNestedScrollConnection
+import com.avocado.expensescompose.presentation.shared.shimmerBackground
 
 @Composable
 fun AllExpensesListContent(
   filteredList: List<Expense>,
   totalExpenses: Double,
+  isLoading: Boolean,
+  modifier: Modifier = Modifier,
+  isChartScreen: Boolean = false,
   cards: Set<Card> = setOf(),
   chartType: ChartType = ChartType.BAR,
-  isLoading: Boolean,
-  isChartScreen: Boolean = false,
-  modifier: Modifier = Modifier,
   onEdit: (expenseId: String) -> Unit = {},
   onEvent: (event: AllExpensesListEvents) -> Unit = { }
 ) {
@@ -58,7 +60,35 @@ fun AllExpensesListContent(
 
   when {
     isLoading -> {
-      Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+      Column(
+        modifier
+          .nestedScroll(fabNestedScrollConnection)
+          .padding(top = 8.dp, bottom = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+      ) {
+        Row(
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(end = 24.dp),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+          Box(
+            modifier = Modifier
+              .size(18.dp)
+              .padding(start = 8.dp, end = 12.dp)
+              .shimmerBackground()
+              .weight(0.5f)
+          )
+
+          Box(
+            modifier = Modifier
+              .size(18.dp)
+              .padding(start = 8.dp, end = 12.dp)
+              .shimmerBackground()
+              .weight(0.5f)
+          )
+        }
         repeat(15) {
           Card(
             modifier = Modifier
@@ -91,8 +121,7 @@ fun AllExpensesListContent(
               mutableStateOf(ChartDataEntityType.CATEGORY)
             }
 
-            Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
-              ChartTypeMenu { chartType -> onEvent(AllExpensesListEvents.SelectChartType(chartType)) }
+            Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
               ChartDatFilterMenu { filter -> entityType = ChartDataEntityType.valueOf(filter) }
             }
             ExpensesCharts(
@@ -151,7 +180,8 @@ fun MenuRow(
     )
     FilterAndSortMenu(
       list = filteredList,
-      cards = cards
+      cards = cards,
+      onSelectedChart = { chartType -> onEvent(AllExpensesListEvents.SelectChartType(chartType)) }
     ) { filters ->
       onEvent(AllExpensesListEvents.ApplyFilter(filters))
     }
@@ -214,46 +244,6 @@ fun ChartDatFilterMenu(onFilterSelect: (String) -> Unit) {
           expanded = !expanded
           buttonText = "Concept quantity"
           onFilterSelect(ChartDataEntityType.CONCEPT_QUANTITY.name)
-        }
-      )
-    }
-  }
-}
-
-@Composable
-fun ChartTypeMenu(onChartSelected: (chartType: ChartType) -> Unit) {
-  val context = LocalContext.current
-  var expanded by remember { mutableStateOf(false) }
-  var buttonText by remember {
-    mutableStateOf(context.resources.getString(R.string.expenses_list_chart_type))
-  }
-
-  OutlinedButton(onClick = { expanded = !expanded }) {
-    Text(text = buttonText, modifier = Modifier)
-    Icon(imageVector = Icons.Rounded.ArrowDropDown, contentDescription = "")
-  }
-
-  Box {
-    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = !expanded }) {
-      DropdownMenuItem(
-        text = {
-          Text(text = "Bar")
-        },
-        onClick = {
-          expanded = !expanded
-          buttonText = "Bar"
-          onChartSelected(ChartType.BAR)
-        }
-      )
-
-      DropdownMenuItem(
-        text = {
-          Text(text = "Pie")
-        },
-        onClick = {
-          expanded = !expanded
-          buttonText = "Pie"
-          onChartSelected(ChartType.PIE)
         }
       )
     }

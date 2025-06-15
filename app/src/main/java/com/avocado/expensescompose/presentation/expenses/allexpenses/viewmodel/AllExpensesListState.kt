@@ -10,6 +10,7 @@ data class AllExpensesListState(
   val totalExpenses: Double = 0.0,
   val cards: Set<Card> = emptySet(),
   val chartType: ChartType = ChartType.BAR,
+  val isChartScreen: Boolean = false,
   val payBeforeInput: String = "",
   val expenseToDelete: String = "",
   val successDelete: Boolean = false,

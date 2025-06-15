@@ -16,6 +16,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -37,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import com.avocado.expensescompose.data.adapters.adapt
 import com.avocado.expensescompose.data.model.card.Card
 import com.avocado.expensescompose.data.model.expense.Expense
+import com.avocado.expensescompose.presentation.charts.ChartType
 import com.avocado.type.Category
 
 enum class Filters {
@@ -51,6 +53,8 @@ enum class Filters {
 fun FilterAndSortMenu(
   list: List<Expense> = emptyList(),
   cards: Set<Card> = emptySet(),
+  enableCharts: Boolean = false,
+  onSelectedChart: (ChartType) -> Unit = {},
   onFilterSelect: (Map<Filters, List<String>>) -> Unit
 ) {
   var showBottomSheet by remember {
@@ -61,14 +65,21 @@ fun FilterAndSortMenu(
   var rememberFilterToApply by remember {
     mutableStateOf(emptyMap<Filters, List<String>>())
   }
+
   var rememberSelectedCategories by remember {
     mutableStateOf(emptyList<String>())
   }
+
   var rememberSelectedCards by remember {
     mutableStateOf(emptyList<String>())
   }
+
   var rememberCashSelected by remember {
     mutableStateOf(false)
+  }
+
+  var rememberChartType by remember {
+    mutableStateOf<ChartType?>(null)
   }
 
   TextButton(onClick = { showBottomSheet = !showBottomSheet }) {
@@ -97,6 +108,7 @@ fun FilterAndSortMenu(
                   rememberFilterToApply = rememberFilterToApply.filter { it.key != Filters.RESET }
                 }
                 onFilterSelect(rememberFilterToApply)
+                onSelectedChart(rememberChartType ?: ChartType.NONE)
               }
             ) {
               Text(text = "Done")
@@ -137,6 +149,16 @@ fun FilterAndSortMenu(
 
             // Filter By
             Text(text = "Filter by", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            cards.takeIf { it.isNotEmpty() }?.let {
+              CardsCheckBox(list = list, cards = cards, selectedList = rememberSelectedCards) { card ->
+                rememberSelectedCards = if (rememberSelectedCards.contains(card)) {
+                  rememberSelectedCards.filter { it != card }
+                } else {
+                  listOf(card) + rememberSelectedCards
+                }
+                rememberFilterToApply = rememberFilterToApply + mapOf(Filters.CARDS to rememberSelectedCards)
+              }
+            }
             CashOnlyCheckBox(selected = rememberCashSelected) { selected ->
               rememberCashSelected = !rememberCashSelected
               rememberFilterToApply = rememberFilterToApply + mapOf(Filters.CASH to listOf(selected.toString()))
@@ -149,16 +171,13 @@ fun FilterAndSortMenu(
               }
               rememberFilterToApply = rememberFilterToApply + mapOf(Filters.CATEGORY to rememberSelectedCategories)
             }
-            cards.takeIf { it.isNotEmpty() }?.let {
-              CardsCheckBox(list = list, cards = cards, selectedList = rememberSelectedCards) { card ->
-                rememberSelectedCards = if (rememberSelectedCards.contains(card)) {
-                  rememberSelectedCards.filter { it != card }
-                } else {
-                  listOf(card) + rememberSelectedCards
-                }
-                rememberFilterToApply = rememberFilterToApply + mapOf(Filters.CARDS to rememberSelectedCards)
+            ChartRadioButton(
+              selected = rememberChartType,
+              onSelected = { type ->
+                rememberChartType = type
+                rememberFilterToApply = rememberFilterToApply + mapOf(Filters.RESET to emptyList())
               }
-            }
+            )
           }
         }
       }
@@ -212,7 +231,7 @@ fun CardsCheckBox(
   Column {
     Text(text = "Cards", fontWeight = FontWeight.Bold)
     LazyVerticalGrid(
-      modifier = Modifier.heightIn(min = 150.dp, max = 600.dp),
+      modifier = Modifier.heightIn(min = 50.dp, max = 600.dp),
       columns = GridCells.Fixed(2),
       userScrollEnabled = false,
       horizontalArrangement = Arrangement.Start
@@ -257,6 +276,30 @@ fun CashOnlyCheckBox(
         text = "Only Cash",
         textAlign = TextAlign.Start
       )
+    }
+  }
+}
+
+@Composable
+fun ChartRadioButton(
+  selected: ChartType?,
+  onSelected: (ChartType) -> Unit
+) {
+  Text(text = "Charts", fontWeight = FontWeight.Bold)
+  Row(
+    modifier = Modifier.fillMaxWidth(),
+    horizontalArrangement = Arrangement.SpaceAround
+  ) {
+    ChartType.entries.forEach { type ->
+      Row(
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        RadioButton(
+          selected = selected == type,
+          onClick = { onSelected(type) }
+        )
+        Text(text = type.name)
+      }
     }
   }
 }

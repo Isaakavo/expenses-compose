@@ -94,7 +94,7 @@ fun AllExpensesListScreen(
         totalExpenses = state.totalExpenses,
         cards = state.cards,
         isLoading = state.isLoading,
-        isChartScreen = isChartScreen,
+        isChartScreen = state.isChartScreen,
         chartType = state.chartType,
         onEdit = { onNavigate(NavigateEvent.NavigateEditExpenseScreen, it) },
         onEvent = viewModel::onEvent
@@ -106,7 +106,8 @@ fun AllExpensesListScreen(
       totalExpenses = state.totalExpenses,
       cards = state.cards,
       isLoading = state.isLoading,
-      isChartScreen = isChartScreen,
+      isChartScreen = state.isChartScreen,
+      chartType = state.chartType,
       onEdit = { onNavigate(NavigateEvent.NavigateEditExpenseScreen, it) },
       onEvent = viewModel::onEvent
     )
