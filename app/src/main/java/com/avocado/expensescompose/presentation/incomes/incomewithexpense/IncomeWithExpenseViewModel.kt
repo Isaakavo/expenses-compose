@@ -29,11 +29,11 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 
 sealed class IncomeWithExpenseEvent {
-  object DeleteIncome : IncomeWithExpenseEvent()
-  object CancelDeleteIncome : IncomeWithExpenseEvent()
-  object ConfirmDeleteIncome : IncomeWithExpenseEvent()
-  object ConfirmDeleteExpense : IncomeWithExpenseEvent()
-  object DeleteExpense : IncomeWithExpenseEvent()
+  data object DeleteIncome : IncomeWithExpenseEvent()
+  data object CancelDeleteIncome : IncomeWithExpenseEvent()
+  data object ConfirmDeleteIncome : IncomeWithExpenseEvent()
+  data object ConfirmDeleteExpense : IncomeWithExpenseEvent()
+  data object DeleteExpense : IncomeWithExpenseEvent()
 }
 
 data class IncomeWithExpenseState(

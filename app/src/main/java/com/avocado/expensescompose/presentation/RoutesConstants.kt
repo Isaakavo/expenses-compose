@@ -9,4 +9,5 @@ object RoutesConstants {
   const val INCOME_EXPENSES_LIST = "income_expense_screen"
   const val CARDS_EXPENSE_SCREEN = "card_expense_screen"
   const val EXPENSES_CARD_SCREEN = "expenses_card_screen"
+  const val EXPENSES_LIST_CHART = "expenses_list_chart_screen"
 }

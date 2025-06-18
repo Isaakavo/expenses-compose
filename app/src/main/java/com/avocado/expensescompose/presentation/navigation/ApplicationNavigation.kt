@@ -1,13 +1,15 @@
 package com.avocado.expensescompose.presentation.navigation
 
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.core.EaseIn
-import androidx.compose.animation.core.EaseOut
-import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.background
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -20,6 +22,7 @@ import com.avocado.expensescompose.presentation.cards.expensesbycard.ExpensesByC
 import com.avocado.expensescompose.presentation.cards.expensestotalbycard.ExpensesTotalByCardScreen
 import com.avocado.expensescompose.presentation.cards.expensestotalbycard.viewmodel.DataSelector
 import com.avocado.expensescompose.presentation.expenses.addexpense.AddExpenseScreen
+import com.avocado.expensescompose.presentation.expenses.allexpenses.AllExpensesListScreen
 import com.avocado.expensescompose.presentation.homescreen.HomeScreen
 import com.avocado.expensescompose.presentation.incomes.addscreen.AddIncomeScreen
 import com.avocado.expensescompose.presentation.incomes.incomewithexpense.IncomeExpensesScreen
@@ -28,17 +31,18 @@ import com.avocado.expensescompose.presentation.util.Operations
 import timber.log.Timber
 
 sealed class NavigateEvent {
-  object NavigateLogin : NavigateEvent()
-  object NavigateHomeScreen : NavigateEvent()
-  object NavigateIncomeExpensesList : NavigateEvent()
-  object NavigationAddIncomeScreen : NavigateEvent()
-  object NavigationEditIncomeScreen : NavigateEvent()
-  object NavigateAddCardsScreen : NavigateEvent()
-  object NavigateEditCardsScreen : NavigateEvent()
-  object NavigateAddExpenseScreen : NavigateEvent()
-  object NavigateEditExpenseScreen : NavigateEvent()
-  object NavigateCardsWithExpenseScreen : NavigateEvent()
-  object NavigateExpensesByCardScreen : NavigateEvent()
+  data object NavigateLogin : NavigateEvent()
+  data object NavigateHomeScreen : NavigateEvent()
+  data object NavigateIncomeExpensesList : NavigateEvent()
+  data object NavigationAddIncomeScreen : NavigateEvent()
+  data object NavigationEditIncomeScreen : NavigateEvent()
+  data object NavigateAddCardsScreen : NavigateEvent()
+  data object NavigateEditCardsScreen : NavigateEvent()
+  data object NavigateAddExpenseScreen : NavigateEvent()
+  data object NavigateEditExpenseScreen : NavigateEvent()
+  data object NavigateCardsWithExpenseScreen : NavigateEvent()
+  data object NavigateExpensesByCardScreen : NavigateEvent()
+  data object NavigateExpensesListChart : NavigateEvent()
 }
 
 private fun <T> navigate(navigateEvent: NavigateEvent, navController: NavController, param: T) {
@@ -117,36 +121,34 @@ private fun <T> navigate(navigateEvent: NavigateEvent, navController: NavControl
     NavigateEvent.NavigateExpensesByCardScreen -> {
       navController.navigate("${RoutesConstants.EXPENSES_CARD_SCREEN}/$param")
     }
+
+    NavigateEvent.NavigateExpensesListChart -> {
+      navController.navigate(
+        "${RoutesConstants.EXPENSES_LIST_CHART}/$param"
+      )
+    }
   }
 }
 
 @Composable
 fun ExpensesApplication() {
   val navController = rememberNavController()
+  val animationTime = 450
   NavHost(
     navController = navController,
     startDestination = "login_screen",
+    modifier = Modifier.background(MaterialTheme.colorScheme.background),
     enterTransition = {
-      fadeIn(
-        animationSpec = tween(
-          300,
-          easing = LinearEasing
-        )
-      ) + slideIntoContainer(
-        animationSpec = tween(350, easing = EaseIn),
-        towards = AnimatedContentTransitionScope.SlideDirection.Start
-      )
+      slideInHorizontally(
+        initialOffsetX = { fullWidth -> fullWidth },
+        animationSpec = tween(animationTime, easing = FastOutSlowInEasing)
+      ) + fadeIn(tween(animationTime))
     },
     exitTransition = {
-      fadeOut(
-        animationSpec = tween(
-          300,
-          easing = LinearEasing
-        )
-      ) + slideOutOfContainer(
-        animationSpec = tween(350, easing = EaseOut),
-        towards = AnimatedContentTransitionScope.SlideDirection.End
-      )
+      slideOutHorizontally(
+        targetOffsetX = { fullWidth -> -fullWidth },
+        animationSpec = tween(animationTime, easing = FastOutSlowInEasing)
+      ) + fadeOut(tween(animationTime))
     }
   ) {
     // Login Screen
@@ -252,7 +254,7 @@ fun ExpensesApplication() {
     // Cards Screen
     composable(
       route = RoutesConstants.CARDS_ADD
-    ) { navBackStackEntry ->
+    ) {
       AddCardScreen(
         onNavigate = { navigateEvent, operation ->
           navigate(navigateEvent, navController, operation)
@@ -269,8 +271,6 @@ fun ExpensesApplication() {
         }
       )
     ) { navBackStackEntry ->
-      val cardId = navBackStackEntry.arguments?.getString("cardId") ?: ""
-
       AddCardScreen(
         onNavigate = { navigateEvent, operation ->
           navigate(navigateEvent, navController, operation)
@@ -323,6 +323,21 @@ fun ExpensesApplication() {
         onNavigate = { event, param ->
           navigate(event, navController, param)
         }
+      )
+    }
+
+    // All Expenses with Chart
+    composable(
+      "${RoutesConstants.EXPENSES_LIST_CHART}/{paymentDate}",
+      arguments = listOf(
+        navArgument("paymentDate") { type = NavType.StringType }
+      )
+    ) { navBackStackEntry ->
+      val payBefore = navBackStackEntry.arguments?.getString("paymentDate").orEmpty()
+      AllExpensesListScreen(
+        payBeforeInput = payBefore,
+        isChartScreen = true,
+        isSingleScreen = true
       )
     }
   }

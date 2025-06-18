@@ -16,7 +16,8 @@ fun IncomeDetailsPreview() {
       incomesTotal = 18750.23,
       remaining = 5000.0,
       expended = 8000.0,
-      month = "DECEMBER"
+      month = "DECEMBER",
+      onClick = {}
     )
   }
 }

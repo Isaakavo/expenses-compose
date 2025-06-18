@@ -24,12 +24,24 @@ fun ExpenseFilterMenu(
   cards: Set<Card>,
   onFilterSelect: (String, String) -> Unit
 ) {
+  var categoryName by remember {
+    mutableStateOf("")
+  }
+  var bankName by remember {
+    mutableStateOf("")
+  }
   var expanded by remember { mutableStateOf(false) }
   var categoryExpanded by remember { mutableStateOf(false) }
   var cardsExpanded by remember { mutableStateOf(false) }
 
+  val outlinedText = when {
+    bankName.isNotBlank() -> bankName
+    categoryName.isNotBlank() -> categoryName
+    else -> stringResource(id = R.string.expenses_list_filter)
+  }
+
   OutlinedButton(onClick = { expanded = !expanded }) {
-    Text(text = stringResource(id = R.string.expenses_list_filter), modifier = Modifier)
+    Text(text = outlinedText, modifier = Modifier)
     Icon(imageVector = Icons.Rounded.ArrowDropDown, contentDescription = "")
   }
 
@@ -73,19 +85,28 @@ fun ExpenseFilterMenu(
         text = { Text(text = stringResource(R.string.expenses_list_filter_reset)) },
         onClick = {
           expanded = false
+          bankName = ""
+          categoryName = ""
           onFilterSelect("RESET", "ALL")
         }
       )
     }
-    ExpenseCategoryList(categoryExpanded = categoryExpanded, onCategoryExpandedChange = { categoryExpanded = it }) { field, name ->
+    ExpenseCategoryList(
+      categoryExpanded = categoryExpanded,
+      onCategoryExpandedChange = { categoryExpanded = it }
+    ) { field, name ->
+      categoryName = name
+      bankName = ""
       onFilterSelect(field, name)
     }
     ExpenseCardsList(
       cards = cards,
       cardsExpanded = cardsExpanded,
       onCardExpandedChange = { cardsExpanded = it }
-    ) { field, bankName ->
-      onFilterSelect(field, bankName)
+    ) { field, name ->
+      bankName = name
+      categoryName = ""
+      onFilterSelect(field, name)
     }
   }
 }

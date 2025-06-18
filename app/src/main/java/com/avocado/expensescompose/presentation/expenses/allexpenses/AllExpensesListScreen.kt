@@ -6,14 +6,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.avocado.expensescompose.R
+import com.avocado.expensescompose.data.model.expense.Expense
 import com.avocado.expensescompose.presentation.expenses.allexpenses.components.AllExpensesListContent
 import com.avocado.expensescompose.presentation.expenses.allexpenses.viewmodel.AllExpensesListEvents
 import com.avocado.expensescompose.presentation.expenses.allexpenses.viewmodel.AllExpensesListViewModel
 import com.avocado.expensescompose.presentation.navigation.NavigateEvent
+import com.avocado.expensescompose.presentation.shared.CustomScaffold
 import com.avocado.expensescompose.ui.theme.LocalSnackBarHostState
 import kotlinx.coroutines.launch
 
@@ -22,7 +25,10 @@ fun AllExpensesListScreen(
   viewModel: AllExpensesListViewModel = hiltViewModel(),
   payBeforeInput: String? = null,
   dateRange: LongRange? = null,
-  onNavigate: (navigateEvent: NavigateEvent, operation: String) -> Unit = { one, two -> }
+  isChartScreen: Boolean = false,
+  isSingleScreen: Boolean = false,
+  onNavigate: (navigateEvent: NavigateEvent, operation: String) -> Unit = { one, two -> },
+  onSetData: (expenseList: List<Expense>) -> Unit = {}
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
   val scope = rememberCoroutineScope()
@@ -52,9 +58,9 @@ fun AllExpensesListScreen(
 
         when (snackBarResult) {
           SnackbarResult.ActionPerformed -> {
-            viewModel.onEvent(AllExpensesListEvents.UpdateSuccessDelete, "", null, null)
-            viewModel.onEvent(AllExpensesListEvents.UpdateDeleteExpenseId, "", null, null)
-            viewModel.onEvent(AllExpensesListEvents.RestoreLists, "", null, null)
+            viewModel.onEvent(AllExpensesListEvents.UpdateSuccessDelete)
+            viewModel.onEvent(AllExpensesListEvents.UpdateDeleteExpenseId(""))
+            viewModel.onEvent(AllExpensesListEvents.RestoreLists)
           }
 
           SnackbarResult.Dismissed -> {
@@ -62,7 +68,7 @@ fun AllExpensesListScreen(
           }
         }
 
-        viewModel.onEvent(AllExpensesListEvents.UpdateSuccessDelete, "", null, null)
+        viewModel.onEvent(AllExpensesListEvents.UpdateSuccessDelete)
       }
     }
   }
@@ -76,12 +82,34 @@ fun AllExpensesListScreen(
     }
   }
 
-  AllExpensesListContent(
-    filteredList = state.filteredExpenses,
-    totalExpenses = state.totalExpenses,
-    cards = state.cards,
-    isLoading = state.isLoading,
-    onEdit = { onNavigate(NavigateEvent.NavigateEditExpenseScreen, it) },
-    onEvent = viewModel::onEvent
-  )
+  LaunchedEffect(key1 = state.filteredExpenses) {
+    onSetData(state.filteredExpenses)
+  }
+
+  // TODO handle in a better way this logic
+  if (isSingleScreen) {
+    CustomScaffold {
+      AllExpensesListContent(
+        filteredList = state.filteredExpenses,
+        totalExpenses = state.totalExpenses,
+        cards = state.cards,
+        isLoading = state.isLoading,
+        isChartScreen = state.isChartScreen,
+        chartType = state.chartType,
+        onEdit = { onNavigate(NavigateEvent.NavigateEditExpenseScreen, it) },
+        onEvent = viewModel::onEvent
+      )
+    }
+  } else {
+    AllExpensesListContent(
+      filteredList = state.filteredExpenses,
+      totalExpenses = state.totalExpenses,
+      cards = state.cards,
+      isLoading = state.isLoading,
+      isChartScreen = state.isChartScreen,
+      chartType = state.chartType,
+      onEdit = { onNavigate(NavigateEvent.NavigateEditExpenseScreen, it) },
+      onEvent = viewModel::onEvent
+    )
+  }
 }

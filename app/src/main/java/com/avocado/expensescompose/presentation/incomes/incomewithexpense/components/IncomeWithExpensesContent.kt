@@ -75,45 +75,52 @@ fun IncomeWithExpensesContent(
       )
     }
   ) {
-    if (isLoading) {
-      Column(
-        modifier = Modifier
-          .fillMaxSize()
-          .padding(22.dp)
-      ) {
-        CircularProgressIndicator(strokeWidth = 6.dp)
-      }
-    } else {
-      DeleteAlertDialog(
-        shouldDisplay = shouldDeleteIncome || shouldDeleteExpense,
-        deleteMessage = stringResource(
-          id = if (shouldDeleteIncome) R.string.income_expense_delete_income else R.string.income_expense_delete_expense
-        ),
-        onConfirmRequest = {
-          if (shouldDeleteIncome) {
-            onEvent(
-              IncomeWithExpenseEvent.ConfirmDeleteIncome,
-              incomeId
-            )
-          } else {
-            onEvent(IncomeWithExpenseEvent.ConfirmDeleteExpense, "")
+    Column(
+      modifier = Modifier
+        .fillMaxSize()
+        .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 12.dp),
+      verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+      when {
+        isLoading -> {
+          Column(
+            modifier = Modifier
+              .fillMaxSize()
+              .padding(22.dp)
+          ) {
+            CircularProgressIndicator(strokeWidth = 6.dp)
           }
-        },
-        onDismissRequest = { onEvent(IncomeWithExpenseEvent.CancelDeleteIncome, "") }
-      )
-      Column(
-        modifier = Modifier
-          .fillMaxSize()
-          .padding(top = 8.dp, start = 16.dp, end = 16.dp, bottom = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-      ) {
-        IncomeDetails(
-          incomesTotal = incomesTotal,
-          remaining = remaining,
-          expended = expended,
-          month = month
-        )
-        AllExpensesListScreen(payBeforeInput = paymentDate, onNavigate = onNavigate)
+        }
+
+        else -> {
+          DeleteAlertDialog(
+            shouldDisplay = shouldDeleteIncome || shouldDeleteExpense,
+            deleteMessage = stringResource(
+              id = if (shouldDeleteIncome) R.string.income_expense_delete_income else R.string.income_expense_delete_expense
+            ),
+            onConfirmRequest = {
+              if (shouldDeleteIncome) {
+                onEvent(
+                  IncomeWithExpenseEvent.ConfirmDeleteIncome,
+                  incomeId
+                )
+              } else {
+                onEvent(IncomeWithExpenseEvent.ConfirmDeleteExpense, "")
+              }
+            },
+            onDismissRequest = { onEvent(IncomeWithExpenseEvent.CancelDeleteIncome, "") }
+          )
+
+          IncomeDetails(
+            incomesTotal = incomesTotal,
+            remaining = remaining,
+            expended = expended,
+            month = month
+          ) {
+            onNavigate(NavigateEvent.NavigateExpensesListChart, paymentDate)
+          }
+          AllExpensesListScreen(payBeforeInput = paymentDate, onNavigate = onNavigate)
+        }
       }
     }
   }
