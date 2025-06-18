@@ -75,12 +75,9 @@ class TokenManagerRepository @Inject constructor(private val context: Context) :
 
   override suspend fun getAccessToken(): MyResult<String?> = try {
     val preferences = context.dataStore.data.first()
-    val accessToken = preferences[JWT_REFRESH_KEY]
-    if (accessToken != null) {
-      MyResult.Success(preferences[JWT_ACCESS_KEY])
-    } else {
-      MyResult.Error(null, R.string.token_user_error)
-    }
+    preferences[JWT_REFRESH_KEY]
+      ?.let { MyResult.Success(preferences[JWT_ACCESS_KEY]) }
+      ?: MyResult.Error(null, R.string.token_user_error)
   } catch (e: Exception) {
     Timber.e("Error get access token ${e.printStackTrace()}")
     MyResult.Error(null, R.string.token_user_error)
