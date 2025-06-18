@@ -25,15 +25,13 @@ class AuthRepository @Inject constructor(
 
   suspend fun getUsername() = tokenManagerRepository.getUsername()
 
-  private suspend fun saveAccessToken(value: String): MyResult<Boolean> =
-    tokenManagerRepository.saveAccessToken(
-      value
-    )
+  suspend fun saveAccessToken(value: String): MyResult<Boolean> =
+    tokenManagerRepository.saveAccessToken(value)
 
   private suspend fun saveRefreshToken(value: String): MyResult<Boolean> =
     tokenManagerRepository.saveRefreshToken(value)
 
-  private suspend fun getAccessToken(): MyResult<String?> = tokenManagerRepository.getAccessToken()
+  suspend fun getAccessToken(): MyResult<String?> = tokenManagerRepository.getAccessToken()
   suspend fun getRefreshToken(): MyResult<String?> =
     tokenManagerRepository.getRefreshToken()
 

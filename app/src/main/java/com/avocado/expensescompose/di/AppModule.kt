@@ -51,16 +51,12 @@ object AppModule {
   @Provides
   @Singleton
   fun provideApolloClient(
-    authClient: AuthRepository,
-    tokenManagerRepository: TokenManagerRepository
+    authClient: AuthRepository
   ): ApolloClient =
     ApolloClient.Builder()
       .serverUrl(BuildConfig.GRAPHQL_ENDPOINT)
       .addHttpInterceptor(
-        AuthorizationInterceptor(
-          authClient = authClient,
-          tokenManagerRepository = tokenManagerRepository
-        )
+        AuthorizationInterceptor(authRepository = authClient)
       )
       .build()
 

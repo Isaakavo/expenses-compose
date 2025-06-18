@@ -8,7 +8,6 @@ import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.data.model.auth.Auth
 import com.avocado.expensescompose.data.model.auth.AuthParameters
 import com.avocado.expensescompose.data.repositories.AuthRepository
-import com.avocado.expensescompose.data.repositories.TokenManagerRepository
 import com.avocado.expensescompose.presentation.util.logErrorWithThread
 import javax.inject.Inject
 import kotlinx.coroutines.sync.Mutex
@@ -16,13 +15,61 @@ import kotlinx.coroutines.sync.withLock
 import timber.log.Timber
 
 class AuthorizationInterceptor @Inject constructor(
-  private val authClient: AuthRepository,
-  private val tokenManagerRepository: TokenManagerRepository
+  private val authRepository: AuthRepository
 ) : HttpInterceptor {
   private val mutex = Mutex()
 
+  override suspend fun intercept(
+    request: HttpRequest,
+    chain: HttpInterceptorChain
+  ): HttpResponse = try {
+    // Extract the current access token
+    val jwt = extractJwt()
+    validateJwtIsNotNullOrEmpty(jwt, request, chain).let { httpResponse ->
+      // If the token is not valid, extract the current token and call refresh api
+      if (httpResponse.statusCode == 401) {
+        // Extract the refresh token from the data store
+        val refreshToken = mutex.withLock {
+          when (val value = authRepository.getRefreshToken()) {
+            is MyResult.Success -> {
+              value.data
+            }
+
+            is MyResult.Error -> {
+              ""
+            }
+          }
+        }
+
+        val refreshTokenResponse = authRepository.refreshToken(
+          Auth(
+            authFlow = "REFRESH_TOKEN_AUTH",
+            authParameters = AuthParameters(refreshToken = refreshToken ?: "")
+          )
+        )
+        // If cognito returns the new access token, save it to replace the old one and proceed with
+        // the request
+        if (refreshTokenResponse is MyResult.Success) {
+          val authResults = refreshTokenResponse.data.authenticationResult
+          val accessToken = authResults.accessToken
+          authRepository.saveAccessToken(accessToken)
+          chain.proceed(
+            request.newBuilder()
+              .addHeader("X-Session-Key", accessToken).build()
+          )
+        }
+        chain.proceed(request.newBuilder().build())
+      }
+
+      httpResponse
+    }
+  } catch (e: Exception) {
+    logErrorWithThread(e.stackTraceToString())
+    chain.proceed(request)
+  }
+
   private suspend fun extractJwt(): String? = mutex.withLock {
-    when (val value = tokenManagerRepository.getAccessToken()) {
+    when (val value = authRepository.getAccessToken()) {
       is MyResult.Success -> {
         return value.data
       }
@@ -37,63 +84,10 @@ class AuthorizationInterceptor @Inject constructor(
     jwt: String?,
     request: HttpRequest,
     chain: HttpInterceptorChain
-  ): HttpResponse {
-    if (jwt.isNullOrBlank()) {
-      Timber.d("Error jwt empty")
-      return chain.proceed(request)
-    }
-
-    return chain.proceed(request.newBuilder().addHeader("X-Session-Key", jwt).build())
-  }
-
-  override suspend fun intercept(
-    request: HttpRequest,
-    chain: HttpInterceptorChain
-  ): HttpResponse {
-    try {
-      // Extract the current access token
-      val jwt = extractJwt()
-      val response = validateJwtIsNotNullOrEmpty(jwt, request, chain)
-      // If the token is not valid, extract the current token and call refresh api
-      return if (response.statusCode == 401) {
-        // Extract the refresh token from the data store
-        val refreshToken = mutex.withLock {
-          when (val value = tokenManagerRepository.getRefreshToken()) {
-            is MyResult.Success -> {
-              value.data
-            }
-
-            is MyResult.Error -> {
-              ""
-            }
-          }
-        }
-
-        val refreshTokenResponse = authClient.refreshToken(
-          Auth(
-            authFlow = "REFRESH_TOKEN_AUTH",
-            authParameters = AuthParameters(refreshToken = refreshToken ?: "")
-          )
-        )
-        // If cognito returns the new access token, save it to replace the old one and proceed with
-        // the request
-        if (refreshTokenResponse is MyResult.Success) {
-          val authResults = refreshTokenResponse.data.authenticationResult
-          val accessToken = authResults.accessToken
-          tokenManagerRepository.saveAccessToken(accessToken)
-          return chain.proceed(
-            request.newBuilder()
-              .addHeader("X-Session-Key", accessToken).build()
-          )
-        }
-        chain.proceed(request.newBuilder().build())
-      } else {
-        response
-      }
-    } catch (e: Exception) {
-      logErrorWithThread(e.stackTraceToString())
-    }
-
-    return chain.proceed(request)
+  ): HttpResponse = if (!jwt.isNullOrBlank()) {
+    chain.proceed(request.newBuilder().addHeader("X-Session-Key", jwt).build())
+  } else {
+    Timber.d("Error jwt empty")
+    chain.proceed(request)
   }
 }

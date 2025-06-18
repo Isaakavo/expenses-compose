@@ -7,7 +7,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.avocado.expensescompose.R
-import com.avocado.expensescompose.data.TokenService
+import com.avocado.expensescompose.data.TokenManagerService
 import com.avocado.expensescompose.data.model.MyResult
 import javax.inject.Inject
 import kotlinx.coroutines.flow.first
@@ -16,7 +16,7 @@ import timber.log.Timber
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "auth")
 
-class TokenManagerRepository @Inject constructor(private val context: Context) : TokenService {
+class TokenManagerRepository @Inject constructor(private val context: Context) : TokenManagerService {
 
   companion object {
     private val JWT_ACCESS_KEY = stringPreferencesKey("ACCESS_JWT")
@@ -24,8 +24,8 @@ class TokenManagerRepository @Inject constructor(private val context: Context) :
     private val USER_NAME_KEY = stringPreferencesKey("USERNAME_KEY")
   }
 
-  suspend fun saveUsername(username: String): MyResult<Boolean> {
-    return try {
+  override suspend fun saveUsername(username: String): MyResult<Boolean> =
+    try {
       context.dataStore.edit { preferences ->
         preferences[USER_NAME_KEY] = username
       }
@@ -35,10 +35,9 @@ class TokenManagerRepository @Inject constructor(private val context: Context) :
       Timber.e("Token user save error ${exception.printStackTrace()}")
       MyResult.Error(false, R.string.token_user_save_error, exception = exception)
     }
-  }
 
-  suspend fun getUsername(): MyResult<String?> {
-    return try {
+  override suspend fun getUsername(): MyResult<String?> =
+    try {
       val preferences = context.dataStore.data.first()
       val accessToken = preferences[USER_NAME_KEY]
       if (accessToken != null) {
@@ -50,10 +49,9 @@ class TokenManagerRepository @Inject constructor(private val context: Context) :
       Timber.e("Token get user error ${e.printStackTrace()}")
       MyResult.Error(null, R.string.token_user_error)
     }
-  }
 
-  suspend fun deleteUsername(): MyResult<Boolean> {
-    return try {
+  override suspend fun deleteUsername(): MyResult<Boolean> =
+    try {
       context.dataStore.edit { preferences ->
         preferences.remove(USER_NAME_KEY)
       }
@@ -62,7 +60,6 @@ class TokenManagerRepository @Inject constructor(private val context: Context) :
       Timber.e("Error deleting access token ${exception.printStackTrace()}")
       MyResult.Error(false, R.string.token_user_error)
     }
-  }
 
   override suspend fun saveAccessToken(value: String): MyResult<Boolean> =
     try {
