@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.model.MyResult
+import com.avocado.expensescompose.data.model.successOrError
 import com.avocado.expensescompose.domain.login.usecase.LoginUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -26,7 +27,9 @@ data class LoginViewModelState(
   val isQuickLogin: Boolean = false,
   val userMessage: Int? = null,
   val isSuccess: Boolean = false,
-  val emailHasError: Boolean = false
+  val emailHasError: Boolean = false,
+  val isButtonEnabled: Boolean = true,
+  val passwordHasError: Boolean = false
 )
 
 @HiltViewModel
@@ -60,14 +63,16 @@ class LoginViewModel @Inject constructor(
       }
 
       LoginViewModelEvents.UpdatePassword -> _uiState.update {
-        it.copy(password = value)
+        val hasError = validatePasswordInput(value)
+        it.copy(password = value, passwordHasError = hasError, isButtonEnabled = !hasError)
       }
 
       LoginViewModelEvents.UpdateUsername -> _uiState.update {
-        it.copy(username = value, emailHasError = validateEmailInput())
+        val hasError = validateEmailInput(value)
+        it.copy(username = value, emailHasError = hasError, isButtonEnabled = !hasError)
       }
 
-      LoginViewModelEvents.Login -> saveUsername()
+      LoginViewModelEvents.Login -> login()
 
       LoginViewModelEvents.SetIsSuccess -> _uiState.update {
         it.copy(isSuccess = false)
@@ -84,66 +89,73 @@ class LoginViewModel @Inject constructor(
     }
   }
 
-  private fun validateEmailInput(): Boolean =
-    _uiState.value.username.isNotBlank() && !EMAIL_ADDRESS.matcher(_uiState.value.username).matches()
+  private fun validateEmailInput(username: String): Boolean =
+    username.isNotBlank() && !EMAIL_ADDRESS.matcher(username).matches()
+
+  private fun validatePasswordInput(password: String): Boolean = password.isBlank()
 
   // TODO refactor this
-  fun login() {
-    viewModelScope.launch {
-      _uiState.update {
-        it.copy(isLoading = true)
+  fun login() =
+    viewModelScope
+      .launch {
+        _uiState.update {
+          it.copy(isLoading = true, isButtonEnabled = false)
+        }
+
+        if (saveUsername()) {
+          val loginResult = loginUseCase(
+            email = uiState.value.username.trim(),
+            password = uiState.value.password.trim()
+          )
+
+          if (loginResult.emailError != null) {
+            _uiState.update {
+              it.copy(userMessage = R.string.login_incorrect_email)
+            }
+          }
+          if (loginResult.passwordError != null) {
+            _uiState.update {
+              it.copy(userMessage = R.string.login_incorrect_password)
+            }
+          }
+
+          when (loginResult.result) {
+            is MyResult.Success -> {
+              Timber.d("Setting success")
+              _uiState.update {
+                it.copy(isSuccess = true)
+              }
+            }
+
+            is MyResult.Error -> {
+              _uiState.update {
+                it.copy(userMessage = loginResult.result.uiText)
+              }
+            }
+
+            else -> {}
+          }
+        }
+
+        _uiState.update {
+          it.copy(isLoading = false, isButtonEnabled = true)
+        }
       }
-      val loginResult = loginUseCase(
-        email = uiState.value.username.trim(),
-        password = uiState.value.password.trim()
+
+  private suspend fun saveUsername() =
+    loginUseCase
+      .saveUsername(_uiState.value.username)
+      .successOrError(
+        onSuccess = {
+          Timber.d("Username saved successfully")
+          true
+        },
+        onError = { error ->
+          Timber.e("Error saving username: ${error.uiText}")
+          _uiState.update { it.copy(userMessage = error.uiText) }
+          false
+        }
       )
-
-      if (loginResult.emailError != null) {
-        _uiState.update {
-          it.copy(userMessage = R.string.login_incorrect_email)
-        }
-      }
-      if (loginResult.passwordError != null) {
-        _uiState.update {
-          it.copy(userMessage = R.string.login_incorrect_password)
-        }
-      }
-
-      when (loginResult.result) {
-        is MyResult.Success -> {
-          Timber.d("Setting success")
-          _uiState.update {
-            it.copy(isSuccess = true, isLoading = false)
-          }
-        }
-
-        is MyResult.Error -> {
-          _uiState.update {
-            it.copy(userMessage = loginResult.result.uiText, isLoading = false)
-          }
-        }
-
-        else -> {}
-      }
-    }
-  }
-
-  private fun saveUsername() {
-    viewModelScope.launch {
-      when (val isSaved = loginUseCase.saveUsername(_uiState.value.username)) {
-        is MyResult.Error -> {
-          Timber
-            .e(
-              "Error trying to save the username in data storage: " + isSaved.exception?.stackTraceToString()
-            )
-        }
-
-        is MyResult.Success -> {
-          login()
-        }
-      }
-    }
-  }
 
   private fun getUsername() {
     viewModelScope.launch {

@@ -39,7 +39,9 @@ fun LoginScreenContent(
   shouldShowPassword: Boolean,
   isQuickLogin: Boolean,
   isLoading: Boolean,
-  validatorHasError: Boolean = false,
+  emailHasError: Boolean = false,
+  passwordHasError: Boolean = false,
+  isButtonEnabled: Boolean = true,
   onEvent: (event: LoginViewModelEvents, value: String) -> Unit
 ) {
   Surface {
@@ -54,9 +56,9 @@ fun LoginScreenContent(
           value = username,
           onValueChange = { onEvent(LoginViewModelEvents.UpdateUsername, it) },
           placeholder = { Text(text = stringResource(id = R.string.login_user)) },
-          isError = validatorHasError,
+          isError = emailHasError,
           supportingText = {
-            if (validatorHasError) {
+            if (emailHasError) {
               Text(text = stringResource(id = R.string.login_email_error), color = Color.Red)
             }
           }
@@ -67,6 +69,12 @@ fun LoginScreenContent(
           placeholder = { Text(text = stringResource(id = R.string.login_password)) },
           keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
           enabled = !isQuickLogin,
+          isError = passwordHasError,
+          supportingText = {
+            if (passwordHasError) {
+              Text(text = stringResource(id = R.string.login_password_error), color = Color.Red)
+            }
+          },
           trailingIcon = {
             IconButton(onClick = { onEvent(LoginViewModelEvents.ToggleViewPassword, "") }) {
               if (shouldShowPassword) {
@@ -86,7 +94,7 @@ fun LoginScreenContent(
         )
 
         Button(
-          enabled = !validatorHasError && (!isLoading || !isQuickLogin),
+          enabled = isButtonEnabled,
           onClick = { onEvent(LoginViewModelEvents.Login, "") }
         ) {
           Row(horizontalArrangement = Arrangement.SpaceBetween) {

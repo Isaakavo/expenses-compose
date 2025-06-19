@@ -30,7 +30,9 @@ fun LoginScreen(
     shouldShowPassword = state.shouldShowPassword,
     isQuickLogin = state.isQuickLogin,
     isLoading = state.isLoading,
-    validatorHasError = state.emailHasError,
+    emailHasError = state.emailHasError,
+    passwordHasError = state.passwordHasError,
+    isButtonEnabled = state.isButtonEnabled,
     onEvent = viewModel::onEvent
   )
 }
