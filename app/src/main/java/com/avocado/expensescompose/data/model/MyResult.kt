@@ -15,14 +15,12 @@ sealed class MyResult<out R> {
 fun <D, R> MyResult<D>.successOrError(
   onSuccess: (success: MyResult.Success<D>) -> R,
   onError: (error: MyResult.Error<D>) -> R
-): R {
-  return when (this) {
-    is MyResult.Success -> {
-      onSuccess(this)
-    }
+): R = when (this) {
+  is MyResult.Success -> {
+    onSuccess(this)
+  }
 
-    is MyResult.Error -> {
-      onError(this)
-    }
+  is MyResult.Error -> {
+    onError(this)
   }
 }
