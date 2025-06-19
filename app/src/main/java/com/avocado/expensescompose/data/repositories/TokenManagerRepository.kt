@@ -9,6 +9,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.TokenManagerService
 import com.avocado.expensescompose.data.model.MyResult
+import com.avocado.expensescompose.presentation.util.isFirstInstall
 import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 import okio.IOException
@@ -43,7 +44,11 @@ class TokenManagerRepository @Inject constructor(private val context: Context) :
       if (accessToken != null) {
         MyResult.Success(preferences[USER_NAME_KEY])
       } else {
-        MyResult.Error(null, R.string.token_user_not_found)
+        if (!isFirstInstall(context)) {
+          MyResult.Error(null, R.string.token_user_not_found)
+        }
+
+        MyResult.Error(null)
       }
     } catch (e: Exception) {
       Timber.e("Token get user error ${e.printStackTrace()}")
