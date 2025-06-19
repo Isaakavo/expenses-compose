@@ -1,8 +1,8 @@
 package com.avocado.expensescompose.presentation.util
 
 sealed class AuthError : Error() {
-  object FieldEmpty : AuthError()
-  object InputTooShort : AuthError()
-  object InvalidEmail : AuthError()
-  object InvalidPassword : AuthError()
+  data object FieldEmpty : AuthError()
+  data object InputTooShort : AuthError()
+  data object InvalidEmail : AuthError()
+  data object InvalidPassword : AuthError()
 }

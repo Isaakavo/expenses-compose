@@ -39,6 +39,7 @@ fun LoginScreenContent(
   shouldShowPassword: Boolean,
   isQuickLogin: Boolean,
   isLoading: Boolean,
+  validatorHasError: Boolean = false,
   onEvent: (event: LoginViewModelEvents, value: String) -> Unit
 ) {
   Surface {
@@ -52,7 +53,13 @@ fun LoginScreenContent(
         OutlinedTextField(
           value = username,
           onValueChange = { onEvent(LoginViewModelEvents.UpdateUsername, it) },
-          placeholder = { Text(text = stringResource(id = R.string.login_user)) }
+          placeholder = { Text(text = stringResource(id = R.string.login_user)) },
+          isError = validatorHasError,
+          supportingText = {
+            if (validatorHasError) {
+              Text(text = stringResource(id = R.string.login_email_error), color = Color.Red)
+            }
+          }
         )
         OutlinedTextField(
           value = password,
@@ -78,7 +85,10 @@ fun LoginScreenContent(
           visualTransformation = if (shouldShowPassword) VisualTransformation.None else PasswordVisualTransformation()
         )
 
-        Button(enabled = !isLoading || !isQuickLogin, onClick = { onEvent(LoginViewModelEvents.Login, "") }) {
+        Button(
+          enabled = !validatorHasError && (!isLoading || !isQuickLogin),
+          onClick = { onEvent(LoginViewModelEvents.Login, "") }
+        ) {
           Row(horizontalArrangement = Arrangement.SpaceBetween) {
             if (isLoading) {
               CircularProgressIndicator(

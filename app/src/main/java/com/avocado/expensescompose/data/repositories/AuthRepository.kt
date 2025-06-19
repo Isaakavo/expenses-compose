@@ -31,7 +31,9 @@ class AuthRepository @Inject constructor(
   private suspend fun saveRefreshToken(value: String): MyResult<Boolean> =
     tokenManagerRepository.saveRefreshToken(value)
 
-  suspend fun getAccessToken(): MyResult<String?> = tokenManagerRepository.getAccessToken()
+  suspend fun getAccessToken(): MyResult<String?> =
+    tokenManagerRepository.getAccessToken()
+
   suspend fun getRefreshToken(): MyResult<String?> =
     tokenManagerRepository.getRefreshToken()
 
