@@ -9,7 +9,10 @@ class LoginUseCase @Inject constructor(
   private val authRepository: AuthRepository
 ) {
 
-  suspend operator fun invoke(email: String, password: String): LoginResult {
+  suspend operator fun invoke(
+    email: String,
+    password: String
+  ): LoginResult {
     val emailError = if (email.isBlank()) AuthError.FieldEmpty else null
     val passwordError = if (password.isBlank()) AuthError.FieldEmpty else null
 

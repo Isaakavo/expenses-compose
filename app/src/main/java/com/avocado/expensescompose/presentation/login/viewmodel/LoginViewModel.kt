@@ -3,10 +3,14 @@ package com.avocado.expensescompose.presentation.login.viewmodel
 import android.util.Patterns.EMAIL_ADDRESS
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.avocado.LoginQuery
 import com.avocado.expensescompose.R
+import com.avocado.expensescompose.data.adapters.graphql.utils.validateDataAndCollect
+import com.avocado.expensescompose.data.apolloclients.GraphQlClientImpl
 import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.data.model.successOrError
 import com.avocado.expensescompose.domain.login.usecase.LoginUseCase
+import com.avocado.type.AUTH_STATUS
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,9 +38,11 @@ data class LoginViewModelState(
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-  private val loginUseCase: LoginUseCase
+  private val loginUseCase: LoginUseCase,
+  private val graphQlClientImpl: GraphQlClientImpl
 ) : ViewModel() {
 
+  private val authState = MutableStateFlow(AUTH_STATUS.UNAUTHENTICATED)
   private val _uiState = MutableStateFlow(LoginViewModelState())
   val uiState: StateFlow<LoginViewModelState> = _uiState.asStateFlow()
 
@@ -103,6 +109,7 @@ class LoginViewModel @Inject constructor(
         }
 
         if (saveUsername()) {
+          validateLogin()
           val loginResult = loginUseCase(
             email = uiState.value.username.trim(),
             password = uiState.value.password.trim()
@@ -123,7 +130,7 @@ class LoginViewModel @Inject constructor(
             is MyResult.Success -> {
               Timber.d("Setting success")
               _uiState.update {
-                it.copy(isSuccess = true)
+                it.copy(isSuccess = authState.value == AUTH_STATUS.AUTHENTICATED)
               }
             }
 
@@ -140,6 +147,17 @@ class LoginViewModel @Inject constructor(
         _uiState.update {
           it.copy(isLoading = false, isButtonEnabled = true)
         }
+      }
+
+  private suspend fun validateLogin() =
+    graphQlClientImpl
+      .query(
+        LoginQuery(),
+        onError = {}
+      )
+      .validateDataAndCollect { response ->
+        response?.login?.status
+          .let { status -> authState.value = status ?: AUTH_STATUS.UNAUTHENTICATED }
       }
 
   private suspend fun saveUsername() =
