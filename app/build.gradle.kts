@@ -16,6 +16,10 @@ apollo {
       "com.avocado.expensescompose.data.adapters.graphql.scalar.Date",
       "com.avocado.expensescompose.data.adapters.graphql.scalar.dateAdapter"
     )
+    introspection {
+      endpointUrl.set("http://localhost:4000/graphql")
+      schemaFile.set(file("src/main/graphql/com/avocado/schema.graphqls"))
+    }
   }
 }
 
