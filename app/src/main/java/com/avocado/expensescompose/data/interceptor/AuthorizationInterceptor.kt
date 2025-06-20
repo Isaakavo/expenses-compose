@@ -53,15 +53,15 @@ class AuthorizationInterceptor @Inject constructor(
           val authResults = refreshTokenResponse.data.authenticationResult
           val accessToken = authResults.accessToken
           authRepository.saveAccessToken(accessToken)
-          chain.proceed(
+          return chain.proceed(
             request.newBuilder()
               .addHeader("X-Session-Key", accessToken).build()
           )
         }
-        chain.proceed(request.newBuilder().build())
+        return chain.proceed(request.newBuilder().build())
       }
 
-      httpResponse
+      return httpResponse
     }
   } catch (e: Exception) {
     logErrorWithThread(e.stackTraceToString())
