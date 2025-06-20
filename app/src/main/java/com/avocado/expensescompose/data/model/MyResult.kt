@@ -12,9 +12,9 @@ sealed class MyResult<out R> {
   ) : MyResult<T>()
 }
 
-fun <D, R> MyResult<D>.successOrError(
-  onSuccess: (success: MyResult.Success<D>) -> R,
-  onError: (error: MyResult.Error<D>) -> R
+suspend fun <D, R> MyResult<D>.successOrError(
+  onSuccess: suspend (success: MyResult.Success<D>) -> R,
+  onError: suspend (error: MyResult.Error<D>) -> R
 ): R = when (this) {
   is MyResult.Success -> {
     onSuccess(this)
