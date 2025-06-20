@@ -5,9 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.avocado.LoginQuery
 import com.avocado.expensescompose.R
-import com.avocado.expensescompose.data.adapters.graphql.utils.validateDataAndCollect
+import com.avocado.expensescompose.data.adapters.graphql.utils.awaitResult
 import com.avocado.expensescompose.data.apolloclients.GraphQlClientImpl
 import com.avocado.expensescompose.data.model.MyResult
+import com.avocado.expensescompose.data.model.onError
+import com.avocado.expensescompose.data.model.onSuccess
 import com.avocado.expensescompose.data.model.successOrError
 import com.avocado.expensescompose.domain.login.usecase.LoginUseCase
 import com.avocado.type.AUTH_STATUS
@@ -42,7 +44,6 @@ class LoginViewModel @Inject constructor(
   private val graphQlClientImpl: GraphQlClientImpl
 ) : ViewModel() {
 
-  private val authState = MutableStateFlow(AUTH_STATUS.UNAUTHENTICATED)
   private val _uiState = MutableStateFlow(LoginViewModelState())
   val uiState: StateFlow<LoginViewModelState> = _uiState.asStateFlow()
 
@@ -100,7 +101,6 @@ class LoginViewModel @Inject constructor(
 
   private fun validatePasswordInput(password: String): Boolean = password.isBlank()
 
-  // TODO refactor this
   fun login() =
     viewModelScope
       .launch {
@@ -110,38 +110,6 @@ class LoginViewModel @Inject constructor(
 
         if (saveUsername()) {
           validateLogin()
-          val loginResult = loginUseCase(
-            email = uiState.value.username.trim(),
-            password = uiState.value.password.trim()
-          )
-
-          if (loginResult.emailError != null) {
-            _uiState.update {
-              it.copy(userMessage = R.string.login_incorrect_email)
-            }
-          }
-          if (loginResult.passwordError != null) {
-            _uiState.update {
-              it.copy(userMessage = R.string.login_incorrect_password)
-            }
-          }
-
-          when (loginResult.result) {
-            is MyResult.Success -> {
-              Timber.d("Setting success")
-              _uiState.update {
-                it.copy(isSuccess = authState.value == AUTH_STATUS.AUTHENTICATED)
-              }
-            }
-
-            is MyResult.Error -> {
-              _uiState.update {
-                it.copy(userMessage = loginResult.result.uiText)
-              }
-            }
-
-            else -> {}
-          }
         }
 
         _uiState.update {
@@ -151,13 +119,43 @@ class LoginViewModel @Inject constructor(
 
   private suspend fun validateLogin() =
     graphQlClientImpl
-      .query(
-        LoginQuery(),
-        onError = {}
-      )
-      .validateDataAndCollect { response ->
+      .query(LoginQuery()) { throwable ->
+        Timber.e("Error validating login: ${throwable.message}")
+        _uiState.update { it.copy(userMessage = R.string.general_error) }
+      }
+      .awaitResult()
+      .onSuccess { response ->
         response?.login?.status
-          .let { status -> authState.value = status ?: AUTH_STATUS.UNAUTHENTICATED }
+          .let { status ->
+            val loginResult = loginUseCase(
+              email = uiState.value.username.trim(),
+              password = uiState.value.password.trim()
+            )
+
+            if (loginResult.emailError != null) {
+              _uiState.update {
+                it.copy(userMessage = R.string.login_incorrect_email)
+              }
+            }
+            if (loginResult.passwordError != null) {
+              _uiState.update {
+                it.copy(userMessage = R.string.login_incorrect_password)
+              }
+            }
+
+            loginResult
+              .result
+              ?.onSuccess {
+                Timber.d("Setting success")
+                _uiState.update {
+                  it.copy(isSuccess = status == AUTH_STATUS.AUTHENTICATED)
+                }
+              }
+          }
+      }
+      .onError { throwable ->
+        Timber.e("Error validating login: ${throwable.message}")
+        _uiState.update { it.copy(userMessage = R.string.general_error) }
       }
 
   private suspend fun saveUsername() =

@@ -12,9 +12,9 @@ sealed class MyResult<out R> {
   ) : MyResult<T>()
 }
 
-suspend fun <D, R> MyResult<D>.successOrError(
-  onSuccess: suspend (success: MyResult.Success<D>) -> R,
-  onError: suspend (error: MyResult.Error<D>) -> R
+inline fun <reified D, reified R> MyResult<D>.successOrError(
+  onSuccess: (success: MyResult.Success<D>) -> R,
+  onError: (error: MyResult.Error<D>) -> R
 ): R = when (this) {
   is MyResult.Success -> {
     onSuccess(this)
@@ -23,4 +23,14 @@ suspend fun <D, R> MyResult<D>.successOrError(
   is MyResult.Error -> {
     onError(this)
   }
+}
+
+inline fun <T> MyResult<T>.onSuccess(block: (T) -> Unit): MyResult<T> {
+  if (this is MyResult.Success) block(data)
+  return this
+}
+
+inline fun <T> MyResult<T>.onError(block: (Throwable) -> Unit): MyResult<T> {
+  if (this is MyResult.Error) exception?.let { block(it) }
+  return this
 }

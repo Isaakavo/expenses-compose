@@ -115,6 +115,7 @@ class AuthRepository @Inject constructor(
 
               is MyResult.Error -> {
                 Timber.d(savedRefreshToken.uiText.toString())
+                MyResult.Error(savedRefreshToken.uiText)
               }
             }
           }
