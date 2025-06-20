@@ -8,7 +8,6 @@ import com.avocado.expensescompose.data.model.auth.Auth
 import com.avocado.expensescompose.data.model.auth.AuthParameters
 import com.avocado.expensescompose.data.model.successOrError
 import com.avocado.expensescompose.data.repositories.AuthRepository
-import com.avocado.expensescompose.presentation.util.logErrorWithThread
 import javax.inject.Inject
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -30,13 +29,10 @@ class AuthorizationInterceptor @Inject constructor(
   override suspend fun intercept(
     request: HttpRequest,
     chain: HttpInterceptorChain
-  ): HttpResponse = try {
+  ): HttpResponse {
     val jwt = extractJwt()
     val httpResponse = validateJwtIsNotNullOrEmpty(jwt, request, chain)
-    handle401(httpResponse, request, chain)
-  } catch (e: Exception) {
-    logErrorWithThread(e.stackTraceToString())
-    throw e
+    return handle401(httpResponse, request, chain)
   }
 
   private suspend fun extractJwt(): String? = mutex.withLock {
