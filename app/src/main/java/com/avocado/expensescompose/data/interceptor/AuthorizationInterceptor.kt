@@ -32,7 +32,7 @@ class AuthorizationInterceptor @Inject constructor(
   ): HttpResponse {
     val jwt = extractJwt()
     val httpResponse = validateJwtIsNotNullOrEmpty(jwt, request, chain)
-    return handle401(httpResponse, request, chain)
+    return handleHttpResponse(httpResponse, request, chain)
   }
 
   private suspend fun extractJwt(): String? = mutex.withLock {
@@ -58,43 +58,48 @@ class AuthorizationInterceptor @Inject constructor(
     chain.proceed(request)
   }
 
-  private suspend fun handle401(
+  private suspend fun handleHttpResponse(
     response: HttpResponse,
     request: HttpRequest,
     chain: HttpInterceptorChain
-  ): HttpResponse = if (response.statusCode == 401) {
-    val refreshToken = mutex.withLock {
+  ): HttpResponse = when (response.statusCode) {
+    // This can be moved to another class
+    401 -> {
+      val refreshToken = mutex.withLock {
+        authRepository
+          .getRefreshToken()
+          .successOrError(
+            onSuccess = { it.data },
+            onError = { throw RefreshTokenNotFoundException() }
+          )
+      }
+      val auth = Auth(
+        authFlow = "REFRESH_TOKEN_AUTH",
+        authParameters = AuthParameters(refreshToken = refreshToken ?: "")
+      )
       authRepository
-        .getRefreshToken()
+        .refreshToken(auth)
         .successOrError(
-          onSuccess = { it.data },
-          onError = { throw RefreshTokenNotFoundException() }
+          onSuccess = { success ->
+            val accessToken = success.data.authenticationResult.accessToken
+            authRepository
+              .saveAccessToken(accessToken)
+              .successOrError(
+                onSuccess = {
+                  chain.proceed(
+                    request.newBuilder()
+                      .addHeader(HEADER_SESSION_KEY, accessToken).build()
+                  )
+                },
+                onError = { throw RefreshTokenSavedException() }
+              )
+          },
+          onError = { throw RefreshTokenExpiredException() }
         )
     }
-    val auth = Auth(
-      authFlow = "REFRESH_TOKEN_AUTH",
-      authParameters = AuthParameters(refreshToken = refreshToken ?: "")
-    )
-    authRepository
-      .refreshToken(auth)
-      .successOrError(
-        onSuccess = { success ->
-          val accessToken = success.data.authenticationResult.accessToken
-          authRepository
-            .saveAccessToken(accessToken)
-            .successOrError(
-              onSuccess = {
-                chain.proceed(
-                  request.newBuilder()
-                    .addHeader(HEADER_SESSION_KEY, accessToken).build()
-                )
-              },
-              onError = { throw RefreshTokenSavedException() }
-            )
-        },
-        onError = { throw RefreshTokenExpiredException() }
-      )
-  } else {
-    response
+
+    else -> {
+      response
+    }
   }
 }

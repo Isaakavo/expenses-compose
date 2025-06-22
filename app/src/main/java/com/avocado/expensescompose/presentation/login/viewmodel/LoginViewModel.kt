@@ -108,6 +108,11 @@ class LoginViewModel @Inject constructor(
           it.copy(isLoading = true, isButtonEnabled = false)
         }
 
+        val (_, _, result) = loginUseCase(
+          email = uiState.value.username.trim(),
+          password = uiState.value.password.trim()
+        )
+
         if (saveUsername()) {
           validateLogin()
         }
@@ -127,30 +132,10 @@ class LoginViewModel @Inject constructor(
       .onSuccess { response ->
         response?.login?.status
           .let { status ->
-            val loginResult = loginUseCase(
-              email = uiState.value.username.trim(),
-              password = uiState.value.password.trim()
-            )
-
-            if (loginResult.emailError != null) {
-              _uiState.update {
-                it.copy(userMessage = R.string.login_incorrect_email)
-              }
+            Timber.d("Setting success")
+            _uiState.update {
+              it.copy(isSuccess = status == AUTH_STATUS.AUTHENTICATED)
             }
-            if (loginResult.passwordError != null) {
-              _uiState.update {
-                it.copy(userMessage = R.string.login_incorrect_password)
-              }
-            }
-
-            loginResult
-              .result
-              ?.onSuccess {
-                Timber.d("Setting success")
-                _uiState.update {
-                  it.copy(isSuccess = status == AUTH_STATUS.AUTHENTICATED)
-                }
-              }
           }
       }
       .onError { throwable ->

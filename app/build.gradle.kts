@@ -69,7 +69,7 @@ android {
       initWith(getByName("debug"))
       manifestPlaceholders["hostNam"] = "internal.avocado.com"
       applicationIdSuffix = ".staging"
-      buildConfigField("String", "GRAPHQL_ENDPOINT", "\"http://192.168.100.5:4000/graphql\"")
+      buildConfigField("String", "GRAPHQL_ENDPOINT", "\"https://expenses-graphql.fly.dev/graphql\"")
     }
   }
 
