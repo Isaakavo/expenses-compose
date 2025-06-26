@@ -99,19 +99,21 @@ class TokenManagerService @Inject constructor(
       MyResult.Error(data = Unit, exception = exception)
     }
 
-  override suspend fun getRefreshToken(): MyResult<String?> = try {
-    val preferences = context.dataStore.data.first()
-    MyResult.Success(data = preferences[JWT_REFRESH_KEY])
-  } catch (exception: Exception) {
-    MyResult.Error(exception = exception)
-  }
-
-  override suspend fun deleteRefreshToken(): MyResult<Unit> = try {
-    context.dataStore.edit { preferences ->
-      preferences.remove(JWT_REFRESH_KEY)
+  override suspend fun getRefreshToken(): MyResult<String?> =
+    try {
+      val preferences = context.dataStore.data.first()
+      MyResult.Success(data = preferences[JWT_REFRESH_KEY])
+    } catch (exception: Exception) {
+      MyResult.Error(exception = exception)
     }
-    MyResult.Success(data = Unit)
-  } catch (exception: IOException) {
-    MyResult.Error(data = Unit, exception = exception)
-  }
+
+  override suspend fun deleteRefreshToken(): MyResult<Unit> =
+    try {
+      context.dataStore.edit { preferences ->
+        preferences.remove(JWT_REFRESH_KEY)
+      }
+      MyResult.Success(data = Unit)
+    } catch (exception: IOException) {
+      MyResult.Error(data = Unit, exception = exception)
+    }
 }
