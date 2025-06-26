@@ -7,7 +7,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.avocado.expensescompose.R
-import com.avocado.expensescompose.data.TokenService
+import com.avocado.expensescompose.data.TokenManagerServiceI
 import com.avocado.expensescompose.data.model.MyResult
 import javax.inject.Inject
 import kotlinx.coroutines.flow.first
@@ -16,7 +16,9 @@ import timber.log.Timber
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "auth")
 
-class TokenManagerRepository @Inject constructor(private val context: Context) : TokenService {
+class TokenManagerService @Inject constructor(
+  private val context: Context
+) : TokenManagerServiceI {
 
   companion object {
     private val JWT_ACCESS_KEY = stringPreferencesKey("ACCESS_JWT")

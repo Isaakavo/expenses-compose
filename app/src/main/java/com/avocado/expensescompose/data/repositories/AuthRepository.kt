@@ -18,7 +18,7 @@ import timber.log.Timber
 
 class AuthRepository @Inject constructor(
   private val awsApi: LoginJwtClient,
-  private val tokenManagerRepository: TokenManagerRepository
+  private val tokenManagerRepository: TokenManagerService
 ) {
 
   suspend fun saveUsername(username: String) = tokenManagerRepository.saveUsername(username)
