@@ -8,7 +8,7 @@ import com.avocado.expensescompose.data.apolloclients.incomes.ApolloIncomesClien
 import com.avocado.expensescompose.data.interceptor.AuthorizationInterceptor
 import com.avocado.expensescompose.data.network.LoginJwtClient
 import com.avocado.expensescompose.data.repositories.AuthRepository
-import com.avocado.expensescompose.data.repositories.TokenManagerRepository
+import com.avocado.expensescompose.data.repositories.TokenManagerService
 import com.avocado.expensescompose.domain.income.IncomesClient
 import com.avocado.expensescompose.domain.income.usecase.CreateIncomeUseCase
 import com.avocado.expensescompose.presentation.util.Constants
@@ -79,5 +79,5 @@ object AppModule {
   @Singleton
   fun provideDataStoreRepository(
     @ApplicationContext app: Context
-  ) = TokenManagerRepository(app)
+  ) = TokenManagerService(app)
 }

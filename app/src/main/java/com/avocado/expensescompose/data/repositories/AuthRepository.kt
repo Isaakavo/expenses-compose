@@ -17,23 +17,21 @@ import retrofit2.HttpException
 import timber.log.Timber
 
 class AuthRepository @Inject constructor(
-  private val loginJwtClient: LoginJwtClient,
-  private val tokenManagerRepository: TokenManagerRepository
+  private val awsApi: LoginJwtClient,
+  private val tokenManagerRepository: TokenManagerService
 ) {
 
   suspend fun saveUsername(username: String) = tokenManagerRepository.saveUsername(username)
 
   suspend fun getUsername() = tokenManagerRepository.getUsername()
 
-  suspend fun saveAccessToken(value: String): MyResult<Boolean> =
+  suspend fun saveAccessToken(value: String): MyResult<Unit> =
     tokenManagerRepository.saveAccessToken(value)
 
-  private suspend fun saveRefreshToken(value: String): MyResult<Boolean> =
+  private suspend fun saveRefreshToken(value: String): MyResult<Unit> =
     tokenManagerRepository.saveRefreshToken(value)
 
-  suspend fun getAccessToken(): MyResult<String?> =
-    tokenManagerRepository.getAccessToken()
-
+  suspend fun getAccessToken(): MyResult<String?> = tokenManagerRepository.getAccessToken()
   suspend fun getRefreshToken(): MyResult<String?> =
     tokenManagerRepository.getRefreshToken()
 
@@ -49,9 +47,9 @@ class AuthRepository @Inject constructor(
     return MyResult.Error(false)
   }
 
-  suspend fun getTokenFromApi(email: String, password: String): SimpleResource =
+  private suspend fun getTokenFromApi(email: String, password: String): SimpleResource =
     try {
-      val response = loginJwtClient.getJwtToken(
+      val response = awsApi.getJwtToken(
         base = Constants.AWS_PROVIDER,
         auth = Auth(
           authParameters = AuthParameters(
@@ -96,7 +94,7 @@ class AuthRepository @Inject constructor(
     }
 
   suspend fun getAccessToken(email: String, password: String): SimpleResource {
-    val accessToken = tokenManagerRepository.getAccessToken()
+//    return getTokenFromApi(email, password)
     return try {
       // Validate the existence of a previous Access Token
       // If exists, continue and use it
@@ -115,7 +113,6 @@ class AuthRepository @Inject constructor(
 
               is MyResult.Error -> {
                 Timber.d(savedRefreshToken.uiText.toString())
-                MyResult.Error(savedRefreshToken.uiText)
               }
             }
           }
@@ -135,7 +132,7 @@ class AuthRepository @Inject constructor(
   }
 
   suspend fun refreshToken(auth: Auth): MyResult<CognitoResponse> = try {
-    val result = loginJwtClient.refreshToken(base = Constants.AWS_PROVIDER, auth)
+    val result = awsApi.refreshToken(base = Constants.AWS_PROVIDER, auth)
     MyResult.Success(result)
   } catch (e: Exception) {
     Timber.e("Error refreshing the token ${e.message}")
