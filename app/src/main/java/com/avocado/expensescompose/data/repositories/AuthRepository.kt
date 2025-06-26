@@ -17,7 +17,7 @@ import retrofit2.HttpException
 import timber.log.Timber
 
 class AuthRepository @Inject constructor(
-  private val awsApi: LoginJwtClient,
+  private val loginJwtClient: LoginJwtClient,
   private val tokenManagerRepository: TokenManagerRepository
 ) {
 
@@ -49,9 +49,9 @@ class AuthRepository @Inject constructor(
     return MyResult.Error(false)
   }
 
-  private suspend fun getTokenFromApi(email: String, password: String): SimpleResource =
+  suspend fun getTokenFromApi(email: String, password: String): SimpleResource =
     try {
-      val response = awsApi.getJwtToken(
+      val response = loginJwtClient.getJwtToken(
         base = Constants.AWS_PROVIDER,
         auth = Auth(
           authParameters = AuthParameters(
@@ -96,7 +96,7 @@ class AuthRepository @Inject constructor(
     }
 
   suspend fun getAccessToken(email: String, password: String): SimpleResource {
-//    return getTokenFromApi(email, password)
+    val accessToken = tokenManagerRepository.getAccessToken()
     return try {
       // Validate the existence of a previous Access Token
       // If exists, continue and use it
@@ -135,7 +135,7 @@ class AuthRepository @Inject constructor(
   }
 
   suspend fun refreshToken(auth: Auth): MyResult<CognitoResponse> = try {
-    val result = awsApi.refreshToken(base = Constants.AWS_PROVIDER, auth)
+    val result = loginJwtClient.refreshToken(base = Constants.AWS_PROVIDER, auth)
     MyResult.Success(result)
   } catch (e: Exception) {
     Timber.e("Error refreshing the token ${e.message}")

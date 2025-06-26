@@ -78,6 +78,7 @@ class TokenManagerRepository @Inject constructor(private val context: Context) :
       MyResult.Error(false, R.string.token_user_save_error)
     }
 
+  // TODO change this to return the access token instead of the refresh token
   override suspend fun getAccessToken(): MyResult<String?> = try {
     val preferences = context.dataStore.data.first()
     preferences[JWT_REFRESH_KEY]
