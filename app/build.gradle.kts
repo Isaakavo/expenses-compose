@@ -1,3 +1,4 @@
+
 plugins {
   alias(libs.plugins.android.application)
   alias(libs.plugins.kotlin.android)
@@ -6,6 +7,7 @@ plugins {
   alias(libs.plugins.compose.compiler)
   alias(libs.plugins.ksp)
   alias(libs.plugins.hilt)
+  alias(libs.plugins.android.junit)
 }
 
 apollo {
@@ -150,7 +152,12 @@ dependencies {
   implementation(libs.vico.compose)
   implementation(libs.vico.compose.m3)
 
-  testImplementation(libs.junit)
+  testImplementation(libs.junit.jupiter)
+  testImplementation(kotlin("test"))
+  testImplementation(libs.mockk)
+  testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.0")
+
   androidTestImplementation(libs.androidx.test.ext)
   androidTestImplementation(libs.androidx.test.espresso.core)
   androidTestImplementation(composeBom)
