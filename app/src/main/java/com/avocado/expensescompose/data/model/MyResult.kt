@@ -52,4 +52,10 @@ inline fun <T, R> MyResult<T>.fold(
 fun <T> MyResult<T>.isSuccess(): Boolean = this is MyResult.Success
 fun <T> MyResult<T>.isError(): Boolean = this is MyResult.Error
 
+inline fun <T, R> MyResult<T>.flatMapSuccess(transform: (T) -> MyResult<R>): MyResult<R> =
+  when (this) {
+    is MyResult.Success -> transform(data)
+    is MyResult.Error -> MyResult.Error(data = null, uiText = uiText, exception = exception)
+  }
+
 // TODO create more utility functions for MyResult, like in Result.kt

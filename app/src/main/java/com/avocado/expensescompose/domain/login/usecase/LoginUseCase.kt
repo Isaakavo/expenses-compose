@@ -60,7 +60,7 @@ class LoginUseCase @Inject constructor(
 //        Timber.e("No refresh token found, proceeding with login")
 //      }
 
-    return LoginResult(result = authRepository.getAccessToken(email, password))
+    return LoginResult(result = authRepository.signIn(email, password))
   }
 
   suspend fun getRefreshToken() = authRepository.getRefreshToken()
