@@ -17,6 +17,7 @@ inline fun <reified D, reified R> MyResult<D>.successOrError(
   onError: (error: MyResult.Error<D>) -> R
 ): R = when (this) {
   is MyResult.Success -> {
+    Result
     onSuccess(this)
   }
 
@@ -47,5 +48,8 @@ inline fun <T, R> MyResult<T>.fold(
   is MyResult.Success -> onSuccess(data)
   is MyResult.Error -> onError(exception)
 }
+
+fun <T> MyResult<T>.isSuccess(): Boolean = this is MyResult.Success
+fun <T> MyResult<T>.isError(): Boolean = this is MyResult.Error
 
 // TODO create more utility functions for MyResult, like in Result.kt

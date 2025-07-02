@@ -28,10 +28,8 @@ class AuthRepository @Inject constructor(
   suspend fun saveAccessToken(value: String): MyResult<Unit> =
     tokenManagerRepository.saveAccessToken(value)
 
-  private suspend fun saveRefreshToken(value: String): MyResult<Unit> =
-    tokenManagerRepository.saveRefreshToken(value)
-
   suspend fun getAccessToken(): MyResult<String?> = tokenManagerRepository.getAccessToken()
+
   suspend fun getRefreshToken(): MyResult<String?> =
     tokenManagerRepository.getRefreshToken()
 
@@ -60,15 +58,14 @@ class AuthRepository @Inject constructor(
       )
       val accessToken = response.authenticationResult.accessToken
       val refreshToken = response.authenticationResult.refreshToken
-      run {
-        saveAccessToken(accessToken)
-        saveRefreshToken(refreshToken)
-        MyResult.Success(Unit)
-      }
+      tokenManagerRepository.saveAccessToken(accessToken)
+      tokenManagerRepository.saveRefreshToken(refreshToken)
+      MyResult.Success(Unit)
     } catch (e: IOException) {
       Timber.e("Error getting token from AWS ${e.message}")
-      MyResult.Error(uiText = R.string.general_error)
+      MyResult.Error(Unit)
     } catch (e: HttpException) {
+      // TODO move to another function
       when (e.code()) {
         400 -> {
           val gson = Gson()
@@ -82,6 +79,7 @@ class AuthRepository @Inject constructor(
             "NotAuthorizedException" -> MyResult.Error(
               uiText = R.string.login_incorrect_email_password
             )
+
             else -> MyResult.Error(uiText = R.string.general_error)
           }
         }
@@ -93,43 +91,15 @@ class AuthRepository @Inject constructor(
       }
     }
 
-  suspend fun getAccessToken(email: String, password: String): SimpleResource {
-//    return getTokenFromApi(email, password)
-    return try {
-      // Validate the existence of a previous Access Token
-      // If exists, continue and use it
-      when (val savedAccessToken = getAccessToken()) {
-        is MyResult.Success -> {
-          if (savedAccessToken.data != null) {
-            // Validate also that there is a refresh token available
-            // If exists, we are safe to make the request
-            // Interceptor will use it to ask for a new access token
-            when (val savedRefreshToken = getRefreshToken()) {
-              is MyResult.Success -> {
-                if (savedRefreshToken.data != null) {
-                  return MyResult.Success(Unit)
-                }
-              }
-
-              is MyResult.Error -> {
-                Timber.d(savedRefreshToken.uiText.toString())
-              }
-            }
-          }
-        }
-
-        is MyResult.Error -> {
-          Timber.d("Access Token not found, requesting a new one")
-          return getTokenFromApi(email, password)
-        }
-      }
-      // Timber.e("Login error $")
-      MyResult.Error(uiText = R.string.credentials_error)
-    } catch (e: Exception) {
-      Timber.e("Error retrieving credentials ${e.message}")
-      MyResult.Error(null, R.string.credentials_error)
+  // Validate the existence of a previous Access Token
+  // If exists, continue and use it in the interceptor
+  // If not, request a new one and save it
+  suspend fun getAccessToken(email: String, password: String): SimpleResource =
+    if (tokenManagerRepository.validateTokens()) {
+      MyResult.Success(Unit)
+    } else {
+      getTokenFromApi(email, password)
     }
-  }
 
   suspend fun refreshToken(auth: Auth): MyResult<CognitoResponse> = try {
     val result = awsApi.refreshToken(base = Constants.AWS_PROVIDER, auth)

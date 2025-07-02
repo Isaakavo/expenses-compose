@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.avocado.expensescompose.data.TokenManagerServiceI
 import com.avocado.expensescompose.data.model.MyResult
+import com.avocado.expensescompose.data.model.isSuccess
 import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 import okio.IOException
@@ -57,6 +58,9 @@ class TokenManagerService @Inject constructor(
     } catch (exception: Exception) {
       MyResult.Error(data = Unit, exception = exception)
     }
+
+  suspend fun validateTokens(): Boolean =
+    getAccessToken().isSuccess() && getRefreshToken().isSuccess()
 
   override suspend fun saveAccessToken(value: String): MyResult<Unit> =
     try {

@@ -12,6 +12,10 @@ class LoginUseCase @Inject constructor(
   private val loginValidationRepository: LoginValidationRepository<LoginQuery.Data?>
 ) {
 
+  // Use cases
+  // validate JWT in the graphql client
+  // validate and extract refresh token
+  // validate and save username
   suspend operator fun invoke(
     email: String,
     password: String
