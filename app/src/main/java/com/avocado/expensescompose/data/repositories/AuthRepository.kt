@@ -7,7 +7,7 @@ import com.avocado.expensescompose.data.model.auth.Auth
 import com.avocado.expensescompose.data.model.auth.AuthParameters
 import com.avocado.expensescompose.data.model.auth.AuthenticationResultException
 import com.avocado.expensescompose.data.model.auth.CognitoResponse
-import com.avocado.expensescompose.data.network.LoginJwtClient
+import com.avocado.expensescompose.data.network.CognitoRetrofitWebClient
 import com.avocado.expensescompose.presentation.util.Constants
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -17,7 +17,7 @@ import retrofit2.HttpException
 import timber.log.Timber
 
 class AuthRepository @Inject constructor(
-  private val awsApi: LoginJwtClient,
+  private val awsApi: CognitoRetrofitWebClient,
   private val tokenManagerRepository: TokenManagerService
 ) {
 

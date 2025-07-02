@@ -6,7 +6,7 @@ import com.avocado.expensescompose.BuildConfig
 import com.avocado.expensescompose.data.apolloclients.GraphQlClientImpl
 import com.avocado.expensescompose.data.apolloclients.incomes.ApolloIncomesClient
 import com.avocado.expensescompose.data.interceptor.AuthorizationInterceptor
-import com.avocado.expensescompose.data.network.LoginJwtClient
+import com.avocado.expensescompose.data.network.CognitoRetrofitWebClient
 import com.avocado.expensescompose.data.repositories.AuthRepository
 import com.avocado.expensescompose.data.repositories.TokenManagerService
 import com.avocado.expensescompose.domain.income.IncomesClient
@@ -41,12 +41,12 @@ object AppModule {
 
   @Provides
   @Singleton
-  fun provideAuthClient(client: OkHttpClient): LoginJwtClient =
+  fun provideAuthClient(client: OkHttpClient): CognitoRetrofitWebClient =
     Retrofit.Builder()
       .baseUrl(Constants.AWS_PROVIDER)
       .client(client)
       .addConverterFactory(GsonConverterFactory.create())
-      .build().create(LoginJwtClient::class.java)
+      .build().create(CognitoRetrofitWebClient::class.java)
 
   @Provides
   @Singleton
