@@ -31,8 +31,8 @@ inline fun <T> MyResult<T>.onSuccess(block: (T) -> Unit): MyResult<T> {
   return this
 }
 
-inline fun <T> MyResult<T>.onError(block: (Throwable) -> Unit): MyResult<T> {
-  if (this is MyResult.Error) exception?.let { block(it) }
+inline fun <T> MyResult<T>.onError(block: (Throwable?, Int) -> Unit): MyResult<T> {
+  if (this is MyResult.Error) uiText?.let { block(exception, uiText) }
   return this
 }
 

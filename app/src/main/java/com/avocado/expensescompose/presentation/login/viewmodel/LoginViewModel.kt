@@ -12,7 +12,7 @@ import com.avocado.expensescompose.data.model.onError
 import com.avocado.expensescompose.data.model.onSuccess
 import com.avocado.expensescompose.data.model.successOrError
 import com.avocado.expensescompose.domain.login.usecase.LoginUseCase
-import com.avocado.expensescompose.domain.login.usecase.UsernameUseCase
+import com.avocado.expensescompose.domain.login.usecase.UserInfoUseCase
 import com.avocado.type.AUTH_STATUS
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -42,7 +42,7 @@ data class LoginViewModelState(
 @HiltViewModel
 class LoginViewModel @Inject constructor(
   private val loginUseCase: LoginUseCase,
-  private val usernameUseCase: UsernameUseCase,
+  private val userInfoUseCase: UserInfoUseCase,
   private val graphQlClientImpl: GraphQlClientImpl
 ) : ViewModel() {
 
@@ -51,23 +51,20 @@ class LoginViewModel @Inject constructor(
 
   init {
     viewModelScope.launch {
-      usernameUseCase()
-        .onSuccess { username ->
-          _uiState.update { it.copy(username = username.orEmpty()) }
+      userInfoUseCase()
+        .onSuccess { userInfo ->
+          _uiState.update {
+            it.copy(
+              username = userInfo.userEmail,
+              isQuickLogin = userInfo.isInfoAvailable
+            )
+          }
         }
-    }
-//    getUsername()
-    refreshTokenExist()
-  }
-
-  private fun refreshTokenExist() {
-    viewModelScope.launch {
-      val result = loginUseCase.getRefreshToken()
-      if (result is MyResult.Success && result.data != null) {
-        _uiState.update {
-          it.copy(isQuickLogin = true, password = "Fake value for now")
+        .onError { throwable, uiText ->
+          _uiState.update {
+            it.copy(userMessage = uiText)
+          }
         }
-      }
     }
   }
 
@@ -104,11 +101,14 @@ class LoginViewModel @Inject constructor(
     }
   }
 
+  // TODO move this to the login use case
   private fun validateEmailInput(username: String): Boolean =
     username.isNotBlank() && !EMAIL_ADDRESS.matcher(username).matches()
 
+  // TODO move this to the login use case
   private fun validatePasswordInput(password: String): Boolean = password.isBlank()
 
+  // TODO move this to the login use case
   fun login() =
     viewModelScope
       .launch {
@@ -130,6 +130,7 @@ class LoginViewModel @Inject constructor(
         }
       }
 
+  // TODO move this to the login use case
   private suspend fun validateLogin() =
     graphQlClientImpl
       .query(LoginQuery()) { throwable ->
@@ -146,11 +147,12 @@ class LoginViewModel @Inject constructor(
             }
           }
       }
-      .onError { throwable ->
-        Timber.e("Error validating login: ${throwable.message}")
+      .onError { throwable, uiText ->
+        Timber.e("Error validating login: ${throwable?.message}")
         _uiState.update { it.copy(userMessage = R.string.general_error) }
       }
 
+  // TODO move this to the login use case
   private suspend fun saveUsername() =
     loginUseCase
       .saveUsername(_uiState.value.username)
