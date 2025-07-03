@@ -12,6 +12,7 @@ import com.avocado.expensescompose.data.model.onError
 import com.avocado.expensescompose.data.model.onSuccess
 import com.avocado.expensescompose.data.model.successOrError
 import com.avocado.expensescompose.domain.login.usecase.LoginUseCase
+import com.avocado.expensescompose.domain.login.usecase.UsernameUseCase
 import com.avocado.type.AUTH_STATUS
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -41,6 +42,7 @@ data class LoginViewModelState(
 @HiltViewModel
 class LoginViewModel @Inject constructor(
   private val loginUseCase: LoginUseCase,
+  private val usernameUseCase: UsernameUseCase,
   private val graphQlClientImpl: GraphQlClientImpl
 ) : ViewModel() {
 
@@ -48,7 +50,13 @@ class LoginViewModel @Inject constructor(
   val uiState: StateFlow<LoginViewModelState> = _uiState.asStateFlow()
 
   init {
-    getUsername()
+    viewModelScope.launch {
+      usernameUseCase()
+        .onSuccess { username ->
+          _uiState.update { it.copy(username = username.orEmpty()) }
+        }
+    }
+//    getUsername()
     refreshTokenExist()
   }
 
@@ -157,18 +165,4 @@ class LoginViewModel @Inject constructor(
           false
         }
       )
-
-  private fun getUsername() {
-    viewModelScope.launch {
-      when (val username = loginUseCase.getUsernameFromStorage()) {
-        is MyResult.Error -> {
-          _uiState.update { it.copy(userMessage = username.uiText) }
-        }
-
-        is MyResult.Success -> {
-          _uiState.update { it.copy(username = username.data.orEmpty()) }
-        }
-      }
-    }
-  }
 }
