@@ -12,12 +12,12 @@ import com.avocado.expensescompose.data.model.fold
 import javax.inject.Inject
 
 class CognitoAuthProvider @Inject constructor(
-  private val cognitoAuthProvider: CognitoAuthService
+  private val cognitoAuthService: CognitoAuthService
 ) : AuthProvider {
 
   override suspend fun singIn(credentials: UserCredentials): MyResult<AuthResult> {
     val (username, password) = credentials
-    val response = cognitoAuthProvider.signIn(username, password)
+    val response = cognitoAuthService.signIn(username, password)
 
     return response
       .fold(
@@ -39,7 +39,7 @@ class CognitoAuthProvider @Inject constructor(
         refreshToken = refreshToken
       )
     )
-    val response = cognitoAuthProvider.refreshToken(auth)
+    val response = cognitoAuthService.refreshToken(auth)
 
     return response
       .fold(
