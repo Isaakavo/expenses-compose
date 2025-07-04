@@ -99,6 +99,7 @@ class LoginViewModel @Inject constructor(
 
   private fun validatePasswordInput(password: String): Boolean = password.isBlank()
 
+  // TODO change to flows instead of MyResult
   fun login() =
     viewModelScope
       .launch {
