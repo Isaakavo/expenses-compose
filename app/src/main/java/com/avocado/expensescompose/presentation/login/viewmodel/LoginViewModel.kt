@@ -3,17 +3,11 @@ package com.avocado.expensescompose.presentation.login.viewmodel
 import android.util.Patterns.EMAIL_ADDRESS
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.avocado.LoginQuery
-import com.avocado.expensescompose.R
-import com.avocado.expensescompose.data.adapters.graphql.utils.awaitResult
-import com.avocado.expensescompose.data.apolloclients.GraphQlClientImpl
 import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.data.model.onError
 import com.avocado.expensescompose.data.model.onSuccess
-import com.avocado.expensescompose.data.model.successOrError
 import com.avocado.expensescompose.domain.login.usecase.LoginUseCase
 import com.avocado.expensescompose.domain.login.usecase.UserInfoUseCase
-import com.avocado.type.AUTH_STATUS
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,8 +36,7 @@ data class LoginViewModelState(
 @HiltViewModel
 class LoginViewModel @Inject constructor(
   private val loginUseCase: LoginUseCase,
-  private val userInfoUseCase: UserInfoUseCase,
-  private val graphQlClientImpl: GraphQlClientImpl
+  private val userInfoUseCase: UserInfoUseCase
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(LoginViewModelState())
@@ -60,7 +53,7 @@ class LoginViewModel @Inject constructor(
             )
           }
         }
-        .onError { throwable, uiText ->
+        .onError { data, throwable, uiText ->
           _uiState.update {
             it.copy(userMessage = uiText)
           }
@@ -101,14 +94,11 @@ class LoginViewModel @Inject constructor(
     }
   }
 
-  // TODO move this to the login use case
   private fun validateEmailInput(username: String): Boolean =
     username.isNotBlank() && !EMAIL_ADDRESS.matcher(username).matches()
 
-  // TODO move this to the login use case
   private fun validatePasswordInput(password: String): Boolean = password.isBlank()
 
-  // TODO move this to the login use case
   fun login() =
     viewModelScope
       .launch {
@@ -116,55 +106,31 @@ class LoginViewModel @Inject constructor(
           it.copy(isLoading = true, isButtonEnabled = false)
         }
 
-        val (_, _, result) = loginUseCase(
+        loginUseCase(
           email = uiState.value.username.trim(),
-          password = uiState.value.password.trim()
+          password = uiState.value.password.trim(),
+          isQuickLogin = _uiState.value.isQuickLogin
         )
-
-        if (saveUsername()) {
-          validateLogin()
-        }
+          .onSuccess { result ->
+            Timber.d("Login successful: $result")
+            _uiState.update {
+              it.copy(isSuccess = result.isSuccess, userMessage = null)
+            }
+          }
+          .onError { data, error, uiText ->
+            Timber.e("Login error: ${error?.message}")
+            _uiState.update {
+              it.copy(
+                isSuccess = data?.isSuccess ?: false,
+                userMessage = uiText,
+                isLoading = false,
+                isButtonEnabled = true
+              )
+            }
+          }
 
         _uiState.update {
           it.copy(isLoading = false, isButtonEnabled = true)
         }
       }
-
-  // TODO move this to the login use case
-  private suspend fun validateLogin() =
-    graphQlClientImpl
-      .query(LoginQuery()) { throwable ->
-        Timber.e("Error validating login: ${throwable.message}")
-        _uiState.update { it.copy(userMessage = R.string.general_error) }
-      }
-      .awaitResult()
-      .onSuccess { response ->
-        response?.login?.status
-          .let { status ->
-            Timber.d("Setting success")
-            _uiState.update {
-              it.copy(isSuccess = status == AUTH_STATUS.AUTHENTICATED)
-            }
-          }
-      }
-      .onError { throwable, uiText ->
-        Timber.e("Error validating login: ${throwable?.message}")
-        _uiState.update { it.copy(userMessage = R.string.general_error) }
-      }
-
-  // TODO move this to the login use case
-  private suspend fun saveUsername() =
-    loginUseCase
-      .saveUsername(_uiState.value.username)
-      .successOrError(
-        onSuccess = {
-          Timber.d("Username saved successfully")
-          true
-        },
-        onError = { error ->
-          Timber.e("Error saving username: ${error.uiText}")
-          _uiState.update { it.copy(userMessage = error.uiText) }
-          false
-        }
-      )
 }

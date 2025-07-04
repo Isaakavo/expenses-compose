@@ -1,10 +1,15 @@
 package com.avocado.expensescompose.domain.login.usecase
 
 import com.avocado.LoginQuery
+import com.avocado.expensescompose.data.model.MyResult
+import com.avocado.expensescompose.data.model.flatMapSuccess
+import com.avocado.expensescompose.data.model.map
+import com.avocado.expensescompose.data.model.onError
 import com.avocado.expensescompose.data.repositories.AuthRepository
 import com.avocado.expensescompose.data.repositories.login.loginvalidation.LoginValidationRepository
 import com.avocado.expensescompose.domain.login.models.LoginResult
 import com.avocado.expensescompose.presentation.util.AuthError
+import com.avocado.type.AUTH_STATUS
 import javax.inject.Inject
 
 class LoginUseCase @Inject constructor(
@@ -18,52 +23,37 @@ class LoginUseCase @Inject constructor(
   // validate and save username
   suspend operator fun invoke(
     email: String,
-    password: String
-  ): LoginResult {
+    password: String,
+    isQuickLogin: Boolean = false
+  ): MyResult<LoginResult> {
     // TODO add more validation logic here
     val emailError = if (email.isBlank()) AuthError.FieldEmpty else null
     val passwordError = if (password.isBlank()) AuthError.FieldEmpty else null
 
-    if (emailError != null || passwordError != null) {
-      return LoginResult(emailError, passwordError)
-    }
+    // TODO improve this logic
+//    if ((emailError != null || passwordError != null) && !isQuickLogin) {
+//    if (!isQuickLogin) {
+//      return MyResult.Error(LoginResult(emailError, passwordError))
+//    }
 
-//    authRepository.getAccessToken()
-//      .fold(
-//        onSuccess = {
-//          authRepository.getRefreshToken()
-//            .onSuccess {
-//              Timber.d("Refresh token found, proceeding with login")
-//            }
-//        },
-//        onError = {
-//          authRepository.getTokenFromApi(email, password)
-//        }
-//      )
-//      .map { result ->
-//
-//      }
-//      .map { accessToken ->
-//        if (accessToken != null) {
-//          return@map getRefreshToken()
-//        }
-//        null
-//      }
-//      .onError {
-//        authRepository.getTokenFromApi(email, password)
-//        Result
-//      }
-//      .map { refreshToken ->
-//        if (refreshToken != null) {
-//
-//        }
-//        Timber.e("No refresh token found, proceeding with login")
-//      }
+    return loginValidationRepository
+      .validate()
+      .map { data ->
+        val status = data?.login?.status
+        if (status != AUTH_STATUS.AUTHENTICATED) {
+          LoginResult()
+        }
 
-    return LoginResult(result = authRepository.signIn(email, password))
+        LoginResult(isSuccess = true)
+      }
+      .onError { data, throwable, uiText ->
+        return authRepository
+          .signIn(email, password)
+          .flatMapSuccess {
+            MyResult.Success(LoginResult(isSuccess = true))
+          }
+      }
   }
-
-  suspend fun getRefreshToken() = authRepository.getRefreshToken()
 
   suspend fun saveUsername(username: String) = authRepository.saveUsername(username)
 

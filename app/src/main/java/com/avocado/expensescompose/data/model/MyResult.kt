@@ -1,12 +1,14 @@
 package com.avocado.expensescompose.data.model
 
+import com.avocado.expensescompose.R
+
 typealias SimpleResource = MyResult<Unit>
 
 sealed class MyResult<out R> {
   data class Success<out T>(val data: T) : MyResult<T>()
   data class Error<out T>(
     val data: T? = null,
-    val uiText: Int? = null,
+    val uiText: Int = R.string.general_error,
     var uiErrorText: String? = null,
     val exception: Throwable? = null
   ) : MyResult<T>()
@@ -31,14 +33,14 @@ inline fun <T> MyResult<T>.onSuccess(block: (T) -> Unit): MyResult<T> {
   return this
 }
 
-inline fun <T> MyResult<T>.onError(block: (Throwable?, Int) -> Unit): MyResult<T> {
-  if (this is MyResult.Error) uiText?.let { block(exception, uiText) }
+inline fun <T> MyResult<T>.onError(block: (T?, Throwable?, Int) -> Unit): MyResult<T> {
+  if (this is MyResult.Error) block(data, exception, uiText)
   return this
 }
 
 inline fun <T, R> MyResult<T>.map(transform: (T) -> R): MyResult<R> = when (this) {
   is MyResult.Success -> MyResult.Success(transform(data))
-  is MyResult.Error -> MyResult.Error(exception = exception)
+  is MyResult.Error -> MyResult.Error(exception = exception, uiText = uiText)
 }
 
 inline fun <T, R> MyResult<T>.fold(

@@ -6,5 +6,6 @@ import com.avocado.expensescompose.presentation.util.AuthError
 data class LoginResult(
   val emailError: AuthError? = null,
   val passwordError: AuthError? = null,
-  val result: SimpleResource? = null
+  val result: SimpleResource? = null, // add auth status
+  val isSuccess: Boolean = false
 )
