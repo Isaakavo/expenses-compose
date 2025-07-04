@@ -100,38 +100,38 @@ class LoginViewModel @Inject constructor(
   private fun validatePasswordInput(password: String): Boolean = password.isBlank()
 
   // TODO change to flows instead of MyResult
-  fun login() =
-    viewModelScope
-      .launch {
-        _uiState.update {
-          it.copy(isLoading = true, isButtonEnabled = false)
-        }
-
-        loginUseCase(
-          email = uiState.value.username.trim(),
-          password = uiState.value.password.trim(),
-          isQuickLogin = _uiState.value.isQuickLogin
-        )
-          .onSuccess { result ->
-            Timber.d("Login successful: $result")
-            _uiState.update {
-              it.copy(isSuccess = result.isSuccess, userMessage = null)
-            }
-          }
-          .onError { data, error, uiText ->
-            Timber.e("Login error: ${error?.message}")
-            _uiState.update {
-              it.copy(
-                isSuccess = data?.isSuccess ?: false,
-                userMessage = uiText,
-                isLoading = false,
-                isButtonEnabled = true
-              )
-            }
-          }
-
-        _uiState.update {
-          it.copy(isLoading = false, isButtonEnabled = true)
-        }
+  fun login() {
+    viewModelScope.launch {
+      _uiState.update {
+        it.copy(isLoading = true, isButtonEnabled = false)
       }
+
+      loginUseCase(
+        email = uiState.value.username.trim(),
+        password = uiState.value.password.trim(),
+        isQuickLogin = _uiState.value.isQuickLogin
+      )
+        .onSuccess { result ->
+          Timber.d("Login successful: $result")
+          _uiState.update {
+            it.copy(isSuccess = result.isSuccess, userMessage = null)
+          }
+        }
+        .onError { data, error, uiText ->
+          Timber.e("Login error: ${error?.message}")
+          _uiState.update {
+            it.copy(
+              isSuccess = data?.isSuccess ?: false,
+              userMessage = uiText,
+              isLoading = false,
+              isButtonEnabled = true
+            )
+          }
+        }
+
+      _uiState.update {
+        it.copy(isLoading = false, isButtonEnabled = true)
+      }
+    }
+  }
 }
