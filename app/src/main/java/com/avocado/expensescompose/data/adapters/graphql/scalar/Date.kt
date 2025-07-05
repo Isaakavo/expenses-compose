@@ -1,9 +1,9 @@
 package com.avocado.expensescompose.data.adapters.graphql.scalar
 
-import com.apollographql.apollo3.api.Adapter
-import com.apollographql.apollo3.api.CustomScalarAdapters
-import com.apollographql.apollo3.api.json.JsonReader
-import com.apollographql.apollo3.api.json.JsonWriter
+import com.apollographql.apollo.api.Adapter
+import com.apollographql.apollo.api.CustomScalarAdapters
+import com.apollographql.apollo.api.json.JsonReader
+import com.apollographql.apollo.api.json.JsonWriter
 import com.avocado.expensescompose.presentation.util.formatDateToISO
 import java.time.Instant
 import java.time.LocalDateTime

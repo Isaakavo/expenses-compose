@@ -1,7 +1,7 @@
 package com.avocado.expensescompose.di
 
 import android.content.Context
-import com.apollographql.apollo3.ApolloClient
+import com.apollographql.apollo.ApolloClient
 import com.avocado.expensescompose.BuildConfig
 import com.avocado.expensescompose.data.apolloclients.GraphQlClientImpl
 import com.avocado.expensescompose.data.apolloclients.incomes.ApolloIncomesClient

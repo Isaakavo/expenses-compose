@@ -1,9 +1,9 @@
 package com.avocado.expensescompose.data.apolloclients
 
-import com.apollographql.apollo3.ApolloClient
-import com.apollographql.apollo3.api.ApolloResponse
-import com.apollographql.apollo3.api.Mutation
-import com.apollographql.apollo3.api.Query
+import com.apollographql.apollo.ApolloClient
+import com.apollographql.apollo.api.ApolloResponse
+import com.apollographql.apollo.api.Mutation
+import com.apollographql.apollo.api.Query
 import com.avocado.expensescompose.presentation.util.logErrorWithThread
 import com.avocado.expensescompose.presentation.util.logWithThread
 import javax.inject.Inject
@@ -32,7 +32,8 @@ class GraphQlClientImpl @Inject constructor(private val apolloClient: ApolloClie
   ): Flow<ApolloResponse<D>> =
     apolloClient
       .query(query)
-      .toFlow()
+      // TODO migrate this https://www.apollographql.com/docs/kotlin/migration/4.0#fetch-errors-do-not-throw
+      .toFlowV3()
       .onStart { logWithThread("Started Query ${query.name()}") }
       .catch { exception ->
         logErrorWithThread("Apollo error ${exception.message}")
@@ -47,7 +48,7 @@ class GraphQlClientImpl @Inject constructor(private val apolloClient: ApolloClie
   ): Flow<ApolloResponse<D>> {
     return apolloClient
       .mutation(mutation)
-      .toFlow()
+      .toFlowV3()
       .onStart { logWithThread("Started Mutation ${mutation.name()})") }
       .catch {
         logErrorWithThread("Apollo error ${it.message}")

@@ -1,10 +1,10 @@
 package com.avocado.expensescompose.data.adapters.graphql.utils
 
-import com.apollographql.apollo3.api.ApolloResponse
-import com.apollographql.apollo3.api.Operation
-import com.apollographql.apollo3.exception.ApolloException
-import com.apollographql.apollo3.exception.ApolloHttpException
-import com.apollographql.apollo3.exception.ApolloParseException
+import com.apollographql.apollo.api.ApolloResponse
+import com.apollographql.apollo.api.Operation
+import com.apollographql.apollo.exception.ApolloException
+import com.apollographql.apollo.exception.ApolloHttpException
+import com.apollographql.apollo.exception.ApolloParseException
 import com.avocado.expensescompose.R
 import com.avocado.expensescompose.data.model.MyResult
 import kotlinx.coroutines.flow.Flow
