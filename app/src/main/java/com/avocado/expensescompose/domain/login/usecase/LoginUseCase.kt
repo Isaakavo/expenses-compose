@@ -30,7 +30,7 @@ class LoginUseCase @Inject constructor(
     val emailError = if (email.isBlank()) AuthError.FieldEmpty else null
     val passwordError = if (password.isBlank()) AuthError.FieldEmpty else null
 
-    // TODO improve this logic
+    // TODO email and password validation can be done in the login validation repository
 //    if ((emailError != null || passwordError != null) && !isQuickLogin) {
 //      return MyResult.Error(LoginResult(emailError, passwordError))
 //    }

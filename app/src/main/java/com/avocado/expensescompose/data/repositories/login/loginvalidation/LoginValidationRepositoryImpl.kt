@@ -10,6 +10,7 @@ import timber.log.Timber
 class LoginValidationRepositoryImpl @Inject constructor(
   private val graphQlClientImpl: GraphQlClientImpl
 ) : LoginValidationRepository<LoginQuery.Data?> {
+  // TODO add email and password validation logic here
   override suspend fun validate(): MyResult<LoginQuery.Data?> =
     graphQlClientImpl
       .query(LoginQuery()) { throwable ->
