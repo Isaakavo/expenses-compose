@@ -32,7 +32,6 @@ class LoginUseCase @Inject constructor(
 
     // TODO improve this logic
 //    if ((emailError != null || passwordError != null) && !isQuickLogin) {
-//    if (!isQuickLogin) {
 //      return MyResult.Error(LoginResult(emailError, passwordError))
 //    }
 
