@@ -1,39 +1,90 @@
 package com.avocado.expensescompose.data.repositories
 
 import com.avocado.expensescompose.R
+import com.avocado.expensescompose.data.auth.AuthProvider
+import com.avocado.expensescompose.data.auth.RefreshTokenData
+import com.avocado.expensescompose.data.auth.UserCredentials
 import com.avocado.expensescompose.data.model.MyResult
-import com.avocado.expensescompose.data.model.SimpleResource
 import com.avocado.expensescompose.data.model.auth.Auth
-import com.avocado.expensescompose.data.model.auth.AuthParameters
-import com.avocado.expensescompose.data.model.auth.AuthenticationResultException
 import com.avocado.expensescompose.data.model.auth.CognitoResponse
-import com.avocado.expensescompose.data.network.LoginJwtClient
+import com.avocado.expensescompose.data.model.flatMapSuccess
+import com.avocado.expensescompose.data.model.fold
+import com.avocado.expensescompose.data.model.onSuccess
+import com.avocado.expensescompose.data.network.CognitoRetrofitWebClient
 import com.avocado.expensescompose.presentation.util.Constants
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import javax.inject.Inject
-import okio.IOException
-import retrofit2.HttpException
 import timber.log.Timber
 
+// TODO check the correct way of handle errors in the viewmodel
 class AuthRepository @Inject constructor(
-  private val awsApi: LoginJwtClient,
-  private val tokenManagerRepository: TokenManagerRepository
+  private val authProvider: AuthProvider,
+  private val awsApi: CognitoRetrofitWebClient,
+  private val tokenManagerRepository: TokenManagerService
 ) {
+
+  suspend fun signIn(email: String, password: String): MyResult<Unit> =
+    if (tokenManagerRepository.validateTokens()) {
+      MyResult.Success(Unit)
+    } else {
+      authProvider
+        .singIn(
+          credentials = UserCredentials(
+            username = email,
+            password = password
+          )
+        )
+        .flatMapSuccess { authResult ->
+          // Save tokens and username in the repository
+          tokenManagerRepository
+            .saveAccessToken(authResult.accessToken)
+            .onSuccess {
+              tokenManagerRepository.saveRefreshToken(authResult.refreshToken.orEmpty())
+              tokenManagerRepository.saveUsername(email)
+            }
+        }
+    }
+
+  suspend fun refreshToken(): MyResult<Unit> {
+    return tokenManagerRepository.getRefreshToken()
+      .fold(
+        onSuccess = { refreshToken ->
+          if (refreshToken != null) {
+            val result = authProvider.refreshToken(RefreshTokenData(refreshToken))
+            result.flatMapSuccess { authResult ->
+              // Save the new access token and refresh token
+              tokenManagerRepository
+                .saveAccessToken(authResult.accessToken)
+                .onSuccess {
+                  tokenManagerRepository.saveRefreshToken(authResult.refreshToken.orEmpty())
+                }
+            }
+          }
+          MyResult.Error(
+            uiText = R.string.credentials_error,
+            data = Unit
+          )
+        },
+        onError = { exception ->
+          MyResult.Error(
+            exception = exception,
+            uiText = R.string.credentials_error,
+            data = Unit
+          )
+        }
+      )
+  }
+
+  // TODO Remove all functions that are not needed after refactoring
 
   suspend fun saveUsername(username: String) = tokenManagerRepository.saveUsername(username)
 
   suspend fun getUsername() = tokenManagerRepository.getUsername()
 
-  private suspend fun saveAccessToken(value: String): MyResult<Boolean> =
-    tokenManagerRepository.saveAccessToken(
-      value
-    )
+  suspend fun saveAccessToken(value: String): MyResult<Unit> =
+    tokenManagerRepository.saveAccessToken(value)
 
-  private suspend fun saveRefreshToken(value: String): MyResult<Boolean> =
-    tokenManagerRepository.saveRefreshToken(value)
+  suspend fun getAccessToken(): MyResult<String?> = tokenManagerRepository.getAccessToken()
 
-  private suspend fun getAccessToken(): MyResult<String?> = tokenManagerRepository.getAccessToken()
   suspend fun getRefreshToken(): MyResult<String?> =
     tokenManagerRepository.getRefreshToken()
 
@@ -47,90 +98,6 @@ class AuthRepository @Inject constructor(
     }
 
     return MyResult.Error(false)
-  }
-
-  private suspend fun getTokenFromApi(email: String, password: String): SimpleResource =
-    try {
-      val response = awsApi.getJwtToken(
-        base = Constants.AWS_PROVIDER,
-        auth = Auth(
-          authParameters = AuthParameters(
-            password = password,
-            username = email
-          )
-        )
-      )
-      val accessToken = response.authenticationResult.accessToken
-      val refreshToken = response.authenticationResult.refreshToken
-      run {
-        saveAccessToken(accessToken)
-        saveRefreshToken(refreshToken)
-        MyResult.Success(Unit)
-      }
-    } catch (e: IOException) {
-      Timber.e("Error getting token from AWS ${e.message}")
-      MyResult.Error(uiText = R.string.general_error)
-    } catch (e: HttpException) {
-      when (e.code()) {
-        400 -> {
-          val gson = Gson()
-          val errorResponse = gson.fromJson<AuthenticationResultException>(
-            e.response()?.errorBody()?.charStream(),
-            object : TypeToken<AuthenticationResultException>() {}.type
-          )
-
-          Timber.e("AWS error $errorResponse")
-          when (errorResponse.type) {
-            "NotAuthorizedException" -> MyResult.Error(
-              uiText = R.string.login_incorrect_email_password
-            )
-            else -> MyResult.Error(uiText = R.string.general_error)
-          }
-        }
-
-        else -> {
-          Timber.e("Error getting token from AWS ${e.message}")
-          MyResult.Error(uiText = R.string.general_error)
-        }
-      }
-    }
-
-  suspend fun getAccessToken(email: String, password: String): SimpleResource {
-//    return getTokenFromApi(email, password)
-    return try {
-      // Validate the existence of a previous Access Token
-      // If exists, continue and use it
-      when (val savedAccessToken = getAccessToken()) {
-        is MyResult.Success -> {
-          if (savedAccessToken.data != null) {
-            // Validate also that there is a refresh token available
-            // If exists, we are safe to make the request
-            // Interceptor will use it to ask for a new access token
-            when (val savedRefreshToken = getRefreshToken()) {
-              is MyResult.Success -> {
-                if (savedRefreshToken.data != null) {
-                  return MyResult.Success(Unit)
-                }
-              }
-
-              is MyResult.Error -> {
-                Timber.d(savedRefreshToken.uiText.toString())
-              }
-            }
-          }
-        }
-
-        is MyResult.Error -> {
-          Timber.d("Access Token not found, requesting a new one")
-          return getTokenFromApi(email, password)
-        }
-      }
-      // Timber.e("Login error $")
-      MyResult.Error(uiText = R.string.credentials_error)
-    } catch (e: Exception) {
-      Timber.e("Error retrieving credentials ${e.message}")
-      MyResult.Error(null, R.string.credentials_error)
-    }
   }
 
   suspend fun refreshToken(auth: Auth): MyResult<CognitoResponse> = try {

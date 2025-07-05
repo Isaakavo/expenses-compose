@@ -9,7 +9,7 @@ import retrofit2.http.POST
 import retrofit2.http.Url
 
 @Singleton
-interface LoginJwtClient {
+interface CognitoRetrofitWebClient {
 
   @Headers(
     "X-Amz-Target: AWSCognitoIdentityProviderService.InitiateAuth",

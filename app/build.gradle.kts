@@ -1,3 +1,4 @@
+
 plugins {
   alias(libs.plugins.android.application)
   alias(libs.plugins.kotlin.android)
@@ -6,6 +7,7 @@ plugins {
   alias(libs.plugins.compose.compiler)
   alias(libs.plugins.ksp)
   alias(libs.plugins.hilt)
+  alias(libs.plugins.android.junit)
 }
 
 apollo {
@@ -16,6 +18,10 @@ apollo {
       "com.avocado.expensescompose.data.adapters.graphql.scalar.Date",
       "com.avocado.expensescompose.data.adapters.graphql.scalar.dateAdapter"
     )
+    introspection {
+      endpointUrl.set("http://localhost:4000/graphql")
+      schemaFile.set(file("src/main/graphql/com/avocado/schema.graphqls"))
+    }
   }
 }
 
@@ -65,7 +71,7 @@ android {
       initWith(getByName("debug"))
       manifestPlaceholders["hostNam"] = "internal.avocado.com"
       applicationIdSuffix = ".staging"
-      buildConfigField("String", "GRAPHQL_ENDPOINT", "\"http://192.168.100.5:4000/graphql\"")
+      buildConfigField("String", "GRAPHQL_ENDPOINT", "\"https://expenses-graphql.fly.dev/graphql\"")
     }
   }
 
@@ -146,7 +152,12 @@ dependencies {
   implementation(libs.vico.compose)
   implementation(libs.vico.compose.m3)
 
-  testImplementation(libs.junit)
+  testImplementation(libs.junit.jupiter)
+  testImplementation(kotlin("test"))
+  testImplementation(libs.mockk)
+  testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.0")
+
   androidTestImplementation(libs.androidx.test.ext)
   androidTestImplementation(libs.androidx.test.espresso.core)
   androidTestImplementation(composeBom)

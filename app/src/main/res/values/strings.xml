@@ -5,6 +5,7 @@
     <string name="general_error_title">Oops! 😓</string>
     <string name="general_error_body">Something didn\'t go as expected. \n Please try again.</string>
     <string name="credentials_error">Oh no! Something went wrong retrieving your credentials. 😓"</string>
+    <string name="network_error">Something went wrong with the request</string>
     <string name="generic_Add">Add</string>
     <string name="token_user_not_found">Username not found</string>
     <string name="token_user_error">An error occurred trying to get your info.</string>
@@ -40,6 +41,8 @@
     <string name="login_show_password">Show Password</string>
     <string name="login_hide_password">Hide Password</string>
     <string name="login_incorrect_email">Incorrect email</string>
+    <string name="login_email_error">Incorrect email format</string>
+    <string name="login_password_error">Password can\'t be empty</string>
     <string name="login_incorrect_password">Incorrect password</string>
     <string name="login_incorrect_email_password">Incorrect username or password.</string>
     <string name="login_change_user">Change user</string>

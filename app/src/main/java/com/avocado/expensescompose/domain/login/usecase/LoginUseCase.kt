@@ -1,31 +1,58 @@
 package com.avocado.expensescompose.domain.login.usecase
 
+import com.avocado.LoginQuery
+import com.avocado.expensescompose.data.model.MyResult
+import com.avocado.expensescompose.data.model.flatMapSuccess
+import com.avocado.expensescompose.data.model.map
+import com.avocado.expensescompose.data.model.onError
 import com.avocado.expensescompose.data.repositories.AuthRepository
+import com.avocado.expensescompose.data.repositories.login.loginvalidation.LoginValidationRepository
 import com.avocado.expensescompose.domain.login.models.LoginResult
 import com.avocado.expensescompose.presentation.util.AuthError
+import com.avocado.type.AUTH_STATUS
 import javax.inject.Inject
 
 class LoginUseCase @Inject constructor(
-  private val authRepository: AuthRepository
-
+  private val authRepository: AuthRepository,
+  private val loginValidationRepository: LoginValidationRepository<LoginQuery.Data?>
 ) {
 
-  suspend operator fun invoke(email: String, password: String): LoginResult {
+  // Use cases
+  // validate JWT in the graphql client
+  // validate and extract refresh token
+  // validate and save username
+  suspend operator fun invoke(
+    email: String,
+    password: String,
+    isQuickLogin: Boolean = false
+  ): MyResult<LoginResult> {
+    // TODO add more validation logic here
     val emailError = if (email.isBlank()) AuthError.FieldEmpty else null
     val passwordError = if (password.isBlank()) AuthError.FieldEmpty else null
 
-    if (emailError != null || passwordError != null) {
-      return LoginResult(emailError, passwordError)
-    }
+    // TODO email and password validation can be done in the login validation repository
+//    if ((emailError != null || passwordError != null) && !isQuickLogin) {
+//      return MyResult.Error(LoginResult(emailError, passwordError))
+//    }
 
-    return LoginResult(result = authRepository.getAccessToken(email, password))
+    return loginValidationRepository
+      .validate()
+      .map { data ->
+        val status = data?.login?.status
+        if (status != AUTH_STATUS.AUTHENTICATED) {
+          LoginResult()
+        }
+
+        LoginResult(isSuccess = true)
+      }
+      .onError { data, throwable, uiText ->
+        return authRepository
+          .signIn(email, password)
+          .flatMapSuccess {
+            MyResult.Success(LoginResult(isSuccess = true))
+          }
+      }
   }
-
-  suspend fun getRefreshToken() = authRepository.getRefreshToken()
-
-  suspend fun saveUsername(username: String) = authRepository.saveUsername(username)
-
-  suspend fun getUsernameFromStorage() = authRepository.getUsername()
 
   suspend fun resetLoginCredentials() = authRepository.resetTokens()
 }

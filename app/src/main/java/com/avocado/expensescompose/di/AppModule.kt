@@ -6,9 +6,9 @@ import com.avocado.expensescompose.BuildConfig
 import com.avocado.expensescompose.data.apolloclients.GraphQlClientImpl
 import com.avocado.expensescompose.data.apolloclients.incomes.ApolloIncomesClient
 import com.avocado.expensescompose.data.interceptor.AuthorizationInterceptor
-import com.avocado.expensescompose.data.network.LoginJwtClient
+import com.avocado.expensescompose.data.network.CognitoRetrofitWebClient
 import com.avocado.expensescompose.data.repositories.AuthRepository
-import com.avocado.expensescompose.data.repositories.TokenManagerRepository
+import com.avocado.expensescompose.data.repositories.TokenManagerService
 import com.avocado.expensescompose.domain.income.IncomesClient
 import com.avocado.expensescompose.domain.income.usecase.CreateIncomeUseCase
 import com.avocado.expensescompose.presentation.util.Constants
@@ -41,26 +41,22 @@ object AppModule {
 
   @Provides
   @Singleton
-  fun provideAuthClient(client: OkHttpClient): LoginJwtClient =
+  fun provideAuthClient(client: OkHttpClient): CognitoRetrofitWebClient =
     Retrofit.Builder()
       .baseUrl(Constants.AWS_PROVIDER)
       .client(client)
       .addConverterFactory(GsonConverterFactory.create())
-      .build().create(LoginJwtClient::class.java)
+      .build().create(CognitoRetrofitWebClient::class.java)
 
   @Provides
   @Singleton
   fun provideApolloClient(
-    authClient: AuthRepository,
-    tokenManagerRepository: TokenManagerRepository
+    authClient: AuthRepository
   ): ApolloClient =
     ApolloClient.Builder()
       .serverUrl(BuildConfig.GRAPHQL_ENDPOINT)
       .addHttpInterceptor(
-        AuthorizationInterceptor(
-          authClient = authClient,
-          tokenManagerRepository = tokenManagerRepository
-        )
+        AuthorizationInterceptor(authRepository = authClient)
       )
       .build()
 
@@ -83,5 +79,5 @@ object AppModule {
   @Singleton
   fun provideDataStoreRepository(
     @ApplicationContext app: Context
-  ) = TokenManagerRepository(app)
+  ) = TokenManagerService(app)
 }

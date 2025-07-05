@@ -25,21 +25,21 @@ interface GraphQlClient {
   ): Flow<ApolloResponse<D>>
 }
 
-class GraphQlClientImpl @Inject constructor(private val apolloClient: ApolloClient) :
-  GraphQlClient {
+class GraphQlClientImpl @Inject constructor(private val apolloClient: ApolloClient) : GraphQlClient {
   override suspend fun <D : Query.Data> query(
     query: Query<D>,
     onError: suspend (throwable: Throwable) -> Unit
-  ): Flow<ApolloResponse<D>> {
-    return apolloClient.query(query)
+  ): Flow<ApolloResponse<D>> =
+    apolloClient
+      .query(query)
       .toFlow()
       .onStart { logWithThread("Started Query ${query.name()}") }
-      .catch {
-        logErrorWithThread("Apollo error ${it.message}")
-        onError(it)
+      .catch { exception ->
+        logErrorWithThread("Apollo error ${exception.message}")
+        onError(exception)
+        throw exception
       }
       .flowOn(Dispatchers.IO)
-  }
 
   override suspend fun <D : Mutation.Data> mutate(
     mutation: Mutation<D>,

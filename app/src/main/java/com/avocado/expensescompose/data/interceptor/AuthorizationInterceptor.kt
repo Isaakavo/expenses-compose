@@ -4,96 +4,102 @@ import com.apollographql.apollo3.api.http.HttpRequest
 import com.apollographql.apollo3.api.http.HttpResponse
 import com.apollographql.apollo3.network.http.HttpInterceptor
 import com.apollographql.apollo3.network.http.HttpInterceptorChain
-import com.avocado.expensescompose.data.model.MyResult
 import com.avocado.expensescompose.data.model.auth.Auth
 import com.avocado.expensescompose.data.model.auth.AuthParameters
+import com.avocado.expensescompose.data.model.successOrError
 import com.avocado.expensescompose.data.repositories.AuthRepository
-import com.avocado.expensescompose.data.repositories.TokenManagerRepository
-import com.avocado.expensescompose.presentation.util.logErrorWithThread
 import javax.inject.Inject
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import timber.log.Timber
 
 class AuthorizationInterceptor @Inject constructor(
-  private val authClient: AuthRepository,
-  private val tokenManagerRepository: TokenManagerRepository
+  private val authRepository: AuthRepository
 ) : HttpInterceptor {
   private val mutex = Mutex()
 
-  private suspend fun extractJwt(): String? = mutex.withLock {
-    when (val value = tokenManagerRepository.getAccessToken()) {
-      is MyResult.Success -> {
-        return value.data
-      }
+  companion object {
+    private const val HEADER_SESSION_KEY = "X-Session-Key"
+  }
 
-      is MyResult.Error -> {
-        return ""
-      }
-    }
+  /**
+   * Intercepts the HTTP request to add the JWT token in the header.
+   * If the token is expired, it will refresh the token and retry the request.
+   */
+  override suspend fun intercept(
+    request: HttpRequest,
+    chain: HttpInterceptorChain
+  ): HttpResponse {
+    val jwt = extractJwt()
+    val httpResponse = validateJwtIsNotNullOrEmpty(jwt, request, chain)
+    return handleHttpResponse(httpResponse, request, chain)
+  }
+
+  private suspend fun extractJwt(): String? = mutex.withLock {
+    authRepository
+      .getAccessToken()
+      .successOrError(
+        onSuccess = { it.data },
+        onError = {
+          Timber.e("Error getting access token: ${it.uiErrorText ?: "Unknown error"}")
+          null
+        }
+      )
   }
 
   private suspend fun validateJwtIsNotNullOrEmpty(
     jwt: String?,
     request: HttpRequest,
     chain: HttpInterceptorChain
-  ): HttpResponse {
-    if (jwt.isNullOrBlank()) {
-      Timber.d("Error jwt empty")
-      return chain.proceed(request)
-    }
-
-    return chain.proceed(request.newBuilder().addHeader("X-Session-Key", jwt).build())
+  ): HttpResponse = if (!jwt.isNullOrBlank()) {
+    chain.proceed(request.newBuilder().addHeader(HEADER_SESSION_KEY, jwt).build())
+  } else {
+    Timber.d("Error jwt empty")
+    chain.proceed(request)
   }
 
-  override suspend fun intercept(
+  private suspend fun handleHttpResponse(
+    response: HttpResponse,
     request: HttpRequest,
     chain: HttpInterceptorChain
-  ): HttpResponse {
-    try {
-      // Extract the current access token
-      val jwt = extractJwt()
-      val response = validateJwtIsNotNullOrEmpty(jwt, request, chain)
-      // If the token is not valid, extract the current token and call refresh api
-      return if (response.statusCode == 401) {
-        // Extract the refresh token from the data store
-        val refreshToken = mutex.withLock {
-          when (val value = tokenManagerRepository.getRefreshToken()) {
-            is MyResult.Success -> {
-              value.data
-            }
-
-            is MyResult.Error -> {
-              ""
-            }
-          }
-        }
-
-        val refreshTokenResponse = authClient.refreshToken(
-          Auth(
-            authFlow = "REFRESH_TOKEN_AUTH",
-            authParameters = AuthParameters(refreshToken = refreshToken ?: "")
+  ): HttpResponse = when (response.statusCode) {
+    // This can be moved to another class
+    401 -> {
+      val refreshToken = mutex.withLock {
+        authRepository
+          .getRefreshToken()
+          .successOrError(
+            onSuccess = { it.data },
+            onError = { throw RefreshTokenNotFoundException() }
           )
-        )
-        // If cognito returns the new access token, save it to replace the old one and proceed with
-        // the request
-        if (refreshTokenResponse is MyResult.Success) {
-          val authResults = refreshTokenResponse.data.authenticationResult
-          val accessToken = authResults.accessToken
-          tokenManagerRepository.saveAccessToken(accessToken)
-          return chain.proceed(
-            request.newBuilder()
-              .addHeader("X-Session-Key", accessToken).build()
-          )
-        }
-        chain.proceed(request.newBuilder().build())
-      } else {
-        response
       }
-    } catch (e: Exception) {
-      logErrorWithThread(e.stackTraceToString())
+      val auth = Auth(
+        authFlow = "REFRESH_TOKEN_AUTH",
+        authParameters = AuthParameters(refreshToken = refreshToken ?: "")
+      )
+      authRepository
+        .refreshToken(auth)
+        .successOrError(
+          onSuccess = { success ->
+            val accessToken = success.data.authenticationResult.accessToken
+            authRepository
+              .saveAccessToken(accessToken)
+              .successOrError(
+                onSuccess = {
+                  chain.proceed(
+                    request.newBuilder()
+                      .addHeader(HEADER_SESSION_KEY, accessToken).build()
+                  )
+                },
+                onError = { throw RefreshTokenSavedException() }
+              )
+          },
+          onError = { throw RefreshTokenExpiredException() }
+        )
     }
 
-    return chain.proceed(request)
+    else -> {
+      response
+    }
   }
 }
