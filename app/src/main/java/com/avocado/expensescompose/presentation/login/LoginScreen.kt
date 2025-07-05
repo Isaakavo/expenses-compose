@@ -91,41 +91,43 @@ fun LoginScreen(
           onValueChange = { onEvent(LoginViewModelEvents.UpdateUsername, it) },
           placeholder = { Text(text = stringResource(id = R.string.login_user)) },
           isError = emailHasError,
+          enabled = !isQuickLogin,
           supportingText = {
             if (emailHasError) {
               Text(text = stringResource(id = R.string.login_email_error), color = Color.Red)
             }
           }
         )
-        OutlinedTextField(
-          value = password,
-          onValueChange = { onEvent(LoginViewModelEvents.UpdatePassword, it) },
-          placeholder = { Text(text = stringResource(id = R.string.login_password)) },
-          keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-          enabled = !isQuickLogin,
-          isError = passwordHasError,
-          supportingText = {
-            if (passwordHasError) {
-              Text(text = stringResource(id = R.string.login_password_error), color = Color.Red)
-            }
-          },
-          trailingIcon = {
-            IconButton(onClick = { onEvent(LoginViewModelEvents.ToggleViewPassword, "") }) {
-              if (shouldShowPassword) {
-                Icon(
-                  painter = painterResource(id = R.drawable.baseline_visibility_24),
-                  contentDescription = stringResource(id = R.string.login_show_password)
-                )
-              } else {
-                Icon(
-                  painter = painterResource(id = R.drawable.baseline_visibility_off_24),
-                  contentDescription = stringResource(id = R.string.login_hide_password)
-                )
+        if (!isQuickLogin) {
+          OutlinedTextField(
+            value = password,
+            onValueChange = { onEvent(LoginViewModelEvents.UpdatePassword, it) },
+            placeholder = { Text(text = stringResource(id = R.string.login_password)) },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            isError = passwordHasError,
+            supportingText = {
+              if (passwordHasError) {
+                Text(text = stringResource(id = R.string.login_password_error), color = Color.Red)
               }
-            }
-          },
-          visualTransformation = if (shouldShowPassword) VisualTransformation.None else PasswordVisualTransformation()
-        )
+            },
+            trailingIcon = {
+              IconButton(onClick = { onEvent(LoginViewModelEvents.ToggleViewPassword, "") }) {
+                if (shouldShowPassword) {
+                  Icon(
+                    painter = painterResource(id = R.drawable.baseline_visibility_24),
+                    contentDescription = stringResource(id = R.string.login_show_password)
+                  )
+                } else {
+                  Icon(
+                    painter = painterResource(id = R.drawable.baseline_visibility_off_24),
+                    contentDescription = stringResource(id = R.string.login_hide_password)
+                  )
+                }
+              }
+            },
+            visualTransformation = if (shouldShowPassword) VisualTransformation.None else PasswordVisualTransformation()
+          )
+        }
 
         Button(
           enabled = isButtonEnabled,
