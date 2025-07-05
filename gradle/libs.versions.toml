@@ -6,7 +6,7 @@ androidx-corektx = "1.16.0"
 androidx-compose-bom = "2025.06.01"
 androidx-lifecycle = "2.9.1"
 androidx-navigation = "2.9.1"
-apollographql = "3.8.6"
+apollographql = "4.3.1"
 datastore-preferences = "1.1.7"
 kotlin = "2.2.0"
 ktlint = "12.3.0"
@@ -43,7 +43,7 @@ androidx-lifecycle-viewModelCompose = { module = "androidx.lifecycle:lifecycle-v
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "androidx-navigation" }
 androidx-test-ext = { module = "androidx.test.ext:junit", version.ref = "test-ext-junit" }
 androidx-test-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "spresso-core" }
-apollo-graphql = { module = "com.apollographql.apollo3:apollo-runtime", version.ref = "apollographql" }
+apollo-graphql = { module = "com.apollographql.apollo:apollo-runtime", version.ref = "apollographql" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
 hilt-ext-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hiltExt" }
@@ -63,6 +63,6 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
-apollographql = { id = "com.apollographql.apollo3", version.ref = "apollographql" }
+apollographql = { id = "com.apollographql.apollo", version.ref = "apollographql" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 android-junit = { id = "de.mannodermaus.android-junit5", version.ref = "android-junit5" }

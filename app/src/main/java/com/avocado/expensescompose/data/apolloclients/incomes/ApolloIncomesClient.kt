@@ -1,8 +1,8 @@
 package com.avocado.expensescompose.data.apolloclients.incomes
 
-import com.apollographql.apollo3.ApolloClient
-import com.apollographql.apollo3.api.Optional
-import com.apollographql.apollo3.exception.ApolloException
+import com.apollographql.apollo.ApolloClient
+import com.apollographql.apollo.api.Optional
+import com.apollographql.apollo.exception.ApolloException
 import com.avocado.CreateIncomeMutation
 import com.avocado.HomeScreenAllIncomesQuery
 import com.avocado.expensescompose.R
@@ -25,7 +25,7 @@ class ApolloIncomesClient(private val apolloClient: ApolloClient) : IncomesClien
 
   override suspend fun getAllIncomes(): MyResult<Incomes> {
     try {
-      val responseIncome = apolloClient.query(HomeScreenAllIncomesQuery()).execute().data
+      val responseIncome = apolloClient.query(HomeScreenAllIncomesQuery()).executeV3().data
       val incomesList = responseIncome?.incomesList?.incomes?.map { item ->
         item.incomeFragment.toIncome()
       }
@@ -59,7 +59,7 @@ class ApolloIncomesClient(private val apolloClient: ApolloClient) : IncomesClien
         CreateIncomeMutation(
           input = input
         )
-      ).execute().data?.createIncome?.incomeFragment
+      ).executeV3().data?.createIncome?.incomeFragment
         ?: return MyResult.Error(uiText = R.string.general_error)
 
       return MyResult.Success(

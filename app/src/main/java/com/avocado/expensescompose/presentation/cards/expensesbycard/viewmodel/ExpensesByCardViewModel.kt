@@ -2,7 +2,7 @@ package com.avocado.expensescompose.presentation.cards.expensesbycard.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.apollographql.apollo3.api.Optional
+import com.apollographql.apollo.api.Optional
 import com.avocado.ExpensesByFortnightQuery
 import com.avocado.ExpensesByMonthQuery
 import com.avocado.expensescompose.R

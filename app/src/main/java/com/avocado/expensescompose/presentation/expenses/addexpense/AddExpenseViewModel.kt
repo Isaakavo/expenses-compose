@@ -2,7 +2,7 @@ package com.avocado.expensescompose.presentation.expenses.addexpense
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.apollographql.apollo3.api.Optional
+import com.apollographql.apollo.api.Optional
 import com.avocado.CreateExpenseMutation
 import com.avocado.CreateFixedExpenseMutation
 import com.avocado.ExpenseByIdQuery
